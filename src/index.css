@@ -110,6 +110,49 @@
     @apply rounded-3xl border border-parchment-300 dark:border-vinyl-700
            bg-loam-card dark:bg-vinyl-900 shadow-soft;
   }
+
+  /* The approved wordmark is a geometric lowercase sans. Where it is set as
+     live text (header, dark splash, footer) it is kept lowercase and tight so
+     it reads as part of the same lockup the logo image carries. */
+  .loam-wordmark {
+    font-family: 'Plus Jakarta Sans', Inter, system-ui, -apple-system, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    text-transform: lowercase;
+    line-height: 1;
+  }
+}
+
+/* Splash: one gentle fade in, one out. The global reduced-motion rule below
+   already collapses these to ~0ms, so they never animate for anyone who has
+   asked for less movement. */
+@keyframes loam-splash-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes loam-splash-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.loam-splash-enter {
+  animation: loam-splash-in 0.5s ease-out both;
+}
+
+.loam-splash-leave {
+  animation: loam-splash-out 0.42s ease-in both;
+  pointer-events: none;
 }
 
 @layer utilities {

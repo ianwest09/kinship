@@ -36,6 +36,7 @@ import {
   parseFamilyStoryToKinship,
 } from '../server/kinshipQlooEngine';
 import { HomeView } from './components/HomeView';
+import { SplashScreen } from './components/SplashScreen';
 import { DiscoverView } from './components/DiscoverView';
 import { SharedMomentView } from './components/SharedMomentView';
 import { PreferencesView, TextSize } from './components/PreferencesView';
@@ -137,6 +138,7 @@ export const App: React.FC = () => {
   const [textSize, setTextSize] = useState<TextSize>(
     () => readStored<TextSize>(TEXT_SIZE_KEY, ['normal', 'large', 'largest']) ?? 'normal'
   );
+  const [splashOpen, setSplashOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   const [sundowningModalOpen, setSundowningModalOpen] = useState(false);
   const [traceDrawerOpen, setTraceDrawerOpen] = useState(false);
@@ -444,15 +446,16 @@ export const App: React.FC = () => {
             className="flex items-center gap-3 rounded-2xl -ml-1 pl-1 pr-2 py-1 text-left hover:bg-parchment-200/70 dark:hover:bg-vinyl-900 transition-colors"
             aria-label="Kinship — go to home"
           >
-            <span
+            <img
+              src="/kinship-mark.png"
+              alt=""
               aria-hidden="true"
-              className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-plum-600 text-white flex items-center justify-center shadow-soft shrink-0"
-            >
-              <Disc3 className="w-5 h-5 md:w-6 md:h-6" />
-            </span>
+              draggable={false}
+              className="w-10 h-10 md:w-11 md:h-11 shrink-0 select-none"
+            />
             <span className="min-w-0">
-              <span className="block font-serif text-xl md:text-2xl font-semibold tracking-tight text-loam-ink dark:text-parchment-50 leading-tight">
-                Kinship
+              <span className="loam-wordmark block text-[1.6rem] md:text-[1.8rem] text-loam-ink dark:text-parchment-50">
+                kinship
               </span>
               <span className="hidden sm:block text-xs md:text-sm text-stone-500 dark:text-stone-400 leading-tight">
                 Familiar music &amp; films to share
@@ -720,7 +723,19 @@ export const App: React.FC = () => {
       {/* Footer. Visible at every width — the clinical and provenance
           disclaimer must not be hidden on the phone people actually use. The
           extra bottom padding clears the fixed mobile navigation. */}
-      <footer className="border-t border-parchment-300 dark:border-vinyl-700 py-6 pb-28 md:pb-6 px-4 sm:px-6 text-center text-sm text-stone-600 dark:text-stone-400 space-y-3 no-print">
+      <footer className="border-t border-parchment-300 dark:border-vinyl-700 py-6 pb-28 md:pb-6 px-4 sm:px-6 text-center text-sm text-stone-600 dark:text-stone-400 space-y-4 no-print">
+        <div className="flex items-center justify-center gap-2.5">
+          <img
+            src="/kinship-mark.png"
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            className="w-8 h-8 select-none"
+          />
+          <span className="loam-wordmark text-xl text-loam-ink dark:text-parchment-100">
+            kinship
+          </span>
+        </div>
         <p className="max-w-3xl mx-auto leading-relaxed">
           <strong className="font-semibold text-loam-ink dark:text-parchment-100">
             Educational prompts only — not medical advice.
@@ -782,6 +797,10 @@ export const App: React.FC = () => {
           setGuardrails((prev) => ({ ...prev, hearingLossWarmEq: !prev.hearingLossWarmEq }))
         }
       />
+
+      {splashOpen && (
+        <SplashScreen darkMode={darkMode} onDone={() => setSplashOpen(false)} />
+      )}
 
       <KinshipQlooDrawer
         open={traceDrawerOpen}
