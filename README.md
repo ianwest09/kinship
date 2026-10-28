@@ -28,8 +28,8 @@ Kinship orchestrates **6 entity/insight domains** and **all core Qloo v2 endpoin
 | Agent / Tool | Qloo v2 Endpoint & Parameters | Clinical Care Role |
 |---|---|---|
 | **01. Clue & Bump Resolver** | `GET /search` · `GET /v2/tags` | Resolves 1–2 surviving family clues + grandchild favorites into Qloo UUIDs and locks the `[birthYear+10, birthYear+30]` mPFC window. |
-| **02. Youth-Universe Reconstructor** | `POST /v2/insights` (`urn:entity:artist`, `movie`, `tv_show`, `filter.release_year`, `signal.location.query`, `bias.trends="off"`, `feature.explainability=true`) | Reconstructs high-salience youth cues across **8 global & diaspora regions** (Cape Town, Chicago, London, Brooklyn, Tokyo, Kingston, Mumbai, Buenos Aires) with clue attribution. |
-| **03. Sundowning, Brand & Dining Shield** | `POST /v2/insights` (`filter.exclude.tags=horror,thriller,war`, `urn:entity:brand`, `urn:entity:place`) | Blocks era peril traps, sequences `96→76→62 BPM` Iso-Principle entrainment, prescribes $5 olfactory/tea anchors, and curates **IDDSI Levels 4–6 easy-to-chew (<52°C, medication-safe) nostalgic dining & quiet hours**. |
+| **02. Youth-Universe Reconstructor** | `GET /v2/insights` (`urn:entity:artist`, `movie`, `tv_show`, `filter.release_year`, `signal.location.query`, `bias.trends="off"`, `feature.explainability=true`) | Reconstructs high-salience youth cues across **8 global & diaspora regions** (Cape Town, Chicago, London, Brooklyn, Tokyo, Kingston, Mumbai, Buenos Aires) with clue attribution. |
+| **03. Sundowning, Brand & Dining Shield** | `GET /v2/insights` (`filter.exclude.tags=horror,thriller,war`, `urn:entity:brand`, `urn:entity:place`) | Blocks era peril traps, sequences `96→76→62 BPM` Iso-Principle entrainment, prescribes $5 olfactory/tea anchors, and curates **IDDSI Levels 4–6 easy-to-chew (<52°C, medication-safe) nostalgic dining & quiet hours**. |
 | **04. Intergenerational Soul Bridge** | `GET /v2/analysis/compare` (`a.signal.interests.entities` vs `b.signal.interests.entities`) | Computes shared harmonic & narrative tag co-occurrence across 60 years to generate a 3-step, zero-quiz 15-minute grandchild visit playbook. |
 | **05. Silo Breaker & Hometown Mapper** | `GET /v2/insights?filter.type=urn:demographics` + `filter.type=urn:heatmap` (`output.heatmap.boundary=urn:geohash`) | Proves generational recommender siloing across 6 age bands and maps neighborhood youth geohashes with sensory place prompts. |
 
@@ -41,14 +41,48 @@ Kinship orchestrates **6 entity/insight domains** and **all core Qloo v2 endpoin
 
 ## Quick Start (Local Development)
 
+Requires **Node.js 20.12 or newer** (Node 22 recommended; `process.loadEnvFile` is used to read `.env`).
+
 ```bash
 npm install
-cp .env.example .env   # Optionally add QLOO_API_KEY=... (also configurable live in-app via the Qloo Trace drawer!)
-npm run dev            # Starts Express + Vite + MCP Server on http://localhost:3001
+npm run typecheck      # tsc --noEmit
+npm run build          # vite build -> dist/
+
+cp .env.example .env   # optional; see note below
+npm run dev            # Express + Vite middleware + MCP server
 ```
 
-- **With `QLOO_API_KEY`**: Live Qloo v2 responses dynamically hydrate Youth Universe cards, `/v2/analysis/compare` overlap scores, `urn:entity:place` calm venues, `urn:entity:brand` anchors, `urn:demographics`, and `urn:heatmap` geohashes.
-- **Without `QLOO_API_KEY`**: Automatically runs on Kinship’s **8-Region Verified Cultural Twin** so judges and caregivers can test every workflow immediately with zero setup friction.
+`npm run dev` (and `npm run start`) bind **`process.env.PORT`, defaulting to `3000`**. To use another port, set it explicitly:
+
+```bash
+PORT=3001 npm run dev
+```
+
+### About `.env`
+
+`.env` is loaded by [`server/loadEnv.ts`](./server/loadEnv.ts), which is imported first by both server entrypoints. Two behaviours worth knowing:
+
+- Variables **already present in the real environment take precedence** over `.env`, so platform-injected values (e.g. Vercel encrypted env vars) always win.
+- If `.env` is absent the server starts normally — this is the normal case in production.
+
+For production-style serving of the built bundle:
+
+```bash
+npm run build
+PORT=3001 QLOO_API_KEY=<your-key> npm run start
+```
+
+`npm run start` serves `dist/` only when `NODE_ENV=production` **and** `dist/index.html` exists; otherwise it falls back to Vite middleware mode. Always run `npm run build` first.
+
+### Data source modes
+
+- **With `QLOO_API_KEY`**: live Qloo v2 responses hydrate Youth Universe cards, `/v2/analysis/compare` overlap scores, `urn:entity:place` calm venues, `urn:entity:brand` anchors, `urn:demographics`, and `urn:heatmap` geohashes. Responses report `mode: "live_qloo_api"`.
+- **Without `QLOO_API_KEY`**: Kinship runs on its offline **8-Region Verified Cultural Twin** dataset so every workflow can be exercised with zero setup. Responses report `mode: "verified_cultural_twin"`, and the UI labels this state explicitly.
+
+Check which mode you are in at any time via `GET /api/health` (`qloo.connected`) or the `mode` field on any bridge response. **The offline dataset is curated by us, not returned by Qloo** — the two are not interchangeable as evidence.
+
+> `QLOO_API_KEY` must be supplied as a real environment variable or via `.env`. It is never committed, never sent to the browser, and there is no in-app field for pasting it.
+
 
 ---
 
@@ -57,11 +91,33 @@ npm run dev            # Starts Express + Vite + MCP Server on http://localhost:
 Kinship includes native Vercel Serverless configuration (`vercel.json` + `api/index.ts`):
 
 1. Push this directory to a public GitHub repository (root `LICENSE` is standard MIT so GitHub automatically displays **MIT license** in the **About** sidebar).
-2. Import the repository in **Vercel** (Build Command: `npm run build`, Output Directory: `dist` — auto-detected from `vercel.json`).
-3. Add environment variables in Vercel Project Settings:
-   - `QLOO_API_KEY` = your Qloo API key
+2. Import the repository in **Vercel**. Build Command `npm run build` and Output Directory `dist` are read from `vercel.json`.
+3. **Leave Root Directory empty (repository root).** This is the single most common misconfiguration: `package.json` lives at the repository root, so setting Root Directory to `src` makes Vercel run `npm install` in a folder with no manifest and the build fails with `ENOENT` (exit 254). `src/` holds only the Vite frontend.
+4. Add environment variables in Vercel Project Settings:
+   - `QLOO_API_KEY` = your Qloo API key (encrypted; production, preview, development)
    - `QLOO_BASE_URL` = `https://hackathon.api.qloo.com` (or `https://api.qloo.com`)
-4. Deploy! All `/api/*` and `/api/mcp/*` routes execute serverlessly while keeping your `QLOO_API_KEY` strictly server-side.
+5. If the deployment must be reachable by the public, turn **off** Deployment Protection (Settings → Deployment Protection → Vercel Authentication). With protection enabled, every `*.vercel.app` URL redirects to a Vercel login.
+6. Deploy. All `/api/*` and `/api/mcp/*` routes execute serverlessly while `QLOO_API_KEY` stays strictly server-side.
+
+### Verifying a deployment
+
+```bash
+curl https://<your-deployment>/api/health
+```
+
+Confirm `qloo.connected` is `true` and `maskedKey` shows your key's first and last four characters. If it is `false`, the deployment is serving the offline Verified Cultural Twin rather than live Qloo — check that `QLOO_API_KEY` is set for the target environment, then redeploy.
+
+Also worth checking after deploy:
+
+```bash
+curl https://<your-deployment>/api/mcp/tools          # 5 tools
+curl -X POST https://<your-deployment>/api/kinship-bridge \
+  -H 'Content-Type: application/json' \
+  -d '{"guardrails":{"elderName":"Test","birthYear":1944,"youthGeography":"cape_town","dementiaStage":"moderate_mid","circadianWindow":"afternoon_bridge","sundowningSafeShield":true,"plotFreeMusicalFocus":true,"grandchildName":"Test"}}'
+```
+
+The response's `mode` field must read `live_qloo_api`, not `verified_cultural_twin`.
+
 
 ---
 

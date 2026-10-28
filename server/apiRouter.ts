@@ -46,7 +46,25 @@ export function createKinshipApiApp() {
     });
   });
 
+  // Runtime Qloo configuration is an operator-only action: it mutates global
+  // server state, so on a public deployment it must not be callable by
+  // anonymous visitors. It is disabled entirely unless KINSHIP_ADMIN_TOKEN is
+  // set, and even then requires that token in the `x-kinship-admin` header.
+  // Normal deployments should configure QLOO_API_KEY via the environment.
   app.post('/api/qloo-config', (req, res) => {
+    const adminToken = (process.env.KINSHIP_ADMIN_TOKEN || '').trim();
+    if (!adminToken) {
+      res.status(403).json({
+        error:
+          'Runtime Qloo configuration is disabled on this deployment. Set QLOO_API_KEY as an environment variable instead.',
+      });
+      return;
+    }
+    const provided = String(req.header('x-kinship-admin') || '');
+    if (provided !== adminToken) {
+      res.status(403).json({ error: 'Invalid or missing x-kinship-admin credential.' });
+      return;
+    }
     const { apiKey = '', baseUrl = 'https://hackathon.api.qloo.com' } = req.body || {};
     setKinshipQlooConfig(String(apiKey), String(baseUrl));
     res.json({ ok: true, qlooStatus: getKinshipQlooStatus() });

@@ -381,7 +381,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
             <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-pine-600 dark:text-emerald-300">
               <Music className="w-4 h-4" />
               <span>
-                Agent 02 · POST /v2/insights?filter.release_year={data.bumpWindow.bumpStartYear}..{data.bumpWindow.bumpEndYear}
+                Agent 02 · GET /v2/insights?filter.release_year={data.bumpWindow.bumpStartYear}..{data.bumpWindow.bumpEndYear}
               </span>
             </div>
             <h3 className="text-xl md:text-2xl font-semibold text-stone-900 dark:text-parchment-50 mt-1">
@@ -688,7 +688,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
         <div>
           <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-brass-700 dark:text-brass-200">
             <Coffee className="w-4 h-4" />
-            <span>Cross-Domain Sensory Leap · POST /v2/insights?filter.type=urn:entity:brand</span>
+            <span>Cross-Domain Sensory Leap · GET /v2/insights?filter.type=urn:entity:brand</span>
           </div>
           <h3 className="text-xl font-semibold text-stone-900 dark:text-parchment-50 mt-1">
             Beyond Screens: $5 Smell, Tea &amp; Procedural Touch Anchors (Stage 5–6 Ready)

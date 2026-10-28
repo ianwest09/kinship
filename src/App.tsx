@@ -335,23 +335,6 @@ export const App: React.FC = () => {
     ]);
   };
 
-  const handleSaveKey = async (apiKey: string, baseUrl: string) => {
-    try {
-      const r = await fetch('/api/qloo-config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey, baseUrl }),
-      });
-      if (r.ok) {
-        const j = await r.json();
-        setQlooStatus(j.qlooStatus);
-        runKinshipEngine(guardrails, elderClues, grandchildSeeds, boostedCueIds, excludedCueIds);
-      }
-    } catch {
-      // ignore in standalone viewer
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
       {/* Top Heirloom Navigation Bar */}
@@ -454,6 +437,36 @@ export const App: React.FC = () => {
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-7">
+        {/* Data provenance: distinguish live Qloo results from Kinship's own
+            curated offline dataset. Qloo's SAFE_USE guidance requires that a
+            Qloo result be visibly distinguished from our own interpretation. */}
+        {prescription && (
+          <div
+            role="status"
+            className={`mb-5 rounded-2xl border px-4 py-3 text-xs leading-relaxed no-print ${
+              prescription.mode === 'live_qloo_api'
+                ? 'border-pine-300 bg-pine-50 text-pine-700 dark:border-pine-600 dark:bg-vinyl-900 dark:text-emerald-200'
+                : 'border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-vinyl-900 dark:text-amber-200'
+            }`}
+          >
+            {prescription.mode === 'live_qloo_api' ? (
+              <p>
+                <strong className="font-semibold">Live Qloo Taste AI™.</strong> These results were returned by
+                the Qloo API for this request. They describe aggregate cultural affinities — not predictions
+                about any individual.
+              </p>
+            ) : (
+              <p>
+                <strong className="font-semibold">Offline dataset — Qloo is not connected.</strong> These
+                results come from Kinship’s own curated “Verified Cultural Twin” data, <em>not</em> from the
+                Qloo API. They exist so every workflow can be explored without a credential, and must not be
+                read as Qloo output. Set <code className="font-mono">QLOO_API_KEY</code> server-side for live
+                results.
+              </p>
+            )}
+          </div>
+        )}
+
         {prescription && activeTab === 'intake' && (
           <FamilyIntakePanel
             presets={presets}
@@ -520,8 +533,19 @@ export const App: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-parchment-300 dark:border-vinyl-700 py-5 px-4 sm:px-6 text-center text-xs text-stone-500 no-print">
-        Kinship v3 · Qloo Taste AI™ Agentic Hackathon · Ages 10–30 mPFC Reminiscence Bump, Iso-Principle Entrainment, IDDSI Senior Dining &amp; MCP Server.
+      <footer className="border-t border-parchment-300 dark:border-vinyl-700 py-5 px-4 sm:px-6 text-center text-xs text-stone-500 space-y-2.5 no-print">
+        <p>
+          Kinship v3 · Qloo Taste AI™ Agentic Hackathon · Ages 10–30 mPFC Reminiscence Bump, Iso-Principle
+          Entrainment, IDDSI Senior Dining &amp; MCP Server.
+        </p>
+        <p className="max-w-3xl mx-auto text-[11px] leading-relaxed text-stone-500 dark:text-stone-400">
+          <strong className="font-semibold">Educational prompts only — not medical advice.</strong> Sundowning,
+          Iso-Principle, IDDSI texture, serving-temperature and medication-interaction suggestions are general
+          educational prompts. They are not individualised clinical guidance and must not replace assessment by
+          a clinician, dietitian or speech-and-language therapist. Qloo results describe aggregate cultural
+          affinities; they are not evidence about any individual’s identity, health or behaviour. Kinship
+          persists no personal data and sends no names, birth years or health information to Qloo.
+        </p>
       </footer>
 
       <SundowningRescueModal
@@ -542,7 +566,6 @@ export const App: React.FC = () => {
         primaryElderClue={elderClues[0]?.name || 'Miriam Makeba'}
         primaryGrandchildSeed={grandchildSeeds[0]?.name || 'Laufey'}
         qlooStatus={qlooStatus}
-        onSaveKey={handleSaveKey}
       />
     </div>
   );

@@ -1,3 +1,4 @@
+import './loadEnv.js';
 import express from 'express';
 import fs from 'node:fs';
 import path from 'node:path';

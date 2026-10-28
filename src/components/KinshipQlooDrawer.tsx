@@ -21,7 +21,6 @@ interface Props {
   primaryElderClue: string;
   primaryGrandchildSeed: string;
   qlooStatus: { connected: boolean; baseUrl: string; maskedKey: string };
-  onSaveKey: (apiKey: string, baseUrl: string) => Promise<void>;
 }
 
 export const KinshipQlooDrawer: React.FC<Props> = ({
@@ -33,27 +32,12 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
   primaryElderClue,
   primaryGrandchildSeed,
   qlooStatus,
-  onSaveKey,
 }) => {
-  const [keyInput, setKeyInput] = useState('');
-  const [urlInput, setUrlInput] = useState(qlooStatus.baseUrl || 'https://hackathon.api.qloo.com');
-  const [saving, setSaving] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState<'trace' | 'react' | 'mcp'>('trace');
   const [mcpRunning, setMcpRunning] = useState<string | null>(null);
   const [mcpResultJson, setMcpResultJson] = useState<string | null>(null);
 
   if (!open) return null;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      await onSaveKey(keyInput, urlInput);
-      setKeyInput('');
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const handleRunMcpTool = async (toolName: string) => {
     setMcpRunning(toolName);
@@ -107,46 +91,42 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
           </button>
         </div>
 
-        {/* Live Qloo Key Connector */}
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 p-4 space-y-3"
-        >
-          <div className="flex items-center justify-between">
+        {/* Live Qloo connection status — read only.
+            There is deliberately no field for pasting a credential: the key is
+            configured server-side via the QLOO_API_KEY environment variable and
+            must never be entered into a browser app. */}
+        <div className="rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 p-4 space-y-2">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold flex items-center gap-1.5">
               <KeyRound className="w-3.5 h-3.5 text-plum-600 dark:text-brass-200" />
-              Server-Side Qloo X-Api-Key Connector (250M+ Live Graph Hydration)
+              Server-Side Qloo X-Api-Key Connection
             </span>
-            <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-brass-100 text-brass-700 dark:bg-vinyl-700 dark:text-brass-200 font-semibold">
-              {qlooStatus.connected ? `LIVE KEY (${qlooStatus.maskedKey})` : 'VERIFIED CULTURAL TWIN'}
+            <span
+              className={`font-mono text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0 ${
+                qlooStatus.connected
+                  ? 'bg-pine-50 text-pine-700 dark:bg-vinyl-700 dark:text-emerald-300'
+                  : 'bg-amber-100 text-amber-800 dark:bg-vinyl-700 dark:text-amber-300'
+              }`}
+            >
+              {qlooStatus.connected
+                ? `LIVE QLOO (${qlooStatus.maskedKey})`
+                : 'OFFLINE · VERIFIED CULTURAL TWIN'}
             </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
-            <select
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              className="sm:col-span-5 px-2.5 py-2 rounded-xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50 dark:bg-vinyl-900 font-mono text-[11px]"
-            >
-              <option value="https://hackathon.api.qloo.com">hackathon.api.qloo.com</option>
-              <option value="https://staging.api.qloo.com">staging.api.qloo.com</option>
-              <option value="https://api.qloo.com">api.qloo.com</option>
-            </select>
-            <input
-              type="password"
-              value={keyInput}
-              onChange={(e) => setKeyInput(e.target.value)}
-              placeholder="Paste optional Qloo X-Api-Key..."
-              className="sm:col-span-5 px-3 py-2 rounded-xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50 dark:bg-vinyl-900 font-mono text-xs"
-            />
-            <button
-              type="submit"
-              disabled={saving}
-              className="sm:col-span-2 px-3 py-2 rounded-xl bg-plum-600 hover:bg-plum-700 text-white text-xs font-medium"
-            >
-              {saving ? '...' : 'Apply'}
-            </button>
-          </div>
-        </form>
+          <p className="font-mono text-[11px] text-stone-600 dark:text-stone-300">
+            {qlooStatus.baseUrl || 'https://hackathon.api.qloo.com'}
+          </p>
+          <p className="text-[11px] text-stone-600 dark:text-stone-300">
+            The API key is supplied server-side through the <code className="font-mono">QLOO_API_KEY</code>{' '}
+            environment variable and never reaches the browser. There is intentionally no field to paste a
+            credential here.
+          </p>
+          {!qlooStatus.connected && (
+            <p className="text-[11px] font-medium text-amber-800 dark:text-amber-300">
+              Not connected — results are drawn from Kinship’s own curated offline dataset, not from Qloo.
+            </p>
+          )}
+        </div>
 
         {/* 3 Inspector Sub-Tabs */}
         <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-parchment-200/80 dark:bg-vinyl-800 border border-parchment-300 dark:border-vinyl-700">

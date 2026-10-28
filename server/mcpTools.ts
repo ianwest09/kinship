@@ -12,7 +12,7 @@ export const KINSHIP_MCP_TOOLS: McpToolSchema[] = [
       'Computes an elder’s neurological ages 10–30 mPFC Reminiscence Bump window and queries Qloo /v2/insights (artist, movie, tv_show) with bias.trends="off" and dementia distress-tag exclusions.',
     qlooEndpointsUsed: [
       'GET /search',
-      'POST /v2/insights (filter.release_year, bias.trends=off, filter.exclude.tags)',
+      'GET /v2/insights (filter.release_year, bias.trends=off, filter.exclude.tags)',
       'GET /v2/insights?filter.type=urn:heatmap',
     ],
     inputSchema: {
@@ -64,7 +64,7 @@ export const KINSHIP_MCP_TOOLS: McpToolSchema[] = [
     description:
       'Generates a 3-phase clinical Iso-Principle BPM step-down arc (96 → 76 → 62 BPM) + urn:entity:brand olfactory/tactile triggers and presbycusis warm EQ guardrails for 4:30 PM sundowning agitation.',
     qlooEndpointsUsed: [
-      'POST /v2/insights (sundowning safety shield)',
+      'GET /v2/insights (sundowning safety shield)',
       'GET /v2/insights?filter.type=urn:entity:brand',
     ],
     inputSchema: {
