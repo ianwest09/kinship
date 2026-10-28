@@ -92,12 +92,12 @@ export const SundowningRescueModal: React.FC<Props> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#120F16]/95 backdrop-blur-md p-4 overflow-y-auto no-print"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#111010]/95 backdrop-blur-md p-4 overflow-y-auto no-print"
       role="dialog"
       aria-modal="true"
     >
-      <div className="w-full max-w-5xl rounded-3xl border border-amber-800/50 bg-[#1B1620] text-[#F7F1E5] shadow-2xl overflow-hidden my-auto">
-        <div className="flex flex-wrap items-center justify-between gap-2 px-6 py-4 border-b border-[#31283A] bg-[#151119]">
+      <div className="w-full max-w-5xl rounded-3xl border border-amber-800/50 bg-[#191817] text-[#F4F0E8] shadow-2xl overflow-hidden my-auto">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-6 py-4 border-b border-[#2D2B29] bg-[#131211]">
           <div className="flex items-center gap-2.5">
             <MoonStar className="w-4 h-4 text-amber-300" />
             <span className="text-xs font-semibold uppercase tracking-widest text-amber-200">
@@ -110,8 +110,8 @@ export const SundowningRescueModal: React.FC<Props> = ({
               onClick={onToggleWarmEq}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition ${
                 warmEq
-                  ? 'border-emerald-500/70 bg-emerald-950/80 text-emerald-200'
-                  : 'border-[#3B3046] bg-[#241D2B] text-stone-300'
+                  ? 'border-pine-400/70 bg-vinyl-900/80 text-pine-200'
+                  : 'border-[#363431] bg-[#21201E] text-stone-300'
               }`}
             >
               <Ear className="w-3.5 h-3.5" />
@@ -120,7 +120,7 @@ export const SundowningRescueModal: React.FC<Props> = ({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#3B3046] bg-[#241D2B] text-xs text-stone-300 hover:bg-[#2F2638]"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#363431] bg-[#21201E] text-xs text-stone-300 hover:bg-[#2B2927]"
             >
               <X className="w-3.5 h-3.5" />
               Close
@@ -130,7 +130,7 @@ export const SundowningRescueModal: React.FC<Props> = ({
 
         <div className="p-6 sm:p-7 grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left 4 Cols: Validation Script + Instant Olfactory Grounding */}
-          <div className="lg:col-span-4 rounded-2xl border border-[#332A3D] bg-[#151119] p-5 space-y-4 flex flex-col justify-between">
+          <div className="lg:col-span-4 rounded-2xl border border-[#2F2D2B] bg-[#131211] p-5 space-y-4 flex flex-col justify-between">
             <div className="space-y-3">
               <div className="text-xs font-mono uppercase tracking-wider text-amber-300">
                 3-Step Caregiver Validation
@@ -139,13 +139,13 @@ export const SundowningRescueModal: React.FC<Props> = ({
                 “I want to go home” is a longing for safety, never a geography quiz.
               </h3>
               <div className="space-y-2.5 text-xs leading-relaxed">
-                <div className="p-3 rounded-xl bg-[#211B27] border border-[#32293C]">
+                <div className="p-3 rounded-xl bg-[#1E1D1B] border border-[#2E2C2A]">
                   <div className="font-semibold text-amber-200">01 · Join Emotional Reality</div>
                   <p className="text-stone-300 mt-1">
                     <em>“You miss home so much, {guardrailsApplied.elderName}. You’re completely safe tonight — everything is looked after.”</em>
                   </p>
                 </div>
-                <div className="p-3 rounded-xl bg-[#211B27] border border-[#32293C]">
+                <div className="p-3 rounded-xl bg-[#1E1D1B] border border-[#2E2C2A]">
                   <div className="font-semibold text-amber-200">02 · Eliminate Dusk Glare + Add Scent</div>
                   <p className="text-stone-300 mt-1">
                     Close curtains (dusk reflections mimic strangers outside) and pair with{' '}
@@ -155,7 +155,7 @@ export const SundowningRescueModal: React.FC<Props> = ({
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-700/40 text-[11px] text-amber-100">
+            <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-700/40 text-[0.8125rem] text-amber-100">
               <strong>Why Iso-Principle?</strong> Playing 60 BPM lullabies to someone pacing at 100 BPM clashes with sympathetic arousal. Matching ~96 BPM first and stepping down over 15 minutes lowers heart rate safely.
             </div>
           </div>
@@ -165,7 +165,7 @@ export const SundowningRescueModal: React.FC<Props> = ({
             <div className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-xs font-semibold uppercase tracking-wider text-amber-200 flex items-center gap-1.5">
-                  <Activity className="w-4 h-4 text-emerald-300" />
+                  <Activity className="w-4 h-4 text-pine-300" />
                   15-Minute Iso-Principle Autonomic Step-Down (96 → 76 → 62 BPM)
                 </span>
 
@@ -175,7 +175,7 @@ export const SundowningRescueModal: React.FC<Props> = ({
                     setPlayingSinglePhase(null);
                     toggleIsoPrincipleDemoArc('iso-full-arc', warmEq, (ph) => setActiveIsoPhase(ph));
                   }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-[#151119] text-xs font-bold transition"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-[#131211] text-sm md:text-base font-bold transition"
                 >
                   {activeIsoPhase !== null ? (
                     <>
@@ -199,13 +199,13 @@ export const SundowningRescueModal: React.FC<Props> = ({
                       key={step.phase}
                       className={`rounded-2xl border p-4 transition-all ${
                         isHighlighted
-                          ? 'border-amber-400 bg-[#2C2236] ring-1 ring-amber-400'
-                          : 'border-amber-800/40 bg-[#231C2B]'
+                          ? 'border-amber-400 bg-[#272624] ring-1 ring-amber-400'
+                          : 'border-amber-800/40 bg-[#201F1D]'
                       }`}
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-400/40 font-mono text-[11px] font-bold text-amber-200">
+                          <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-400/40 font-mono text-[0.8125rem] font-bold text-amber-200">
                             PHASE 0{step.phase} · {step.minuteRange} · {step.targetBpm} BPM
                           </span>
                           <span className="text-xs font-semibold text-white">{step.phaseTitle}</span>
@@ -223,7 +223,7 @@ export const SundowningRescueModal: React.FC<Props> = ({
                             );
                             setPlayingSinglePhase(started ? step.phase : null);
                           }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#17121D] border border-[#3E324B] text-[11px] text-amber-200 hover:bg-[#2F253B]"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#151413] border border-[#393734] text-[0.8125rem] text-amber-200 hover:bg-[#2B2927]"
                         >
                           {playingSinglePhase === step.phase ? (
                             <>
@@ -243,7 +243,7 @@ export const SundowningRescueModal: React.FC<Props> = ({
                         {step.cueName} ({step.cueYear} · Age {step.elderAgeThen})
                       </div>
                       <p className="text-xs text-stone-300 mt-0.5">{step.clinicalMechanism}</p>
-                      <div className="mt-2 text-[11px] text-emerald-300 flex items-center gap-1.5">
+                      <div className="mt-2 text-[0.8125rem] text-pine-300 flex items-center gap-1.5">
                         <Sparkles className="w-3.5 h-3.5 shrink-0" />
                         <span>{step.whisperPrompt}</span>
                       </div>
@@ -253,15 +253,15 @@ export const SundowningRescueModal: React.FC<Props> = ({
               </div>
             </div>
 
-            <div className="rounded-xl border border-[#332A3D] bg-[#151119] px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="rounded-xl border border-[#2F2D2B] bg-[#131211] px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-start gap-2">
                 <HeartHandshake className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
                 <div>
                   <div className="text-xs font-semibold text-stone-200 flex items-center gap-1.5">
                     <span>{line.org}</span>
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-pine-300" />
                   </div>
-                  <div className="text-[11px] text-stone-400">
+                  <div className="text-[0.8125rem] text-stone-400">
                     24/7 confidential clinical dementia coaching — never carry evening distress alone.
                   </div>
                 </div>

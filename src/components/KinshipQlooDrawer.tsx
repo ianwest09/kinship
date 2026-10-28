@@ -102,9 +102,9 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
               Server-Side Qloo X-Api-Key Connection
             </span>
             <span
-              className={`font-mono text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0 ${
+              className={`font-mono text-xs px-2 py-0.5 rounded-full font-semibold shrink-0 ${
                 qlooStatus.connected
-                  ? 'bg-pine-50 text-pine-700 dark:bg-vinyl-700 dark:text-emerald-300'
+                  ? 'bg-pine-50 text-pine-700 dark:bg-vinyl-700 dark:text-pine-300'
                   : 'bg-amber-100 text-amber-800 dark:bg-vinyl-700 dark:text-amber-300'
               }`}
             >
@@ -113,16 +113,16 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
                 : 'OFFLINE · VERIFIED CULTURAL TWIN'}
             </span>
           </div>
-          <p className="font-mono text-[11px] text-stone-600 dark:text-stone-300">
+          <p className="font-mono text-[0.8125rem] text-stone-600 dark:text-stone-300">
             {qlooStatus.baseUrl || 'https://hackathon.api.qloo.com'}
           </p>
-          <p className="text-[11px] text-stone-600 dark:text-stone-300">
+          <p className="text-[0.8125rem] text-stone-600 dark:text-stone-300">
             The API key is supplied server-side through the <code className="font-mono">QLOO_API_KEY</code>{' '}
             environment variable and never reaches the browser. There is intentionally no field to paste a
             credential here.
           </p>
           {!qlooStatus.connected && (
-            <p className="text-[11px] font-medium text-amber-800 dark:text-amber-300">
+            <p className="text-[0.8125rem] font-medium text-amber-800 dark:text-amber-300">
               Not connected — results are drawn from Kinship’s own curated offline dataset, not from Qloo.
             </p>
           )}
@@ -185,24 +185,24 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
                     </span>
                     <span className="font-semibold text-sm">{step.agentName}</span>
                   </div>
-                  <span className="font-mono text-[11px] text-plum-600 dark:text-brass-200">
+                  <span className="font-mono text-[0.8125rem] text-plum-600 dark:text-brass-200">
                     {step.durationMs} ms · {step.mode === 'live_qloo_api' ? 'LIVE' : 'TWIN'}
                   </span>
                 </div>
                 <p className="text-xs text-stone-600 dark:text-stone-300">{step.purpose}</p>
-                <div className="p-3 rounded-xl bg-stone-900 text-amber-200 font-mono text-[11px] overflow-x-auto space-y-1">
+                <div className="p-3 rounded-xl bg-stone-900 text-amber-200 font-mono text-[0.8125rem] overflow-x-auto space-y-1">
                   <div>
                     <span className="text-rose-300 font-bold">{step.method}</span>{' '}
                     <span className="text-white">{step.endpoint}</span>
                   </div>
                   {Object.entries(step.params).map(([k, v]) => (
                     <div key={k} className="pl-2 text-stone-300">
-                      <span className="text-emerald-300">{k}</span>=<span className="text-amber-200">{v}</span>
+                      <span className="text-pine-300">{k}</span>=<span className="text-amber-200">{v}</span>
                     </div>
                   ))}
                 </div>
                 <div className="flex items-start gap-2 text-xs text-stone-700 dark:text-stone-300">
-                  <CheckCircle2 className="w-4 h-4 text-pine-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-pine-600 dark:text-pine-300 shrink-0 mt-0.5" />
                   <span>{step.summary}</span>
                 </div>
               </div>
@@ -222,11 +222,11 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
                 className="rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 p-4 space-y-2 text-xs"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-plum-600 text-white font-mono text-[10px] font-bold">
+                  <span className="px-2.5 py-0.5 rounded-full bg-plum-600 text-white font-mono text-xs font-bold">
                     ITERATION 0{item.iteration} · {item.phase}
                   </span>
                   {item.selfCorrected && (
-                    <span className="px-2 py-0.5 rounded-full bg-pine-50 dark:bg-vinyl-900 text-pine-700 dark:text-emerald-300 font-mono text-[10px] font-bold">
+                    <span className="px-2 py-0.5 rounded-full bg-pine-50 dark:bg-vinyl-900 text-pine-700 dark:text-pine-300 font-mono text-xs font-bold">
                       GUARDRAIL / SPARSITY VERIFIED
                     </span>
                   )}
@@ -234,7 +234,7 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
                 <div className="text-stone-700 dark:text-stone-300">
                   <strong className="text-stone-900 dark:text-parchment-50">Thought:</strong> {item.thought}
                 </div>
-                <div className="font-mono text-[11px] text-plum-700 dark:text-brass-200">
+                <div className="font-mono text-[0.8125rem] text-plum-700 dark:text-brass-200">
                   Tool: {item.toolName}
                 </div>
                 <div className="p-2.5 rounded-xl bg-parchment-100/80 dark:bg-vinyl-900 text-stone-700 dark:text-stone-300">
@@ -248,8 +248,8 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
         {/* Sub-Tab 3: Model Context Protocol (MCP) Server */}
         {activeSubTab === 'mcp' && (
           <div className="space-y-3.5">
-            <div className="p-3 rounded-2xl bg-stone-900 text-stone-200 font-mono text-[11px] space-y-1">
-              <div className="text-emerald-300 font-bold">
+            <div className="p-3 rounded-2xl bg-stone-900 text-stone-200 font-mono text-[0.8125rem] space-y-1">
+              <div className="text-pine-300 font-bold">
                 GET /api/mcp/tools · POST /api/mcp/call (mcp/1.0)
               </div>
               <div className="text-stone-400">
@@ -270,7 +270,7 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
                     type="button"
                     disabled={mcpRunning === tool.name}
                     onClick={() => handleRunMcpTool(tool.name)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-plum-600 hover:bg-plum-700 text-white text-[11px] font-semibold"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-plum-600 hover:bg-plum-700 text-white text-[0.8125rem] font-semibold"
                   >
                     <Play className="w-3 h-3 fill-current" />
                     <span>{mcpRunning === tool.name ? 'Running...' : 'Test Tool Call'}</span>
@@ -281,7 +281,7 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
                   {tool.qlooEndpointsUsed.map((ep) => (
                     <span
                       key={ep}
-                      className="px-2 py-0.5 rounded-md bg-parchment-100 dark:bg-vinyl-900 font-mono text-[10px] text-stone-600 dark:text-stone-400"
+                      className="px-2 py-0.5 rounded-md bg-parchment-100 dark:bg-vinyl-900 font-mono text-xs text-stone-600 dark:text-stone-400"
                     >
                       {ep}
                     </span>
@@ -292,7 +292,7 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
 
             {mcpResultJson && (
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs font-mono font-semibold text-pine-700 dark:text-emerald-300">
+                <div className="flex items-center justify-between text-xs font-mono font-semibold text-pine-700 dark:text-pine-300">
                   <span>Live MCP Execution Output (/api/mcp/call):</span>
                   <button
                     type="button"
@@ -302,7 +302,7 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
                     Clear
                   </button>
                 </div>
-                <pre className="p-3.5 rounded-2xl bg-stone-950 text-emerald-300 font-mono text-[11px] max-h-72 overflow-auto">
+                <pre className="p-3.5 rounded-2xl bg-vinyl-950 text-pine-300 font-mono text-[0.8125rem] max-h-72 overflow-auto">
                   {mcpResultJson}
                 </pre>
               </div>

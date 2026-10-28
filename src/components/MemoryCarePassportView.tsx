@@ -170,7 +170,7 @@ export const MemoryCarePassportView: React.FC<Props> = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
               {/* 10 AM Morning Spark */}
               <div className="rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 p-4 space-y-2">
-                <span className="inline-block px-2 py-0.5 rounded-md bg-brass-100 text-brass-700 text-[10px] font-mono font-bold">
+                <span className="inline-block px-2 py-0.5 rounded-md bg-brass-100 text-brass-700 text-xs font-mono font-bold">
                   10:00 AM · MORNING SPARK
                 </span>
                 <div className="font-semibold text-sm">
@@ -183,7 +183,7 @@ export const MemoryCarePassportView: React.FC<Props> = ({
 
               {/* 2 PM Family / Grandchild Bridge */}
               <div className="rounded-2xl border border-plum-300 dark:border-plum-800 bg-plum-50/50 dark:bg-plum-900/20 p-4 space-y-2">
-                <span className="inline-block px-2 py-0.5 rounded-md bg-plum-600 text-white text-[10px] font-mono font-bold">
+                <span className="inline-block px-2 py-0.5 rounded-md bg-plum-600 text-white text-xs font-mono font-bold">
                   2:00 PM · GRANDKID BRIDGE
                 </span>
                 <div className="font-semibold text-sm">
@@ -197,7 +197,7 @@ export const MemoryCarePassportView: React.FC<Props> = ({
 
               {/* 4:30 PM Sundowning Calm */}
               <div className="rounded-2xl border border-pine-500/40 bg-pine-50/60 dark:bg-vinyl-800 p-4 space-y-2">
-                <span className="inline-block px-2 py-0.5 rounded-md bg-pine-600 text-white text-[10px] font-mono font-bold">
+                <span className="inline-block px-2 py-0.5 rounded-md bg-pine-600 text-white text-xs font-mono font-bold">
                   4:30 PM · SUNDOWNING CALM
                 </span>
                 <div className="font-semibold text-sm">
@@ -212,7 +212,7 @@ export const MemoryCarePassportView: React.FC<Props> = ({
             {/* Care Team Do's & Don'ts */}
             <div className="rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div>
-                <div className="font-semibold text-pine-700 dark:text-emerald-300 mb-1">
+                <div className="font-semibold text-pine-700 dark:text-pine-300 mb-1">
                   ✅ ALWAYS DO WITH {data.guardrailsApplied.elderName.toUpperCase()}
                 </div>
                 <ul className="space-y-1 text-stone-600 dark:text-stone-300">
@@ -239,13 +239,13 @@ export const MemoryCarePassportView: React.FC<Props> = ({
                 <span className="font-semibold text-plum-800 dark:text-brass-200">
                   🌿 Pocket Scent &amp; Touch Anchor: {data.sensoryTactileKit[0]?.name}
                 </span>
-                <span className="font-mono text-[10px] text-pine-700 dark:text-emerald-300">
+                <span className="font-mono text-xs text-pine-700 dark:text-pine-300">
                   Iso-Step: 96→76→62 BPM
                 </span>
               </div>
               {data.seniorDiningPlan && (
-                <div className="pt-1.5 border-t border-plum-200/70 dark:border-plum-800/70 text-[11px] text-stone-700 dark:text-stone-300">
-                  <strong className="text-pine-700 dark:text-emerald-300">
+                <div className="pt-1.5 border-t border-plum-200/70 dark:border-plum-800/70 text-[0.8125rem] text-stone-700 dark:text-stone-300">
+                  <strong className="text-pine-700 dark:text-pine-300">
                     🍽 {data.seniorDiningPlan.iddsiLevelLabel}:
                   </strong>{' '}
                   {data.seniorDiningPlan.dishName} · Calm Outing: {data.seniorDiningPlan.calmVenue.name} ({data.seniorDiningPlan.calmVenue.quietHoursWindow})
@@ -253,7 +253,7 @@ export const MemoryCarePassportView: React.FC<Props> = ({
               )}
               {sparkLog.some((s) => s.lucidQuote) ? (
                 <div className="space-y-1.5 pt-1 border-t border-plum-200 dark:border-plum-800">
-                  <div className="font-mono text-[10px] uppercase text-plum-700 dark:text-brass-200 font-bold">
+                  <div className="font-mono text-xs uppercase text-plum-700 dark:text-brass-200 font-bold">
                     Heirloom Lucid Moments Captured by Family:
                   </div>
                   {sparkLog
@@ -266,7 +266,7 @@ export const MemoryCarePassportView: React.FC<Props> = ({
                     ))}
                 </div>
               ) : (
-                <p className="text-[11px] text-stone-600 dark:text-stone-400">
+                <p className="text-[0.8125rem] text-stone-600 dark:text-stone-400">
                   Tip: Tap <strong>“Lit Up / Sang (+Save Spark)”</strong> in Tab 2 whenever a song unlocks a memory quote — it prints right here on {data.guardrailsApplied.elderName}’s bedside sheet.
                 </p>
               )}
@@ -275,7 +275,7 @@ export const MemoryCarePassportView: React.FC<Props> = ({
 
           {/* Right 4 Cols: Scannable ISO/IEC 18004 Bedside QR Card */}
           <div className="lg:col-span-4 rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 p-5 flex flex-col items-center text-center space-y-3">
-            <div className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase text-plum-600 dark:text-brass-200 font-semibold">
+            <div className="inline-flex items-center gap-1.5 text-[0.8125rem] font-mono uppercase text-plum-600 dark:text-brass-200 font-semibold">
               <QrCode className="w-3.5 h-3.5" />
               <span>Nurse &amp; Family QR Passport</span>
             </div>
@@ -288,10 +288,10 @@ export const MemoryCarePassportView: React.FC<Props> = ({
                 aria-label="Scannable Kinship Memory Care Room Passport QR Code"
               >
                 <rect width={qrSize + 4} height={qrSize + 4} fill="#FFFFFF" />
-                <path d={qrPath} fill="#17131A" />
+                <path d={qrPath} fill="#1C1B1A" />
               </svg>
             </div>
-            <div className="text-[11px] font-mono text-stone-500">
+            <div className="text-[0.8125rem] font-mono text-stone-500">
               ISO/IEC 18004 · {share.bytes}B · #kinship=... fragment
             </div>
             <button
@@ -303,7 +303,7 @@ export const MemoryCarePassportView: React.FC<Props> = ({
               <span>Simulate Care-Aide QR Scan</span>
             </button>
             {verifiedMsg && (
-              <div className="p-2.5 rounded-xl bg-pine-50 dark:bg-vinyl-900 text-[11px] text-pine-700 dark:text-emerald-300">
+              <div className="p-2.5 rounded-xl bg-pine-50 dark:bg-vinyl-900 text-[0.8125rem] text-pine-700 dark:text-pine-300">
                 {verifiedMsg}
               </div>
             )}
@@ -318,7 +318,7 @@ export const MemoryCarePassportView: React.FC<Props> = ({
         <section className="rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-900 p-6 md:p-8 shadow-sm space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-pine-600 dark:text-emerald-300">
+              <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-pine-600 dark:text-pine-300">
                 <Activity className="w-4 h-4" />
                 <span>De-Identified Memory Care &amp; Home-Care Cohort Benchmarks</span>
               </div>
@@ -338,10 +338,10 @@ export const MemoryCarePassportView: React.FC<Props> = ({
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 rounded-2xl bg-parchment-50 dark:bg-vinyl-800 border border-parchment-200 dark:border-vinyl-700">
               <div className="text-xs text-stone-500">4 PM Sundowning Distress</div>
-              <div className="font-serif text-2xl font-bold text-pine-600 dark:text-emerald-300 mt-1">
+              <div className="font-serif text-2xl font-bold text-pine-600 dark:text-pine-300 mt-1">
                 5.0 → 0.7/wk
               </div>
-              <div className="text-[11px] font-mono text-pine-700 dark:text-emerald-400 mt-1">
+              <div className="text-[0.8125rem] font-mono text-pine-700 dark:text-pine-300 mt-1">
                 −86% agitation episodes
               </div>
             </div>
@@ -351,7 +351,7 @@ export const MemoryCarePassportView: React.FC<Props> = ({
               <div className="font-serif text-2xl font-bold text-plum-600 dark:text-brass-200 mt-1">
                 18m → 52m
               </div>
-              <div className="text-[11px] font-mono text-plum-700 dark:text-brass-200 mt-1">
+              <div className="text-[0.8125rem] font-mono text-plum-700 dark:text-brass-200 mt-1">
                 2.9× longer relaxed visits
               </div>
             </div>
@@ -361,17 +361,17 @@ export const MemoryCarePassportView: React.FC<Props> = ({
               <div className="font-serif text-2xl font-bold text-stone-900 dark:text-parchment-50 mt-1">
                 84%
               </div>
-              <div className="text-[11px] font-mono text-stone-500 mt-1">
+              <div className="text-[0.8125rem] font-mono text-stone-500 mt-1">
                 During peak bump cues
               </div>
             </div>
 
             <div className="p-4 rounded-2xl bg-parchment-50 dark:bg-vinyl-800 border border-parchment-200 dark:border-vinyl-700">
               <div className="text-xs text-stone-500">Cloud PHI / Diagnosis Stored</div>
-              <div className="font-serif text-2xl font-bold text-pine-600 dark:text-emerald-300 mt-1">
+              <div className="font-serif text-2xl font-bold text-pine-600 dark:text-pine-300 mt-1">
                 0 Bytes
               </div>
-              <div className="text-[11px] font-mono text-stone-500 mt-1 flex items-center gap-1">
+              <div className="text-[0.8125rem] font-mono text-stone-500 mt-1 flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3 text-pine-600" />
                 HIPAA / POPIA / GDPR clean
               </div>
@@ -384,7 +384,7 @@ export const MemoryCarePassportView: React.FC<Props> = ({
                 key={rec.residentToken}
                 className="rounded-2xl border border-parchment-200 dark:border-vinyl-700 bg-parchment-50/80 dark:bg-vinyl-800 p-4 space-y-2 text-xs"
               >
-                <div className="flex items-center justify-between font-mono text-[11px]">
+                <div className="flex items-center justify-between font-mono text-[0.8125rem]">
                   <span className="font-bold text-plum-700 dark:text-brass-200">{rec.residentToken}</span>
                   <span className="text-stone-500">Born {rec.birthYear} · {rec.youthOrigin}</span>
                 </div>
@@ -395,7 +395,7 @@ export const MemoryCarePassportView: React.FC<Props> = ({
                 <div className="text-stone-600 dark:text-stone-300">
                   <strong>Family Bridge:</strong> {rec.grandkidBridgeUsed}
                 </div>
-                <div className="pt-1 flex items-center justify-between font-mono text-[11px] text-pine-700 dark:text-emerald-300">
+                <div className="pt-1 flex items-center justify-between font-mono text-[0.8125rem] text-pine-700 dark:text-pine-300">
                   <span>Sundown: {rec.sundowningEpisodesBeforeWk}→{rec.sundowningEpisodesNowWk}/wk</span>
                   <span>Visits: {rec.familyVisitMinutesAvg[0]}m→{rec.familyVisitMinutesAvg[1]}m</span>
                 </div>
@@ -430,7 +430,7 @@ export const MemoryCarePassportView: React.FC<Props> = ({
         <div className="rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 p-5 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
             <label htmlFor="beds-slider" className="font-semibold text-stone-800 dark:text-parchment-50 flex items-center gap-1.5">
-              <TrendingUp className="w-4 h-4 text-pine-600 dark:text-emerald-300" />
+              <TrendingUp className="w-4 h-4 text-pine-600 dark:text-pine-300" />
               <span>Model Memory-Care Community Size: <strong>{facilityBeds} Residents</strong></span>
             </label>
             <span className="font-mono text-plum-700 dark:text-brass-200 font-semibold">
@@ -450,31 +450,31 @@ export const MemoryCarePassportView: React.FC<Props> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
             <div className="p-3.5 rounded-xl bg-parchment-50 dark:bg-vinyl-900 border border-parchment-200 dark:border-vinyl-700">
-              <div className="text-[11px] text-stone-500">CNA Sundowning Hours Reclaimed</div>
-              <div className="font-serif text-2xl font-bold text-pine-700 dark:text-emerald-300 mt-0.5">
+              <div className="text-[0.8125rem] text-stone-500">CNA Sundowning Hours Reclaimed</div>
+              <div className="font-serif text-2xl font-bold text-pine-700 dark:text-pine-300 mt-0.5">
                 {Math.round(facilityBeds * 18.6).toLocaleString()} hrs/yr
               </div>
-              <div className="text-[11px] font-mono text-stone-500 mt-0.5">
+              <div className="text-[0.8125rem] font-mono text-stone-500 mt-0.5">
                 ~${Math.round(facilityBeds * 18.6 * 26).toLocaleString()} overtime/agency value
               </div>
             </div>
 
             <div className="p-3.5 rounded-xl bg-parchment-50 dark:bg-vinyl-900 border border-parchment-200 dark:border-vinyl-700">
-              <div className="text-[11px] text-stone-500">Estimated Net Operator ROI</div>
+              <div className="text-[0.8125rem] text-stone-500">Estimated Net Operator ROI</div>
               <div className="font-serif text-2xl font-bold text-plum-600 dark:text-brass-200 mt-0.5">
                 2.9× ROI
               </div>
-              <div className="text-[11px] font-mono text-stone-500 mt-0.5">
+              <div className="text-[0.8125rem] font-mono text-stone-500 mt-0.5">
                 Before family referral &amp; LOS lift
               </div>
             </div>
 
             <div className="p-3.5 rounded-xl bg-parchment-50 dark:bg-vinyl-900 border border-parchment-200 dark:border-vinyl-700">
-              <div className="text-[11px] text-stone-500">CMS GUIDE Respite Alignment</div>
+              <div className="text-[0.8125rem] text-stone-500">CMS GUIDE Respite Alignment</div>
               <div className="font-serif text-2xl font-bold text-stone-900 dark:text-parchment-50 mt-0.5">
                 $2,500 / yr
               </div>
-              <div className="text-[11px] font-mono text-stone-500 mt-0.5">
+              <div className="text-[0.8125rem] font-mono text-stone-500 mt-0.5">
                 Medicare dementia caregiver benefit fit
               </div>
             </div>
