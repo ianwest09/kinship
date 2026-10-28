@@ -4,13 +4,15 @@
 
 ## Live Demo
 
-**https://kinship-app-phi.vercel.app** — publicly reachable, no login, no deployment protection, hosted on Vercel with `QLOO_API_KEY` held only in encrypted server-side environment variables.
+**https://kinship-app-phi.vercel.app** — publicly reachable, no login, no deployment protection, hosted on Vercel. `QLOO_API_KEY` is only ever held server-side as an encrypted Vercel environment variable; the browser can neither read it nor set it.
 
 ```bash
 curl https://kinship-app-phi.vercel.app/api/health
 ```
 
-Returns `"connected": true` with a masked key, confirming the deployment is talking to the live Qloo API rather than the offline fallback.
+`qloo.connected` must be `true`, with `maskedKey` showing the key's first and last four characters. If it reads `false`, the deployment is serving the offline Verified Cultural Twin instead of live Qloo: add `QLOO_API_KEY` under **Project Settings → Environment Variables** for the target environments and redeploy. The key cannot be supplied from the browser, so an environment variable is the only supported path.
+
+Because the UI states which source produced what it is showing, an unconnected deployment is never mistaken for live Qloo output — the amber banner says so explicitly.
 
 > **Provenance is stated in the UI.** The landing view renders curated preset case studies, so it carries an amber banner reading *“Offline dataset — Qloo is not connected”* — that content is **not** Qloo output and is labelled as such. Running a reconstruction issues a real request; when Qloo answers it, the banner turns green and reads *“Live Qloo Taste AI™”*. Items actually returned by Qloo additionally carry a `Live Qloo API` badge, and the agent-trace drawer labels every step `LIVE` or `TWIN`, so a Qloo result is never visually confused with Kinship’s own interpretation.
 
