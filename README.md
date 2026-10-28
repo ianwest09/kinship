@@ -2,6 +2,20 @@
 
 > **Qloo Agentic Hackathon (“Agents, but with taste.”)** · Built on **Qloo Taste AI™ v2** (`artist`, `movie`, `tv_show`, `brand`, `place`, `demographics`, `heatmap`, `/v2/analysis/compare`) + **Model Context Protocol (`mcp/1.0`)** · **MIT Licensed** · **Zero Cloud PHI / Zero PII**
 
+## Live Demo
+
+**https://kinship-app-phi.vercel.app** — publicly reachable, no login, no deployment protection, hosted on Vercel with `QLOO_API_KEY` held only in encrypted server-side environment variables.
+
+```bash
+curl https://kinship-app-phi.vercel.app/api/health
+```
+
+Returns `"connected": true` with a masked key, confirming the deployment is talking to the live Qloo API rather than the offline fallback.
+
+> **Provenance is stated in the UI.** The landing view renders curated preset case studies, so it carries an amber banner reading *“Offline dataset — Qloo is not connected”* — that content is **not** Qloo output and is labelled as such. Running a reconstruction issues a real request; when Qloo answers it, the banner turns green and reads *“Live Qloo Taste AI™”*. Items actually returned by Qloo additionally carry a `Live Qloo API` badge, and the agent-trace drawer labels every step `LIVE` or `TWIN`, so a Qloo result is never visually confused with Kinship’s own interpretation.
+
+Source repository: **https://github.com/ianwest09/kinship** (public, MIT licence detected at repository root).
+
 ---
 
 ## Why Kinship Exists
