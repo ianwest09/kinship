@@ -49,3 +49,19 @@ From just **1–2 surviving family clues** (or a messy natural-language family v
 
 ### 4. Quality of the Idea (Tie-Breaker Priority #4)
 - Reframes taste intelligence from passive entertainment discovery into **non-pharmacological neurological medicine and intergenerational human connection** — something impossible for an LLM alone and uniquely unlocked by Qloo.
+
+---
+
+## Submission Links
+
+| Field | Value |
+| --- | --- |
+| **Live demo (public, no login)** | https://kinship-app-phi.vercel.app |
+| **Source repository** | https://github.com/ianwest09/kinship |
+| **Open-source licence** | MIT — `LICENSE` at repository root, auto-detected and shown in the GitHub **About** sidebar |
+| **Health / connectivity proof** | https://kinship-app-phi.vercel.app/api/health → `"connected": true` |
+| **MCP tool manifest** | https://kinship-app-phi.vercel.app/api/mcp/tools → `protocol: mcp/1.0`, 5 tools |
+
+Externally hosted on Vercel (`iad1`, Node 24, Vite build → serverless `api/index.ts`). Not local-only and not behind private access: Deployment Protection is disabled, so any judge can open the URL and run the full workflow end to end. `QLOO_API_KEY` exists only as an encrypted Vercel environment variable and is never sent to the browser — the in-app key-entry field was removed for that reason, and `POST /api/qloo-config` now requires a server-side `KINSHIP_ADMIN_TOKEN` plus a matching `x-kinship-admin` header.
+
+No demo video is submitted (Devpost does not require one); the live URL is the demo.
