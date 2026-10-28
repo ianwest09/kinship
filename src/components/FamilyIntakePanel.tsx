@@ -90,32 +90,46 @@ export const FamilyIntakePanel: React.FC<Props> = ({
       <section className="rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50 dark:bg-vinyl-900 p-6 md:p-8 shadow-sm space-y-6">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-parchment-200 dark:border-vinyl-700">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-plum-50 dark:bg-plum-900/50 border border-plum-200 dark:border-plum-700 text-plum-700 dark:text-brass-200 text-xs font-semibold mb-3">
-              <Brain className="w-3.5 h-3.5" />
-              <span>Medial Prefrontal Cortex (mPFC) Reminiscence Bump · Ages 10–30 Spared Island</span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-semibold text-stone-900 dark:text-parchment-50 leading-tight">
-              Reconstruct the youth universe their brain still remembers — and bridge it to <em className="italic text-plum-600 dark:text-brass-200">yours</em>.
+            <h2 className="font-serif text-3xl md:text-4xl font-semibold text-loam-ink dark:text-parchment-50 leading-tight tracking-tight">
+              Add what you know about them
             </h2>
-            <p className="mt-2 text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
-              Alzheimer’s erodes recent small talk early, yet spares cultural and musical memories encoded between ages 10 and 30. Give Qloo 1–2 fragile family clues and a grandchild’s favorites to build a sundowning-safe bridge across decades.
+            <p className="mt-3 text-base md:text-lg text-stone-600 dark:text-stone-300 leading-relaxed">
+              A couple of small details is plenty — a song, a film, the town they
+              grew up in, what the grandchildren love. Kinship uses them to suggest
+              things you might enjoy together. You can change or remove any of it
+              later.
             </p>
+
+            <details className="mt-4 group">
+              <summary className="flex items-center gap-2 cursor-pointer list-none text-sm md:text-base font-semibold text-plum-700 dark:text-plum-300">
+                <Brain className="w-4 h-4" aria-hidden="true" />
+                <span>Why music from their youth still reaches them</span>
+              </summary>
+              <p className="mt-2.5 pl-6 text-sm md:text-base text-stone-600 dark:text-stone-300 leading-relaxed">
+                Dementia erodes recent small talk early, yet cultural and musical
+                memories formed between roughly ages 10 and 30 are often preserved
+                — they are held in the medial prefrontal cortex, the “Reminiscence
+                Bump”. Kinship looks at that window, and at the places they grew
+                up, to suggest things that may still feel familiar. These are
+                general patterns, not facts about any one person.
+              </p>
+            </details>
           </div>
 
           <button
             type="button"
             onClick={onOpenBridgeView}
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-plum-600 hover:bg-plum-700 text-white font-semibold text-sm shadow-sm transition shrink-0"
+            className="loam-btn-primary shrink-0"
           >
-            <span>Open Reconstructed Youth &amp; Bridge</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>See suggestions</span>
+            <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 
         {/* 1-Click Cross-Generational Family Presets */}
         <div>
           <div className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3">
-            1-Click Real-World Intergenerational Family Stories
+            Start from a story like yours
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3.5">
             {presets.map((p) => {
@@ -131,13 +145,13 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                       : 'border-parchment-300 dark:border-vinyl-700 bg-white/80 dark:bg-vinyl-800 hover:border-plum-500/60'
                   }`}
                 >
-                  <div className="text-[11px] font-mono font-semibold text-plum-600 dark:text-brass-200">
+                  <div className="text-[0.8125rem] font-mono font-semibold text-plum-600 dark:text-brass-200">
                     {p.badge}
                   </div>
                   <div className="font-semibold text-sm text-stone-900 dark:text-parchment-50 mt-1">
                     {p.elderTitle}
                   </div>
-                  <div className="text-xs font-medium text-pine-600 dark:text-emerald-300 mt-0.5">
+                  <div className="text-xs font-medium text-pine-600 dark:text-pine-300 mt-0.5">
                     ↔ {p.grandchildTitle}
                   </div>
                   <p className="mt-2 text-xs text-stone-600 dark:text-stone-400 line-clamp-3 leading-relaxed">
@@ -154,9 +168,9 @@ export const FamilyIntakePanel: React.FC<Props> = ({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-stone-800 dark:text-parchment-50 flex items-center gap-1.5">
               <Wand2 className="w-4 h-4 text-plum-600 dark:text-brass-200" />
-              Zero-Form Family Clue Parser
+              Or describe them in your own words
             </span>
-            <span className="text-[11px] text-stone-500 dark:text-stone-400">
+            <span className="text-[0.8125rem] text-stone-500 dark:text-stone-400">
               Describe your loved one’s age, hometown, one song/film clue, and what the grandkids love:
             </span>
           </div>
@@ -180,13 +194,13 @@ export const FamilyIntakePanel: React.FC<Props> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] text-stone-500 mr-1">1-click family note:</span>
+            <span className="text-[0.8125rem] text-stone-500 mr-1">1-click family note:</span>
             {FAMILY_STORY_EXAMPLES.map((ex) => (
               <button
                 key={ex.label}
                 type="button"
                 onClick={() => handleRunStory(ex.text)}
-                className="px-2.5 py-1 rounded-full border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 hover:border-plum-500 text-[11px] font-medium"
+                className="px-2.5 py-1 rounded-full border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 hover:border-plum-500 text-[0.8125rem] font-medium"
               >
                 “{ex.label}”
               </button>
@@ -206,12 +220,12 @@ export const FamilyIntakePanel: React.FC<Props> = ({
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {parseReceipt.receipts.map((r, i) => (
-                  <div key={i} className="rounded-xl bg-white dark:bg-vinyl-800 border border-parchment-200 dark:border-vinyl-700 px-3 py-1.5 text-[11px]">
+                  <div key={i} className="rounded-xl bg-white dark:bg-vinyl-800 border border-parchment-200 dark:border-vinyl-700 px-3 py-1.5 text-[0.8125rem]">
                     <div className="flex justify-between font-mono">
                       <span className="font-semibold text-plum-700 dark:text-brass-200">{r.parameter}</span>
                       <span className="truncate max-w-[190px]">{r.value}</span>
                     </div>
-                    <div className="text-[10px] text-stone-500 dark:text-stone-400">{r.reason}</div>
+                    <div className="text-xs text-stone-500 dark:text-stone-400">{r.reason}</div>
                   </div>
                 ))}
               </div>
@@ -251,7 +265,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
               onChange={(e) => onUpdateGuardrails({ birthYear: Number(e.target.value) })}
               className="kinship-slider w-full"
             />
-            <div className="flex justify-between text-[10px] font-mono text-stone-500 mt-1">
+            <div className="flex justify-between text-xs font-mono text-stone-500 mt-1">
               <span>1930 (Age 96)</span>
               <span>1946 (Age 80)</span>
               <span>1964 (Age 62)</span>
@@ -259,12 +273,55 @@ export const FamilyIntakePanel: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* 7-Decade mPFC Cortical Preservation Bar Chart */}
-        <div className="grid grid-cols-7 gap-2 pt-3 items-end h-44 px-2 rounded-2xl bg-parchment-50 dark:bg-vinyl-800/70 border border-parchment-200 dark:border-vinyl-700 p-4">
+        {/* Retention across the lifespan. A 7-column grid at 360px gives each
+            column ~45px, which crushes the year labels, so phones get a
+            vertical list instead of a clipped grid or a scroll region. */}
+        <ul className="md:hidden space-y-3 rounded-2xl bg-parchment-50 dark:bg-vinyl-800/70 border border-parchment-200 dark:border-vinyl-700 p-4">
           {bumpWindow.lifeDecades.map((dec) => (
-            <div key={dec.ageRange} className="flex flex-col items-center justify-end h-full gap-1">
+            <li key={dec.ageRange} className="min-w-0">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-sm md:text-base font-semibold text-stone-800 dark:text-parchment-100 truncate">
+                  {dec.ageRange}
+                  {dec.isPeakBump ? ' ★' : ''}
+                </span>
+                <span
+                  className={`font-mono text-sm font-bold shrink-0 ${
+                    dec.isReminiscenceBump
+                      ? 'text-plum-700 dark:text-plum-300'
+                      : 'text-stone-500 dark:text-stone-400'
+                  }`}
+                >
+                  {dec.mpfcRetentionPct}%
+                </span>
+              </div>
+              <div
+                className="mt-1.5 h-3 rounded-full bg-parchment-200 dark:bg-vinyl-700 overflow-hidden"
+                role="img"
+                aria-label={`${dec.ageRange}, ${dec.yearsLabel}: ${dec.mpfcRetentionPct} percent typically retained`}
+              >
+                <div
+                  style={{ width: `${dec.mpfcRetentionPct}%` }}
+                  className={`h-full rounded-full ${
+                    dec.isPeakBump
+                      ? 'bg-plum-600 dark:bg-brass-500'
+                      : dec.isReminiscenceBump
+                        ? 'bg-plum-500/85 dark:bg-brass-600'
+                        : 'bg-parchment-400 dark:bg-vinyl-600'
+                  }`}
+                />
+              </div>
+              <span className="block font-mono text-xs text-stone-500 dark:text-stone-400 mt-1">
+                {dec.yearsLabel}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="hidden md:grid grid-cols-7 gap-2 pt-3 items-end h-44 px-2 rounded-2xl bg-parchment-50 dark:bg-vinyl-800/70 border border-parchment-200 dark:border-vinyl-700 p-4">
+          {bumpWindow.lifeDecades.map((dec) => (
+            <div key={dec.ageRange} className="flex flex-col items-center justify-end h-full gap-1 min-w-0">
               <span
-                className={`font-mono text-[10px] font-bold ${
+                className={`font-mono text-xs font-bold ${
                   dec.isReminiscenceBump ? 'text-plum-700 dark:text-brass-200' : 'text-stone-400'
                 }`}
               >
@@ -280,10 +337,10 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                       : 'bg-parchment-300 dark:bg-vinyl-600'
                 }`}
               />
-              <span className="text-[10px] font-semibold text-stone-800 dark:text-parchment-100 text-center leading-tight mt-1">
+              <span className="text-xs font-semibold text-stone-800 dark:text-parchment-100 text-center leading-tight mt-1">
                 {dec.ageRange}
               </span>
-              <span className="font-mono text-[9px] text-stone-500 dark:text-stone-400 text-center">
+              <span className="font-mono text-xs text-stone-500 dark:text-stone-400 text-center">
                 {dec.yearsLabel}
               </span>
             </div>
@@ -297,7 +354,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
         <section className="lg:col-span-4 rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50 dark:bg-vinyl-900 p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <span className="font-mono text-[11px] uppercase text-plum-600 dark:text-brass-200">
+              <span className="font-mono text-[0.8125rem] uppercase text-plum-600 dark:text-brass-200">
                 a.signal · Elder Clues
               </span>
               <h4 className="text-lg font-semibold">1–2 Fragile Youth Clues</h4>
@@ -340,7 +397,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                 >
                   <div className="min-w-0">
                     <div className="font-semibold truncate">{item.name}</div>
-                    <div className="text-[10px] text-stone-500 truncate">{item.originLabel}</div>
+                    <div className="text-xs text-stone-500 truncate">{item.originLabel}</div>
                   </div>
                   {sel && <Check className="w-4 h-4 text-plum-600 shrink-0" />}
                 </button>
@@ -374,16 +431,16 @@ export const FamilyIntakePanel: React.FC<Props> = ({
         <section className="lg:col-span-4 rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50 dark:bg-vinyl-900 p-5 space-y-3.5">
           <div className="flex items-center justify-between">
             <div>
-              <span className="font-mono text-[11px] uppercase text-pine-600 dark:text-emerald-300">
+              <span className="font-mono text-[0.8125rem] uppercase text-pine-600 dark:text-pine-300">
                 b.signal · Care Circle Visitor
               </span>
               <h4 className="text-lg font-semibold">Visitor Bridge Perspective</h4>
             </div>
-            <Users className="w-5 h-5 text-pine-600 dark:text-emerald-300" />
+            <Users className="w-5 h-5 text-pine-600 dark:text-pine-300" />
           </div>
 
-          {/* 1-Click Care Circle Role Switcher */}
-          <div className="grid grid-cols-3 gap-1.5">
+          {/* Care circle role switcher */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {CARE_CIRCLE_ROLES.map((role) => {
               const active = guardrails.grandchildName === role.visitorLabel;
               return (
@@ -397,8 +454,8 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                       : 'border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800'
                   }`}
                 >
-                  <div className="text-[10px] font-mono font-bold truncate">{role.relationshipBadge}</div>
-                  <div className={`text-[10px] truncate ${active ? 'text-emerald-100' : 'text-stone-500'}`}>
+                  <div className="text-xs font-mono font-bold truncate">{role.relationshipBadge}</div>
+                  <div className={`text-xs truncate ${active ? 'text-pine-100' : 'text-stone-500'}`}>
                     {role.visitorLabel.split('(')[0].trim()}
                   </div>
                 </button>
@@ -441,7 +498,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                 >
                   <div className="min-w-0">
                     <div className="font-semibold truncate">{item.name}</div>
-                    <div className="text-[10px] text-stone-500 truncate">{item.originLabel}</div>
+                    <div className="text-xs text-stone-500 truncate">{item.originLabel}</div>
                   </div>
                   {sel && <Check className="w-4 h-4 text-pine-600 shrink-0" />}
                 </button>
@@ -475,7 +532,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
         <section className="lg:col-span-4 rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50 dark:bg-vinyl-900 p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <span className="font-mono text-[11px] uppercase text-brass-700 dark:text-brass-200">
+              <span className="font-mono text-[0.8125rem] uppercase text-brass-700 dark:text-brass-200">
                 Youth Hometown &amp; Safety
               </span>
               <h4 className="text-lg font-semibold">Cultural Geography &amp; Shield</h4>
@@ -483,7 +540,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
             <Heart className="w-5 h-5 text-plum-600" />
           </div>
 
-          <div className="grid grid-cols-2 gap-1.5">
+          <div className="grid grid-cols-2 gap-2">
             {geographies.map((g) => (
               <button
                 key={g.id}
@@ -496,7 +553,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                 }`}
               >
                 <div className="font-semibold truncate">{g.name.split('&')[0].trim()}</div>
-                <div className={`text-[10px] ${guardrails.youthGeography === g.id ? 'text-plum-100' : 'text-stone-400'}`}>
+                <div className={`text-xs ${guardrails.youthGeography === g.id ? 'text-plum-100' : 'text-stone-400'}`}>
                   {g.country}
                 </div>
               </button>
@@ -577,9 +634,9 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                       <ShieldCheck className="w-3.5 h-3.5 text-pine-600" />
                       <span>{item.title}</span>
                     </div>
-                    <div className="text-[10px] text-stone-500 pl-5">{item.sub}</div>
+                    <div className="text-xs text-stone-500 pl-5">{item.sub}</div>
                   </div>
-                  <span className="font-mono text-[10px] font-bold text-pine-700 dark:text-emerald-300">
+                  <span className="font-mono text-xs font-bold text-pine-700 dark:text-pine-300">
                     {active ? 'ON' : 'OFF'}
                   </span>
                 </button>

@@ -2,46 +2,241 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   Loam Design System — global foundation
+   Calm, warm, legible. Built for an Android phone held at arm's length by an
+   older adult, and reviewed at desktop width for the care team.
+   ========================================================================== */
+
 @layer base {
+  /* Text size is a user preference, not a fixed design constant.
+     The root font-size drives every rem-based Tailwind step, so scaling here
+     grows type AND spacing proportionally — layout relationships are
+     preserved instead of reflowing unpredictably. */
+  html {
+    font-size: 106.25%; /* 17px — "Normal" */
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  html[data-textsize='large'] {
+    font-size: 118.75%; /* 19px */
+  }
+
+  html[data-textsize='largest'] {
+    font-size: 131.25%; /* 21px */
+  }
+
   h1, h2, h3, h4 {
     font-family: 'Fraunces', Georgia, serif;
+    /* Slightly tighter leading for display type at large sizes. */
+    line-height: 1.2;
+  }
+
+  body {
+    line-height: 1.6;
+  }
+
+  p {
+    /* Comfortable measure for people reading on a phone in a care setting. */
+    max-width: 68ch;
+  }
+
+  /* Visible, consistent keyboard focus. WCAG 2.2 needs 3:1 against adjacent
+     colour: #6A7DAD on warm paper is 3.59:1. The supplied #788CBA is only
+     2.95:1, so it is reserved for tints and badges. */
+  :focus-visible {
+    outline: 3px solid #6A7DAD;
+    outline-offset: 2px;
+    border-radius: 0.375rem;
+  }
+
+  .dark :focus-visible {
+    outline-color: #A3B1D5;
+  }
+
+  /* Never remove the outline without providing a replacement. */
+  :focus:not(:focus-visible) {
+    outline: none;
   }
 }
 
+@layer components {
+  /* A skip link keeps keyboard users out of the navigation on every screen. */
+  .loam-skip-link {
+    @apply sr-only;
+  }
+
+  .loam-skip-link:focus-visible {
+    @apply not-sr-only fixed top-3 left-3 z-50 px-4 py-3 rounded-2xl
+           bg-loam-ink text-loam-paper font-semibold shadow-lift;
+  }
+
+  /* Primary action: one clear next step per screen. */
+  .loam-btn-primary {
+    @apply inline-flex items-center justify-center gap-2
+           min-h-[3rem] px-6 py-3.5 rounded-2xl
+           bg-plum-600 text-white font-semibold
+           border border-plum-700
+           shadow-soft transition-colors
+           hover:bg-plum-700 active:bg-plum-800
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Secondary / "change direction" action. Always available, never penalised. */
+  .loam-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2
+           min-h-[3rem] px-5 py-3.5 rounded-2xl
+           bg-loam-card text-loam-ink font-semibold
+           border border-parchment-300 dark:border-vinyl-700
+           dark:bg-vinyl-800 dark:text-parchment-100
+           shadow-soft transition-colors
+           hover:border-plum-400 hover:bg-plum-50
+           dark:hover:bg-vinyl-700 active:bg-parchment-200;
+  }
+
+  /* Quiet action: skip, dismiss, stop. Deliberately low-emphasis so leaving a
+     moment is as easy as starting one. */
+  .loam-btn-quiet {
+    @apply inline-flex items-center justify-center gap-2
+           min-h-[2.75rem] px-4 py-3 rounded-2xl
+           text-loam-ink font-medium
+           dark:text-parchment-200
+           underline decoration-parchment-400 decoration-2 underline-offset-4
+           hover:decoration-plum-500 transition-colors;
+  }
+
+  .loam-card {
+    @apply rounded-3xl border border-parchment-300 dark:border-vinyl-700
+           bg-loam-card dark:bg-vinyl-900 shadow-soft;
+  }
+
+  /* The approved wordmark is a geometric lowercase sans. Where it is set as
+     live text (header, dark splash, footer) it is kept lowercase and tight so
+     it reads as part of the same lockup the logo image carries. */
+  .loam-wordmark {
+    font-family: 'Plus Jakarta Sans', Inter, system-ui, -apple-system, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    text-transform: lowercase;
+    line-height: 1;
+  }
+}
+
+/* Splash: one gentle fade in, one out. The global reduced-motion rule below
+   already collapses these to ~0ms, so they never animate for anyone who has
+   asked for less movement. */
+@keyframes loam-splash-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes loam-splash-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.loam-splash-enter {
+  animation: loam-splash-in 0.5s ease-out both;
+}
+
+.loam-splash-leave {
+  animation: loam-splash-out 0.42s ease-in both;
+  pointer-events: none;
+}
+
+@layer utilities {
+  /* Android safe areas: keep the bottom nav clear of the gesture bar. */
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  /* Only coarse pointers (phones, tablets) get the 44px minimum. Desktop keeps
+     its denser layout instead of inflating every control. */
+  @media (pointer: coarse) {
+    .coarse\:min-touch,
+    button:not(.allow-compact),
+    [role='button']:not(.allow-compact),
+    select,
+    input,
+    textarea {
+      min-height: 44px;
+    }
+  }
+}
+
+/* Range slider, retuned from plum/brass to Loam sage. */
 .kinship-slider {
   -webkit-appearance: none;
   appearance: none;
-  height: 8px;
+  height: 0.5rem;
   border-radius: 999px;
-  background: #E3D5BF;
+  background: #DED6C6;
   outline: none;
 }
 
 .dark .kinship-slider {
-  background: #332E3D;
+  background: #3E3D39;
 }
 
 .kinship-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 1.75rem;
+  height: 1.75rem;
   border-radius: 999px;
-  background: #7C2D41;
-  border: 2px solid #FDFBF7;
+  background: #64745D;
+  border: 3px solid #FDFCF9;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 2px 6px rgba(53, 52, 50, 0.22);
 }
 
 .dark .kinship-slider::-webkit-slider-thumb {
-  background: #F5DF9E;
-  border-color: #1B1820;
+  background: #A9B5A2;
+  border-color: #242321;
+}
+
+.kinship-slider::-moz-range-thumb {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: #64745D;
+  border: 3px solid #FDFCF9;
+  cursor: pointer;
+}
+
+/* Motion is restrained by default and fully removed on request. Nothing in a
+   dementia-facing product should move unexpectedly. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @media print {
   .no-print {
     display: none !important;
   }
+
   body {
     background: #FFFFFF !important;
     color: #000000 !important;
