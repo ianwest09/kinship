@@ -114,7 +114,7 @@ export const SharedMomentView: React.FC<Props> = ({
           <p className="mt-3 text-lg md:text-xl font-serif text-loam-ink dark:text-parchment-50">
             Nothing queued to enjoy yet
           </p>
-          <p className="mt-2 text-base text-stone-600 dark:text-stone-300">
+          <p className="mt-2 text-base text-loam-body dark:text-loam-body-dark">
             Choose something in Discover and it will appear here.
           </p>
           <button type="button" onClick={onBackToDiscover} className="loam-btn-primary mt-6">
@@ -208,13 +208,13 @@ export const SharedMomentView: React.FC<Props> = ({
           <button type="button" onClick={stopSound} className="loam-btn-quiet text-sm md:text-base">
             Stop and sit quietly
           </button>
-          <span className="text-sm md:text-base text-stone-500 dark:text-stone-400">
+          <span className="text-sm md:text-base text-loam-muted dark:text-loam-muted-dark">
             No need to finish anything.
           </span>
         </div>
 
         {warmEq && (
-          <p className="mt-5 text-sm md:text-base text-stone-600 dark:text-stone-300">
+          <p className="mt-5 text-sm md:text-base text-loam-body dark:text-loam-body-dark">
             Warmer, softer sound is on — higher harshness is rolled off. Change this
             any time in Preferences.
           </p>
@@ -226,7 +226,7 @@ export const SharedMomentView: React.FC<Props> = ({
         <section aria-labelledby="together-more">
           <h3
             id="together-more"
-            className="text-base md:text-lg font-semibold text-stone-600 dark:text-stone-300 mb-3"
+            className="text-base md:text-lg font-semibold text-loam-body dark:text-loam-body-dark mb-3"
           >
             Or try one of these
           </h3>
@@ -250,7 +250,7 @@ export const SharedMomentView: React.FC<Props> = ({
                 >
                   <Music className="inline w-4 h-4 mr-2 -mt-0.5" aria-hidden="true" />
                   {q.name}
-                  <span className={active ? 'text-plum-100' : 'text-stone-500 dark:text-stone-400'}>
+                  <span className={active ? 'text-plum-100' : 'text-loam-muted dark:text-loam-muted-dark'}>
                     {' '}
                     · {q.releaseYear}
                   </span>
@@ -273,7 +273,7 @@ export const SharedMomentView: React.FC<Props> = ({
               <p className="mt-2 text-base md:text-lg font-serif italic leading-relaxed text-plum-700 dark:text-plum-300">
                 {bridge.zeroQuizBridgeQuestion}
               </p>
-              <p className="mt-3 text-sm md:text-base text-stone-600 dark:text-stone-300 leading-relaxed">
+              <p className="mt-3 text-sm md:text-base text-loam-body dark:text-loam-body-dark leading-relaxed">
                 {bridge.grandchildSeedName} and {bridge.elderAnchorName} share more
                 than you might expect. Start there — no questions about names or
                 dates needed.
@@ -286,7 +286,7 @@ export const SharedMomentView: React.FC<Props> = ({
       <section className="loam-card p-5 md:p-6 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
         <div className="flex items-start gap-3.5 min-w-0">
           <MoonStar className="w-6 h-6 shrink-0 text-brass-600 dark:text-brass-300 mt-0.5" aria-hidden="true" />
-          <p className="text-sm md:text-base text-stone-600 dark:text-stone-300 leading-relaxed">
+          <p className="text-sm md:text-base text-loam-body dark:text-loam-body-dark leading-relaxed">
             If the late afternoon is getting hard, there is a slow-settling sound
             that eases down in three short phases.
           </p>

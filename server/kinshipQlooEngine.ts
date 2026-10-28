@@ -529,9 +529,9 @@ export async function generateKinshipBridge(
               sundowningSafe: true,
               presbycusisSafe: true,
               plotComplexity: 'zero_plot_musical',
-              whyBrainRemembers: `Live Qloo 250M+ Taste Graph co-occurrence match for ${resolvedElderClues[0].name} inside ${guardrails.elderName}’s ${bump.bumpStartYear}–${bump.bumpEndYear} mPFC autobiographical window.`,
+              whyBrainRemembers: `Qloo returned this alongside ${resolvedElderClues[0].name} for people who grew up around ${bump.bumpStartYear}–${bump.bumpEndYear}. It is a pattern in taste data — a place to start, not a memory anyone has confirmed.`,
               dontQuizWarning: `Avoid asking “Do you know who sang ${e.name}?” — let the opening melody awaken procedural familiarity first.`,
-              sensoryInvitationPrompt: `“Listen to the warm tone on ${e.name} — this came straight from the ${calibratedYr} era when you were ${ageAtRel}.”`,
+              sensoryInvitationPrompt: `“Listen to how warm this sounds — ${e.name} came out around ${calibratedYr}.”`,
               tagLabels: dynamicTags.length > 0 ? dynamicTags : ['Live Qloo Co-Occurrence', 'Era-Verified Youth Cue'],
               explainability: computeClueExplainability(resolvedElderClues, synthVec),
               source: 'live_qloo_api',
@@ -724,7 +724,7 @@ export async function generateKinshipBridge(
     .slice(0, 6)
     .map((x) => x.cue);
 
-  // Dynamically hydrate Youth Universe with live Qloo 250M+ Graph entities first (deduped by title)
+  // Hydrate the youth universe with live Qloo entities first (deduped by title)
   const seenCueTitles = new Set<string>();
   const reconstructedYouthUniverse: ReminiscenceCue[] = [];
   for (const cue of [...liveQlooCues, ...twinYouthCues]) {
@@ -814,9 +814,9 @@ export async function generateKinshipBridge(
       overlapPct,
       sharedTags,
       sharedDnaHeadline: `${sharedTags[0].label} + ${sharedTags[1].label}`,
-      harmonicExplanation: `Qloo’s /v2/analysis/compare reveals why ${guardrails.grandchildName}’s love for ${gc.name} (${gc.year}) shares ${overlapPct}% structural & emotional DNA with ${guardrails.elderName}’s ${best.ea.year} youth touchstone ${best.ea.name} (when ${guardrails.elderName} was ${elderAgeThen}).`,
+      harmonicExplanation: `Qloo’s /v2/analysis/compare rates ${gc.name} (${gc.year}), which ${guardrails.grandchildName} loves, ${overlapPct}% alike in mood, tempo and style with ${best.ea.name} (${best.ea.year}) from ${guardrails.elderName}’s youth. A way in to listening together — not a prediction of any reaction.`,
       threeStepPlaybook: [
-        `Minute 0–4 (Awaken mPFC): Play ${best.ea.name} (${best.ea.year}) first — watch ${guardrails.elderName}’s shoulders, hands, or eyes settle into familiar ground.`,
+        `Minute 0–4 (Settle in): Play ${best.ea.name} (${best.ea.year}) first, and simply watch — shoulders, hands, eyes. Say nothing yet.`,
         `Minute 5–10 (Share Your World): Say “I love this sound too — listen to a singer from my generation who sounds just like this,” and play 90 seconds of ${gc.name}.`,
         `Minute 11–15 (Sensory Togetherness): Keep volume warm and gentle; hold hands, look at a photo, or share tea with zero memory quizzing.`,
       ],
@@ -830,7 +830,7 @@ export async function generateKinshipBridge(
     {
       stepNumber: 1,
       agentName: 'Reminiscence Bump & Family Clue Resolver',
-      purpose: 'Computes the neurological ages 10–30 mPFC preservation window and resolves elder clues + grandchild favorites into Qloo entity UUIDs.',
+      purpose: 'Computes the ages 10–30 reminiscence window from a birth year and resolves elder clues and grandchild favourites into Qloo entity UUIDs.',
       method: 'GET',
       endpoint: '/search & /v2/tags',
       params: {
@@ -843,7 +843,7 @@ export async function generateKinshipBridge(
     },
     {
       stepNumber: 2,
-      agentName: 'Youth-Universe Time-Machine Reconstructor',
+      agentName: 'Youth-Era Reconstructor',
       purpose: 'Queries cross-domain Qloo insights strictly bounded to the elder’s ages 10–30 release years and youth hometown geography.',
       method: 'GET',
       endpoint: '/v2/insights',
@@ -879,7 +879,7 @@ export async function generateKinshipBridge(
     {
       stepNumber: 4,
       agentName: 'Intergenerational Soul-Bridge Composer',
-      purpose: 'Runs Qloo /v2/analysis/compare between the visitor’s favorites and the elder’s youth universe to uncover shared musical & story DNA.',
+      purpose: 'Runs Qloo /v2/analysis/compare between the visitor’s favourites and the elder’s youth era to surface shared musical and stylistic affinity.',
       method: 'GET',
       endpoint: '/v2/analysis/compare',
       params: {
@@ -977,9 +977,9 @@ export async function generateKinshipBridge(
     {
       phase: 1,
       minuteRange: 'Min 0–4',
-      phaseTitle: 'Match Restless Energy (Iso-Attunement)',
+      phaseTitle: 'Start at their pace',
       targetBpm: 96,
-      clinicalMechanism: 'Matches elevated evening pacing cadence first so music feels validating rather than abruptly sleepy.',
+      clinicalMechanism: 'Begins close to the pace of the room, so the music feels like company rather than an instruction to sleep.',
       cueName: upbeatCue?.name || resolvedElderClues[0]?.name || 'Upbeat Youth Groove',
       cueYear: upbeatCue?.releaseYear || bump.peakStartYear + 2,
       elderAgeThen: upbeatCue?.elderAgeAtRelease || 18,
@@ -988,9 +988,9 @@ export async function generateKinshipBridge(
     {
       phase: 2,
       minuteRange: 'Min 4–10',
-      phaseTitle: '3/4 Waltz & Warm Mid-Tempo Bridge',
+      phaseTitle: 'A gentle sway, a little slower',
       targetBpm: 76,
-      clinicalMechanism: 'Gentle 3/4 or swaying meter transitions motor cortex from pacing into seated hand-swaying.',
+      clinicalMechanism: 'A gentle three-beat sway. Some people naturally slow their pacing to it, or sway a hand instead.',
       cueName: midWaltzCue?.name || 'Gentle Youth Waltz',
       cueYear: midWaltzCue?.releaseYear || bump.peakStartYear + 4,
       elderAgeThen: midWaltzCue?.elderAgeAtRelease || 20,
@@ -999,9 +999,9 @@ export async function generateKinshipBridge(
     {
       phase: 3,
       minuteRange: 'Min 10–15',
-      phaseTitle: 'Parasympathetic Dusk Settle',
+      phaseTitle: 'Slowest: settling for dusk',
       targetBpm: 62,
-      clinicalMechanism: 'Entrains respiratory sinus arrhythmia (~62 BPM) in warm 150–600 Hz frequencies with zero percussion startle.',
+      clinicalMechanism: 'Slowest step, in warm low registers with no percussion, so nothing startles. A good point to sit down together.',
       cueName: deepCalmCue?.name || '62 BPM Youth Lullaby',
       cueYear: deepCalmCue?.releaseYear || bump.peakStartYear,
       elderAgeThen: deepCalmCue?.elderAgeAtRelease || 16,
@@ -1277,7 +1277,7 @@ export async function generateKinshipBridge(
   // Upgrade 3: Dynamic "Without Qloo (Blind LLM) vs. With Qloo Taste AI™" Side-by-Side Proof
   const blindLlmComparison: BlindLlmComparisonRow[] = [
     {
-      dimension: '1. Neurological Era Precision (Ages 10–30 mPFC Window)',
+      dimension: '1. Era Precision (Ages 10–30 Reminiscence Window)',
       blindLlmGuess: `Generic “50s & 70s Oldies Playlist” or recency-biased remasters outside ${guardrails.elderName}’s youth.`,
       whyBlindLlmFails: `Misses the exact ${bump.bumpStartYear}–${bump.bumpEndYear} autobiographical window (peak ${bump.peakStartYear}–${bump.peakEndYear}) that survives Alzheimer’s in the medial prefrontal cortex.`,
       qlooTasteAiResult: `Locks release years strictly to ${bump.bumpStartYear}–${bump.bumpEndYear} (top match: ${topCue?.name || resolvedElderClues[0]?.name}, age ${topCue?.elderAgeAtRelease || 19}).`,
@@ -1301,7 +1301,7 @@ export async function generateKinshipBridge(
       dimension: `4. Zero-Quiz Bridge for ${guardrails.grandchildName} (Visitor)`,
       blindLlmGuess: `Advises ${guardrails.grandchildName}: “Ask ${guardrails.elderName} what she had for lunch or if she remembers your school!”`,
       whyBlindLlmFails: 'Direct short-term memory quizzing spotlights hippocampal loss, triggering shame, withdrawal, and 60% grandchild visit dread.',
-      qlooTasteAiResult: `Proves ${topBridge?.overlapPct || 93}% shared harmonic DNA between ${topBridge?.grandchildSeedName || 'modern favorite'} & ${topBridge?.elderAnchorName || 'youth classic'} for side-by-side co-listening.`,
+      qlooTasteAiResult: `Reports ${topBridge?.overlapPct || 93}% shared taste affinity between ${topBridge?.grandchildSeedName || 'modern favourite'} and ${topBridge?.elderAnchorName || 'youth classic'} as a starting point for side-by-side listening.`,
       qlooApiMechanism: `GET /v2/analysis/compare (a.signal vs b.signal) + filter.type=urn:demographics`,
     },
   ];
@@ -1311,7 +1311,7 @@ export async function generateKinshipBridge(
     {
       iteration: 1,
       phase: 'OBSERVE',
-      thought: `Calculated ${guardrails.elderName}’s mPFC Reminiscence Bump (${bump.bumpStartYear}–${bump.bumpEndYear}, peak ${bump.peakStartYear}–${bump.peakEndYear}) in ${geo.name}; circadian state=${guardrails.circadianWindow}, hearingLossWarmEq=${guardrails.hearingLossWarmEq}.`,
+      thought: `Calculated the reminiscence window (${bump.bumpStartYear}–${bump.bumpEndYear}, peak ${bump.peakStartYear}–${bump.peakEndYear}) in ${geo.name}; circadian state=${guardrails.circadianWindow}, hearingLossWarmEq=${guardrails.hearingLossWarmEq}.`,
       toolName: 'compute_reminiscence_window & /search',
       observation: `Resolved ${resolvedElderClues.length} elder seed(s) (${resolvedElderClues[0]?.entity_id}) and ${resolvedGrandchildSeeds.length} visitor seed(s) (${resolvedGrandchildSeeds[0]?.entity_id}).`,
     },

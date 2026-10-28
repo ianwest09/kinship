@@ -26,5 +26,11 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      # Dependency-free suite: node:test + tsx, both already in the project.
+      # Covers contrast ratios, routing, rendered accessibility semantics and
+      # the honesty guards over claim language.
+      - name: Test
+        run: npm test
+
       - name: Build
         run: npm run build

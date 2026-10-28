@@ -49,6 +49,20 @@ interface Props {
   onOpenBridgeView: () => void;
 }
 
+const thisYear = new Date().getFullYear();
+
+/**
+ * The retention curve used to be printed as a percentage — "96%", "33%" — which
+ * reads as a measured medical figure. It is a fixed weighting that ships with
+ * Kinship's own catalogue, so it is now described as what it is.
+ */
+function retentionLabel(weight: number): string {
+  if (weight >= 85) return 'Strongest';
+  if (weight >= 60) return 'Strong';
+  if (weight >= 35) return 'Some';
+  return 'Less';
+}
+
 export const FamilyIntakePanel: React.FC<Props> = ({
   presets,
   activePresetId,
@@ -76,12 +90,23 @@ export const FamilyIntakePanel: React.FC<Props> = ({
   const [customElderText, setCustomElderText] = useState('');
   const [customGcText, setCustomGcText] = useState('');
 
+  /**
+   * Guards against a double tap while the parse is in flight. On a slow
+   * connection the old button gave no feedback at all, so people tapped again
+   * and fired a second request; the text they typed is kept either way.
+   */
+  const [isWorking, setIsWorking] = useState(false);
   const handleRunStory = async (override?: string) => {
     const t = (override ?? storyInput).trim();
-    if (!t) return;
+    if (!t || isWorking) return;
     if (override) setStoryInput(override);
-    const res = await onApplyNarrative(t);
-    setParseReceipt(res);
+    setIsWorking(true);
+    try {
+      const res = await onApplyNarrative(t);
+      setParseReceipt(res);
+    } finally {
+      setIsWorking(false);
+    }
   };
 
   return (
@@ -93,7 +118,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
             <h2 className="font-serif text-3xl md:text-4xl font-semibold text-loam-ink dark:text-parchment-50 leading-tight tracking-tight">
               Add what you know about them
             </h2>
-            <p className="mt-3 text-base md:text-lg text-stone-600 dark:text-stone-300 leading-relaxed">
+            <p className="mt-3 text-base md:text-lg text-loam-body dark:text-loam-body-dark leading-relaxed">
               A couple of small details is plenty — a song, a film, the town they
               grew up in, what the grandchildren love. Kinship uses them to suggest
               things you might enjoy together. You can change or remove any of it
@@ -105,7 +130,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                 <Brain className="w-4 h-4" aria-hidden="true" />
                 <span>Why music from their youth still reaches them</span>
               </summary>
-              <p className="mt-2.5 pl-6 text-sm md:text-base text-stone-600 dark:text-stone-300 leading-relaxed">
+              <p className="mt-2.5 pl-6 text-sm md:text-base text-loam-body dark:text-loam-body-dark leading-relaxed">
                 Dementia erodes recent small talk early, yet cultural and musical
                 memories formed between roughly ages 10 and 30 are often preserved
                 — they are held in the medial prefrontal cortex, the “Reminiscence
@@ -128,7 +153,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
 
         {/* 1-Click Cross-Generational Family Presets */}
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-3">
+          <div className="text-xs font-semibold uppercase tracking-wider text-loam-muted dark:text-loam-muted-dark mb-3">
             Start from a story like yours
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3.5">
@@ -145,16 +170,16 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                       : 'border-parchment-300 dark:border-vinyl-700 bg-white/80 dark:bg-vinyl-800 hover:border-plum-500/60'
                   }`}
                 >
-                  <div className="text-[0.8125rem] font-mono font-semibold text-plum-600 dark:text-brass-200">
+                  <div className="text-meta font-mono font-semibold text-plum-600 dark:text-brass-200">
                     {p.badge}
                   </div>
-                  <div className="font-semibold text-sm text-stone-900 dark:text-parchment-50 mt-1">
+                  <div className="font-semibold text-sm text-loam-ink dark:text-parchment-50 mt-1">
                     {p.elderTitle}
                   </div>
                   <div className="text-xs font-medium text-pine-600 dark:text-pine-300 mt-0.5">
                     ↔ {p.grandchildTitle}
                   </div>
-                  <p className="mt-2 text-xs text-stone-600 dark:text-stone-400 line-clamp-3 leading-relaxed">
+                  <p className="mt-2 text-xs text-loam-body dark:text-loam-muted-dark line-clamp-3 leading-relaxed">
                     {p.storyQuote}
                   </p>
                 </button>
@@ -166,41 +191,57 @@ export const FamilyIntakePanel: React.FC<Props> = ({
         {/* Conversational "Tell Us One Clue" Family Parser */}
         <div className="pt-5 border-t border-parchment-200 dark:border-vinyl-700 space-y-2.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-stone-800 dark:text-parchment-50 flex items-center gap-1.5">
-              <Wand2 className="w-4 h-4 text-plum-600 dark:text-brass-200" />
+            <label
+              htmlFor="family-story"
+              className="text-sm md:text-base font-semibold text-loam-ink dark:text-parchment-50 flex items-center gap-1.5"
+            >
+              <Wand2 className="w-4 h-4 text-plum-600 dark:text-brass-200" aria-hidden="true" />
               Or describe them in your own words
-            </span>
-            <span className="text-[0.8125rem] text-stone-500 dark:text-stone-400">
-              Describe your loved one’s age, hometown, one song/film clue, and what the grandkids love:
+            </label>
+            <span className="text-meta text-loam-muted dark:text-loam-muted-dark">
+              A sentence is plenty: where they grew up, one song or film they
+              loved, and what the younger ones are into.
             </span>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2.5">
             <textarea
-              rows={2}
+              id="family-story"
+              name="family-story"
+              rows={3}
               value={storyInput}
               onChange={(e) => setStoryInput(e.target.value)}
-              placeholder="e.g., “My 82yo grandmother Thandi grew up in Cape Town, hums Miriam Makeba, gets anxious at 4:30 PM, and my 21yo daughter Zuri loves Tems...”"
-              className="flex-1 rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 px-3.5 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-plum-500 resize-none"
+              placeholder="e.g. “My grandmother grew up in Cape Town and hums Miriam Makeba. My daughter loves Tems.”"
+              aria-describedby="family-story-note"
+              className="flex-1 rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 px-3.5 py-3 text-base leading-relaxed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-loam-focus resize-none"
             />
             <button
               type="button"
               onClick={() => handleRunStory()}
-              disabled={!storyInput.trim()}
-              className="px-4 py-2.5 rounded-2xl bg-stone-900 hover:bg-stone-800 dark:bg-brass-500 dark:text-vinyl-950 text-white text-xs font-semibold shrink-0 disabled:opacity-40"
+              disabled={!storyInput.trim() || isWorking}
+              aria-busy={isWorking}
+              className="loam-btn-primary shrink-0 text-sm md:text-base"
             >
-              Reconstruct Era &amp; Bridge
+              <span>{isWorking ? 'Working…' : 'Find suggestions'}</span>
             </button>
           </div>
 
+          <p id="family-story-note" className="text-meta text-loam-muted dark:text-loam-muted-dark">
+            Nothing is uploaded to Qloo, and you can change or remove any of it
+            afterwards.
+          </p>
+
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[0.8125rem] text-stone-500 mr-1">1-click family note:</span>
+            <span className="text-meta text-loam-muted dark:text-loam-muted-dark mr-1">
+              Or start from an example:
+            </span>
             {FAMILY_STORY_EXAMPLES.map((ex) => (
               <button
                 key={ex.label}
                 type="button"
                 onClick={() => handleRunStory(ex.text)}
-                className="px-2.5 py-1 rounded-full border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 hover:border-plum-500 text-[0.8125rem] font-medium"
+                disabled={isWorking}
+                className="px-3 py-2 rounded-full border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 hover:border-plum-500 text-meta font-medium disabled:opacity-50"
               >
                 “{ex.label}”
               </button>
@@ -220,12 +261,12 @@ export const FamilyIntakePanel: React.FC<Props> = ({
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {parseReceipt.receipts.map((r, i) => (
-                  <div key={i} className="rounded-xl bg-white dark:bg-vinyl-800 border border-parchment-200 dark:border-vinyl-700 px-3 py-1.5 text-[0.8125rem]">
+                  <div key={i} className="rounded-xl bg-white dark:bg-vinyl-800 border border-parchment-200 dark:border-vinyl-700 px-3 py-1.5 text-meta">
                     <div className="flex justify-between font-mono">
                       <span className="font-semibold text-plum-700 dark:text-brass-200">{r.parameter}</span>
                       <span className="truncate max-w-[190px]">{r.value}</span>
                     </div>
-                    <div className="text-xs text-stone-500 dark:text-stone-400">{r.reason}</div>
+                    <div className="text-xs text-loam-muted dark:text-loam-muted-dark">{r.reason}</div>
                   </div>
                 ))}
               </div>
@@ -238,37 +279,47 @@ export const FamilyIntakePanel: React.FC<Props> = ({
       <section className="rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-900 p-6 md:p-7 shadow-sm space-y-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <span className="font-mono text-xs uppercase tracking-wider text-plum-600 dark:text-brass-200">
-              Neurological Time-Machine · Qloo filter.release_year.min={bumpWindow.bumpStartYear} &amp; max={bumpWindow.bumpEndYear}
+            <span className="font-mono text-meta uppercase tracking-wider break-words text-plum-600 dark:text-brass-200">
+              Qloo filter.release_year.min={bumpWindow.bumpStartYear} &amp; max={bumpWindow.bumpEndYear}
             </span>
-            <h3 className="text-xl font-semibold text-stone-900 dark:text-parchment-50 mt-0.5">
-              {guardrails.elderName}’s Spared Reminiscence Bump ({bumpWindow.bumpStartYear}–{bumpWindow.bumpEndYear})
+            <h3 className="text-xl font-semibold text-loam-ink dark:text-parchment-50 mt-0.5">
+              The years to draw from ({bumpWindow.bumpStartYear}–{bumpWindow.bumpEndYear})
             </h3>
-            <p className="text-xs text-stone-600 dark:text-stone-400">
-              Slide birth year to watch how Alzheimer’s spares autobiographical &amp; musical encoding from ages 10–30 (peaking ages 15–23 in the dorsal medial prefrontal cortex).
+            <p className="text-sm md:text-base text-loam-body dark:text-loam-body-dark">
+              Most people hold on to the music of their teens and twenties
+              longest — a well-documented pattern called the reminiscence bump.
+              Kinship looks there first. Slide the birth year to change the
+              window.
             </p>
           </div>
 
           <div className="p-3.5 rounded-2xl bg-parchment-100 dark:bg-vinyl-800 border border-parchment-300 dark:border-vinyl-700 lg:w-80">
-            <div className="flex justify-between text-xs font-semibold mb-1.5">
-              <span>Loved One’s Birth Year:</span>
+            <div className="flex justify-between text-sm font-semibold mb-1.5">
+              <label htmlFor="birth-year">Birth year</label>
               <span className="font-mono text-plum-700 dark:text-brass-200">
                 {bumpWindow.birthYear} (Age {bumpWindow.currentAge})
               </span>
             </div>
             <input
+              id="birth-year"
               type="range"
               min={1930}
-              max={1964}
+              max={1980}
               step={1}
               value={guardrails.birthYear}
               onChange={(e) => onUpdateGuardrails({ birthYear: Number(e.target.value) })}
               className="kinship-slider w-full"
+              aria-valuetext={`Born ${bumpWindow.birthYear}, age ${bumpWindow.currentAge}`}
             />
-            <div className="flex justify-between text-xs font-mono text-stone-500 mt-1">
-              <span>1930 (Age 96)</span>
-              <span>1946 (Age 80)</span>
-              <span>1964 (Age 62)</span>
+            {/* Tick ages used to be hardcoded, so they would have drifted every
+                year. The upper bound now reaches 1980: early-onset dementia in
+                someone in their fifties could not be represented before. */}
+            <div className="flex justify-between text-meta font-mono text-loam-muted dark:text-loam-muted-dark mt-1">
+              {[1930, 1955, 1980].map((y) => (
+                <span key={y}>
+                  {y} (age {thisYear - y})
+                </span>
+              ))}
             </div>
           </div>
         </div>
@@ -276,28 +327,36 @@ export const FamilyIntakePanel: React.FC<Props> = ({
         {/* Retention across the lifespan. A 7-column grid at 360px gives each
             column ~45px, which crushes the year labels, so phones get a
             vertical list instead of a clipped grid or a scroll region. */}
+        <p className="text-meta text-loam-muted dark:text-loam-muted-dark">
+          The bars show how much weight Kinship gives each stretch of years when
+          it looks for suggestions. It is Kinship’s own ranking, not a
+          measurement of anyone’s memory.
+        </p>
+
         <ul className="md:hidden space-y-3 rounded-2xl bg-parchment-50 dark:bg-vinyl-800/70 border border-parchment-200 dark:border-vinyl-700 p-4">
           {bumpWindow.lifeDecades.map((dec) => (
             <li key={dec.ageRange} className="min-w-0">
               <div className="flex items-baseline justify-between gap-3">
-                <span className="text-sm md:text-base font-semibold text-stone-800 dark:text-parchment-100 truncate">
+                <span className="text-sm md:text-base font-semibold text-loam-ink dark:text-parchment-100 truncate">
                   {dec.ageRange}
                   {dec.isPeakBump ? ' ★' : ''}
                 </span>
                 <span
-                  className={`font-mono text-sm font-bold shrink-0 ${
+                  className={`text-sm font-semibold shrink-0 ${
                     dec.isReminiscenceBump
                       ? 'text-plum-700 dark:text-plum-300'
-                      : 'text-stone-500 dark:text-stone-400'
+                      : 'text-loam-muted dark:text-loam-muted-dark'
                   }`}
                 >
-                  {dec.mpfcRetentionPct}%
+                  {retentionLabel(dec.mpfcRetentionPct)}
                 </span>
               </div>
               <div
                 className="mt-1.5 h-3 rounded-full bg-parchment-200 dark:bg-vinyl-700 overflow-hidden"
                 role="img"
-                aria-label={`${dec.ageRange}, ${dec.yearsLabel}: ${dec.mpfcRetentionPct} percent typically retained`}
+                aria-label={`${dec.ageRange}, ${dec.yearsLabel}: ${retentionLabel(
+                  dec.mpfcRetentionPct
+                )} weight in Kinship’s suggestions`}
               >
                 <div
                   style={{ width: `${dec.mpfcRetentionPct}%` }}
@@ -310,7 +369,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                   }`}
                 />
               </div>
-              <span className="block font-mono text-xs text-stone-500 dark:text-stone-400 mt-1">
+              <span className="block font-mono text-xs text-loam-muted dark:text-loam-muted-dark mt-1">
                 {dec.yearsLabel}
               </span>
             </li>
@@ -321,11 +380,11 @@ export const FamilyIntakePanel: React.FC<Props> = ({
           {bumpWindow.lifeDecades.map((dec) => (
             <div key={dec.ageRange} className="flex flex-col items-center justify-end h-full gap-1 min-w-0">
               <span
-                className={`font-mono text-xs font-bold ${
-                  dec.isReminiscenceBump ? 'text-plum-700 dark:text-brass-200' : 'text-stone-400'
+                className={`text-meta font-semibold text-center ${
+                  dec.isReminiscenceBump ? 'text-plum-700 dark:text-brass-200' : 'text-loam-muted dark:text-loam-muted-dark'
                 }`}
               >
-                {dec.mpfcRetentionPct}%
+                {retentionLabel(dec.mpfcRetentionPct)}
               </span>
               <div
                 style={{ height: `${dec.mpfcRetentionPct}%` }}
@@ -337,10 +396,10 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                       : 'bg-parchment-300 dark:bg-vinyl-600'
                 }`}
               />
-              <span className="text-xs font-semibold text-stone-800 dark:text-parchment-100 text-center leading-tight mt-1">
+              <span className="text-xs font-semibold text-loam-ink dark:text-parchment-100 text-center leading-tight mt-1">
                 {dec.ageRange}
               </span>
-              <span className="font-mono text-xs text-stone-500 dark:text-stone-400 text-center">
+              <span className="font-mono text-xs text-loam-muted dark:text-loam-muted-dark text-center">
                 {dec.yearsLabel}
               </span>
             </div>
@@ -354,7 +413,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
         <section className="lg:col-span-4 rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50 dark:bg-vinyl-900 p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <span className="font-mono text-[0.8125rem] uppercase text-plum-600 dark:text-brass-200">
+              <span className="font-mono text-meta uppercase text-plum-600 dark:text-brass-200">
                 a.signal · Elder Clues
               </span>
               <h4 className="text-lg font-semibold">1–2 Fragile Youth Clues</h4>
@@ -397,7 +456,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                 >
                   <div className="min-w-0">
                     <div className="font-semibold truncate">{item.name}</div>
-                    <div className="text-xs text-stone-500 truncate">{item.originLabel}</div>
+                    <div className="text-xs text-loam-muted truncate">{item.originLabel}</div>
                   </div>
                   {sel && <Check className="w-4 h-4 text-plum-600 shrink-0" />}
                 </button>
@@ -431,7 +490,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
         <section className="lg:col-span-4 rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50 dark:bg-vinyl-900 p-5 space-y-3.5">
           <div className="flex items-center justify-between">
             <div>
-              <span className="font-mono text-[0.8125rem] uppercase text-pine-600 dark:text-pine-300">
+              <span className="font-mono text-meta uppercase text-pine-600 dark:text-pine-300">
                 b.signal · Care Circle Visitor
               </span>
               <h4 className="text-lg font-semibold">Visitor Bridge Perspective</h4>
@@ -455,7 +514,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                   }`}
                 >
                   <div className="text-xs font-mono font-bold truncate">{role.relationshipBadge}</div>
-                  <div className={`text-xs truncate ${active ? 'text-pine-100' : 'text-stone-500'}`}>
+                  <div className={`text-xs truncate ${active ? 'text-pine-100' : 'text-loam-muted'}`}>
                     {role.visitorLabel.split('(')[0].trim()}
                   </div>
                 </button>
@@ -498,7 +557,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                 >
                   <div className="min-w-0">
                     <div className="font-semibold truncate">{item.name}</div>
-                    <div className="text-xs text-stone-500 truncate">{item.originLabel}</div>
+                    <div className="text-xs text-loam-muted truncate">{item.originLabel}</div>
                   </div>
                   {sel && <Check className="w-4 h-4 text-pine-600 shrink-0" />}
                 </button>
@@ -532,7 +591,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
         <section className="lg:col-span-4 rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50 dark:bg-vinyl-900 p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <span className="font-mono text-[0.8125rem] uppercase text-brass-700 dark:text-brass-200">
+              <span className="font-mono text-meta uppercase text-brass-700 dark:text-brass-200">
                 Youth Hometown &amp; Safety
               </span>
               <h4 className="text-lg font-semibold">Cultural Geography &amp; Shield</h4>
@@ -553,7 +612,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                 }`}
               >
                 <div className="font-semibold truncate">{g.name.split('&')[0].trim()}</div>
-                <div className={`text-xs ${guardrails.youthGeography === g.id ? 'text-plum-100' : 'text-stone-400'}`}>
+                <div className={`text-xs ${guardrails.youthGeography === g.id ? 'text-plum-100' : 'text-loam-muted'}`}>
                   {g.country}
                 </div>
               </button>
@@ -634,7 +693,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                       <ShieldCheck className="w-3.5 h-3.5 text-pine-600" />
                       <span>{item.title}</span>
                     </div>
-                    <div className="text-xs text-stone-500 pl-5">{item.sub}</div>
+                    <div className="text-xs text-loam-muted pl-5">{item.sub}</div>
                   </div>
                   <span className="font-mono text-xs font-bold text-pine-700 dark:text-pine-300">
                     {active ? 'ON' : 'OFF'}

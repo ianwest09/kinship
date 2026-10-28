@@ -245,9 +245,13 @@ export function encodeKinshipPassportLink(params: {
     window.location.protocol.startsWith('http') &&
     Boolean(window.location.origin) &&
     window.location.origin !== 'null';
+  // Outside a real http origin (a file:// preview, an opaque sandbox iframe) the
+  // copied link used to point at a domain that does not exist, so "Copy link"
+  // produced something that could not be opened. It now falls back to the actual
+  // public deployment.
   const origin = hasRealOrigin
     ? `${window.location.origin}${window.location.pathname}`
-    : 'https://kinship.qloo-memory.org/';
+    : 'https://kinship-app-phi.vercel.app/';
   return { hash, url: `${origin}${hash}`, bytes: bytesArr.length };
 }
 

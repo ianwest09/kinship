@@ -9,7 +9,7 @@ export const KINSHIP_MCP_TOOLS: McpToolSchema[] = [
   {
     name: 'reconstruct_reminiscence_bump',
     description:
-      'Computes an elder’s neurological ages 10–30 mPFC Reminiscence Bump window and queries Qloo /v2/insights (artist, movie, tv_show) with bias.trends="off" and dementia distress-tag exclusions.',
+      'Computes the ages 10–30 reminiscence window from a birth year and queries Qloo /v2/insights (artist, movie, tv_show) with bias.trends="off" and distress-tag exclusions. No personal names are sent to Qloo.',
     qlooEndpointsUsed: [
       'GET /search',
       'GET /v2/insights (filter.release_year, bias.trends=off, filter.exclude.tags)',
@@ -18,7 +18,11 @@ export const KINSHIP_MCP_TOOLS: McpToolSchema[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        elderName: { type: 'string', description: 'First name or nickname of elder (zero-PII)' },
+        elderName: {
+          type: 'string',
+          description:
+            'First name or nickname. Used only to word the response; never forwarded to Qloo and never stored.',
+        },
         birthYear: { type: 'number', description: 'Birth year (1928–1966)' },
         youthGeography: {
           type: 'string',
@@ -100,8 +104,8 @@ export const KINSHIP_MCP_TOOLS: McpToolSchema[] = [
   {
     name: 'parse_family_intake_story',
     description:
-      'Zero-PII natural-language clinical intake parser converting messy family notes into structured Qloo Reminiscence Bump parameters, circadian shields, and seed entities.',
-    qlooEndpointsUsed: ['Local Zero-PII Clinical NLP -> Qloo Parameter Compiler'],
+      'Natural-language intake parser that turns free-text family notes into structured reminiscence-window parameters, safety shields and seed entities. Runs entirely in this service; no text is forwarded to Qloo.',
+    qlooEndpointsUsed: ['Local text parser -> Qloo parameter compiler'],
     inputSchema: {
       type: 'object',
       properties: {
