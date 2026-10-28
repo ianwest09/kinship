@@ -358,7 +358,7 @@ export async function generateKinshipBridge(
       }
 
       // 2) Parallel live calls across Qloo's full cross-domain surface:
-      //    - POST /v2/insights (Reminiscence Bump artist/movie with bias.trends='off' & distress tag exclusions)
+      //    - GET /v2/insights (Reminiscence Bump artist/movie with bias.trends='off' & distress tag exclusions)
       //    - GET /v2/analysis/compare (Grandchild <-> Grandparent taste overlap)
       //    - GET /v2/insights?filter.type=urn:heatmap (Hometown cultural geohashes)
       //    - GET /v2/insights?filter.type=urn:demographics (6-band generational skew)
@@ -845,7 +845,7 @@ export async function generateKinshipBridge(
       stepNumber: 2,
       agentName: 'Youth-Universe Time-Machine Reconstructor',
       purpose: 'Queries cross-domain Qloo insights strictly bounded to the elder’s ages 10–30 release years and youth hometown geography.',
-      method: 'POST',
+      method: 'GET',
       endpoint: '/v2/insights',
       params: {
         'filter.type': 'urn:entity:artist,urn:entity:movie,urn:entity:tv_show',
@@ -863,7 +863,7 @@ export async function generateKinshipBridge(
       stepNumber: 3,
       agentName: 'Sundowning, Iso-Principle, Brand & Senior Dining Shield',
       purpose: 'Filters era distress triggers, sequences the 15-min Iso-Principle BPM step-down arc, and cross-walks into urn:entity:brand olfactory triggers + urn:entity:place IDDSI dining.',
-      method: 'POST',
+      method: 'GET',
       endpoint: '/v2/insights (Safety + urn:entity:brand + urn:entity:place)',
       params: {
         'filter.content_rating': 'G,PG,TV-G',
@@ -898,7 +898,7 @@ export async function generateKinshipBridge(
       endpoint: '/v2/insights?filter.type=urn:demographics + urn:heatmap',
       params: {
         'signal.interests.entities': `${resolvedElderClues[0]?.entity_id || ''} vs ${resolvedGrandchildSeeds[0]?.entity_id || ''}`,
-        'signal.location.query': geo.name,
+        'filter.location.query': geo.name,
         'output.heatmap.boundary': 'urn:geohash',
       },
       durationMs: step5Ms,
@@ -1281,7 +1281,7 @@ export async function generateKinshipBridge(
       blindLlmGuess: `Generic “50s & 70s Oldies Playlist” or recency-biased remasters outside ${guardrails.elderName}’s youth.`,
       whyBlindLlmFails: `Misses the exact ${bump.bumpStartYear}–${bump.bumpEndYear} autobiographical window (peak ${bump.peakStartYear}–${bump.peakEndYear}) that survives Alzheimer’s in the medial prefrontal cortex.`,
       qlooTasteAiResult: `Locks release years strictly to ${bump.bumpStartYear}–${bump.bumpEndYear} (top match: ${topCue?.name || resolvedElderClues[0]?.name}, age ${topCue?.elderAgeAtRelease || 19}).`,
-      qlooApiMechanism: `POST /v2/insights → filter.release_year={min:${bump.bumpStartYear}, max:${bump.bumpEndYear}} + bias.trends="off"`,
+      qlooApiMechanism: `GET /v2/insights → filter.release_year={min:${bump.bumpStartYear}, max:${bump.bumpEndYear}} + bias.trends="off"`,
     },
     {
       dimension: '2. Hometown Cultural & Diaspora Specificity',

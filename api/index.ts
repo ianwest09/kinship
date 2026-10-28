@@ -1,3 +1,4 @@
+import '../server/loadEnv.js';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createKinshipApiApp } from '../server/apiRouter.js';
 
