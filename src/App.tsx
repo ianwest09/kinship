@@ -1045,8 +1045,8 @@ export const App: React.FC = () => {
           <strong className="font-semibold text-loam-ink dark:text-parchment-100">
             Educational prompts only — not medical advice.
           </strong>{' '}
-          Sundowning, Iso-Principle, IDDSI texture, serving-temperature and
-          medication-interaction suggestions are general educational prompts. They are
+          Suggestions about sound, settling routines, food texture, serving temperature
+          and timing are general educational prompts. They are
           not individualised clinical guidance and must not replace assessment by a
           clinician, dietitian or speech-and-language therapist. Qloo results describe
           aggregate cultural affinities; they are not evidence about any individual’s

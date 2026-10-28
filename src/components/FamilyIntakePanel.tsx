@@ -133,7 +133,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
               <p className="mt-2.5 pl-6 text-sm md:text-base text-loam-body dark:text-loam-body-dark leading-relaxed">
                 Dementia erodes recent small talk early, yet cultural and musical
                 memories formed between roughly ages 10 and 30 are often preserved
-                — they are held in the medial prefrontal cortex, the “Reminiscence
+                — a pattern often called the “Reminiscence
                 Bump”. Kinship looks at that window, and at the places they grew
                 up, to suggest things that may still feel familiar. These are
                 general patterns, not facts about any one person.
@@ -672,7 +672,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
               },
               {
                 k: 'hearingLossWarmEq' as const,
-                title: 'Presbycusis Hearing-Aid Warmth EQ',
+                title: 'Warm the sound for hearing aids',
                 sub: 'Boosts 150–800 Hz baritone/cello & rolls off shrill >3.2 kHz',
               },
             ].map((item) => {

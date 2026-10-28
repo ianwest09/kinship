@@ -142,7 +142,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
             <div>
               <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider break-words text-plum-600 dark:text-brass-200">
                 <GitCompare className="w-4 h-4" />
-                <span>Why “Agents With Taste” Matter in Clinical Care · Live Patient-Personalized Diff</span>
+                <span>Why “Agents With Taste” matter here · Live request-by-request diff</span>
               </div>
               <h3 className="text-lg md:text-xl font-semibold text-loam-ink dark:text-parchment-50 mt-0.5">
                 Without Qloo (Generic Prompted LLM) vs. With Qloo Taste AI™ for {data.guardrailsApplied.elderName}
@@ -426,7 +426,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                   </div>
                 </div>
 
-                {/* 1-Tap Streaming Launchers + Presbycusis & Zero-Ad Cliff Guardrail */}
+                {/* 1-Tap Streaming Launchers + hearing-comfort & loud-ad guardrail */}
                 <div className="pt-1 flex flex-wrap items-center justify-between gap-2 text-meta">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <a
@@ -626,10 +626,10 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
             <span>Cross-Domain Sensory Leap · GET /v2/insights?filter.type=urn:entity:brand</span>
           </div>
           <h3 className="text-xl font-semibold text-loam-ink dark:text-parchment-50 mt-1">
-            Beyond Screens: $5 Smell, Tea &amp; Procedural Touch Anchors (Stage 5–6 Ready)
+            Beyond the screen: smell, tea and things to hold
           </h3>
           <p className="text-xs md:text-sm text-loam-body dark:text-loam-muted-dark">
-            Olfaction is the only human sense that bypasses the thalamus and projects directly to the amygdala and entorhinal cortex — unlocking deep emotional calm even when vision or speech has faded.
+            Smell is often the last sense to prompt a memory, and it can still reach someone when vision or speech has faded. These are suggestions, not a treatment, and they will not work every time.
           </p>
         </div>
 
@@ -669,7 +669,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
       </section>
 
       {/* ===================================================================== */}
-      {/* PART 2C: DYSPHAGIA-SAFE NOSTALGIC SENIOR DINING & CALM CAFÉ (place)   */}
+      {/* PART 2C: FAMILIAR MEAL, EASY TO EAT & CALM CAFÉ (place) */}
       {/* ===================================================================== */}
       {data.seniorDiningPlan && (
         <section className="rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50 dark:bg-vinyl-900 p-6 md:p-7 shadow-sm space-y-5">
@@ -682,10 +682,10 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                 </span>
               </div>
               <h3 className="text-xl font-semibold text-loam-ink dark:text-parchment-50 mt-1">
-                Dysphagia-Safe Nostalgic Senior Dining &amp; Quiet-Hours Outing
+                A Familiar Meal, Easy to Eat &amp; a Quiet-Hours Outing
               </h3>
               <p className="text-xs md:text-sm text-loam-body dark:text-loam-muted-dark">
-                Matches {data.guardrailsApplied.elderName}’s youth culinary heritage with IDDSI easy-to-chew textures, low-scald (&lt;52°C) temperature safety, medication-aware ingredients, and low-decibel calm cafés.
+                Matches {data.guardrailsApplied.elderName}’s youth culinary heritage with easy-to-chew textures, warm-not-hot serving temperatures and quiet cafés. General comfort ideas — check texture, swallowing and medication questions with the person’s care team.
               </p>
             </div>
             <span className="px-3 py-1 rounded-full bg-brass-100 dark:bg-vinyl-800 text-brass-700 dark:text-brass-200 text-xs font-mono font-bold self-start md:self-auto">
@@ -696,13 +696,13 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
             <div className="lg:col-span-7 rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 p-5 space-y-3">
               <div className="text-meta font-mono uppercase text-plum-600 dark:text-brass-200 font-semibold">
-                Youth-Era Comfort Meal Prescription (Home or Care Kitchen)
+                A Comfort Meal From Their Era (Home or Care Kitchen)
               </div>
               <h4 className="text-lg font-semibold text-loam-ink dark:text-parchment-50">
                 {data.seniorDiningPlan.dishName}
               </h4>
               <div className="p-3 rounded-xl bg-pine-50 dark:bg-vinyl-900 border border-pine-500/25 text-xs text-loam-body dark:text-loam-body-dark leading-relaxed">
-                <strong className="text-pine-700 dark:text-pine-300">Clinical Texture, Thermal &amp; Med Guardrails:</strong>{' '}
+                <strong className="text-pine-700 dark:text-pine-300">Texture, temperature and comfort:</strong>{' '}
                 {data.seniorDiningPlan.thermalAndMedSafety}
               </div>
               <div className="p-3 rounded-xl bg-parchment-100/80 dark:bg-vinyl-900/70 border border-parchment-200 dark:border-vinyl-700 text-xs italic text-loam-ink dark:text-parchment-100">

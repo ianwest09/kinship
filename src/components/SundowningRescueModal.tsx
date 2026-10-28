@@ -34,7 +34,7 @@ const DEMENTIA_HELPLINES: Record<YouthGeographyId, { org: string; phone: string 
   },
   chicago: {
     org: 'Alzheimer’s Association 24/7 Caregiver Helpline (US)',
-    phone: '1-800-272-3900 (24/7 Free Clinical Coaches)',
+    phone: '1-800-272-3900 (24/7 free helpline)',
   },
   nyc_brooklyn: {
     org: 'Alzheimer’s Association 24/7 Helpline & CaringKind NYC',
@@ -202,7 +202,7 @@ export const SundowningRescueModal: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* Right 8 Cols: Interactive 3-Phase Iso-Principle Step-Down Sequencer */}
+          {/* Right 8 Cols: Interactive three-step tempo sequencer */}
           <div className="lg:col-span-8 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">

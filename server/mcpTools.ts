@@ -66,9 +66,9 @@ export const KINSHIP_MCP_TOOLS: McpToolSchema[] = [
   {
     name: 'prescribe_iso_sundowning_rescue',
     description:
-      'Generates a 3-phase clinical Iso-Principle BPM step-down arc (96 → 76 → 62 BPM) + urn:entity:brand olfactory/tactile triggers and presbycusis warm EQ guardrails for 4:30 PM sundowning agitation.',
+      'Builds a three-step tempo arc for late-afternoon settling (96 → 76 → 62 BPM over about 15 minutes), plus urn:entity:brand scent and texture suggestions and an optional warm-EQ setting for hearing aids. A suggestion only — not a treatment, and it will not work every time.',
     qlooEndpointsUsed: [
-      'GET /v2/insights (sundowning safety shield)',
+      'GET /v2/insights (filter.content_rating + filter.exclude.tags)',
       'GET /v2/insights?filter.type=urn:entity:brand',
     ],
     inputSchema: {
@@ -86,10 +86,10 @@ export const KINSHIP_MCP_TOOLS: McpToolSchema[] = [
   {
     name: 'curate_dysphagia_nostalgic_dining',
     description:
-      'Pairs Qloo urn:entity:place calm heritage cafés and regional culinary taste tags with IDDSI Levels 4–6 easy-to-chew textures, <52°C scald-safe warmth, statin/donepezil medication safety, and high-contrast plating.',
+      'Pairs Qloo urn:entity:place calm heritage cafés and regional culinary taste tags with easy-to-chew texture ideas, warm-not-hot serving temperatures and high-contrast plating. General comfort suggestions only — check texture, swallowing and medication questions with the care team.',
     qlooEndpointsUsed: [
       'GET /v2/insights?filter.type=urn:entity:place',
-      'GET /v2/tags (urn:tag:cuisine)',
+      'Local culinary catalogue (used when Qloo returns no place match)',
     ],
     inputSchema: {
       type: 'object',

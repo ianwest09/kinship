@@ -284,7 +284,7 @@ export const PreferencesView: React.FC<Props> = ({
             For care teams
           </h3>
           <p className="mt-1.5 text-sm md:text-base text-loam-body dark:text-loam-body-dark">
-            Deeper detail, including the clinical reasoning and the exact Qloo
+            Deeper detail, including the reasoning and the exact Qloo
             requests behind each suggestion.
           </p>
         </div>
