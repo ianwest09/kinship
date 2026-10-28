@@ -1,0 +1,70 @@
+# Kinship — The Dementia “Reminiscence Bump” & Intergenerational Bridge Agent
+
+> **Qloo Agentic Hackathon (“Agents, but with taste.”)** · Built on **Qloo Taste AI™ v2** (`artist`, `movie`, `tv_show`, `brand`, `place`, `demographics`, `heatmap`, `/v2/analysis/compare`) + **Model Context Protocol (`mcp/1.0`)** · **MIT Licensed** · **Zero Cloud PHI / Zero PII**
+
+---
+
+## Why Kinship Exists
+
+Over **57 million families worldwide** navigate Alzheimer’s and related dementias. Two heartbreaks strike almost every household and memory-care community every single day:
+
+1. **4:30 PM “Sundowning” Agitation**: As daylight fades, circadian confusion triggers acute homesickness (*“I want to go home”*), pacing, and distress. Caregivers or smart-TV autoplay routinely put on generic “oldies” or 1960s films — accidentally playing suspense/war triggers (*Psycho*, *The Birds*, loud streaming ad breaks) that dementia brains perceive as real-room danger.
+2. **Intergenerational Visit Dread**: Over **60% of teens and Gen-Z grandchildren** dread visiting a grandparent with dementia because standard conversation (*“Do you remember my school? What did you have for lunch?”*) inadvertently quizzes damaged short-term hippocampal memory — causing shame and silence.
+
+### The Neurological Breakthrough + Why Only Qloo Taste AI™ Can Solve It
+
+Neuroscience proves that while Alzheimer’s erodes recent hippocampal memory, **autobiographical, musical, olfactory, and culinary memories formed between ages 10 and 30 — the “Reminiscence Bump” — survive into late-stage disease inside the medial prefrontal cortex (mPFC)** (Petr Janata, UC Davis).
+
+A generic prompted LLM **cannot** solve this safely:
+- Generic LLMs guess US/UK Top-40 stereotypes, suffer recency bias, hallucinate release years, recommend peril-heavy era classics, and tell grandchildren to ask memory-testing questions.
+- **Kinship** uses **Qloo Taste AI™’s 250M+ entity cultural graph** with **zero patient PII** to reconstruct an elder’s exact ages 10–30 cultural universe in their youth hometown, filter out distress triggers, compose a 15-minute clinical **Iso-Principle BPM step-down (`96 → 76 → 62 BPM`)**, pair **IDDSI Levels 4–6 dysphagia-safe youth comfort meals & quiet cafés**, and run **`GET /v2/analysis/compare`** to reveal the hidden musical/story DNA connecting a 19-year-old grandchild’s favorites (*Laufey*, *Olivia Dean*, *Studio Ghibli*, *Tems*) with their grandparent’s 1950s–1970s youth touchstones.
+
+---
+
+## Full-Surface Qloo v2 API Architecture
+
+Kinship orchestrates **6 entity/insight domains** and **all core Qloo v2 endpoints** inside a 4-iteration autonomous ReAct agent loop (`OBSERVE → TOOL_CALL → AUDIT_SELF_CORRECT → SYNTHESIZE`):
+
+| Agent / Tool | Qloo v2 Endpoint & Parameters | Clinical Care Role |
+|---|---|---|
+| **01. Clue & Bump Resolver** | `GET /search` · `GET /v2/tags` | Resolves 1–2 surviving family clues + grandchild favorites into Qloo UUIDs and locks the `[birthYear+10, birthYear+30]` mPFC window. |
+| **02. Youth-Universe Reconstructor** | `POST /v2/insights` (`urn:entity:artist`, `movie`, `tv_show`, `filter.release_year`, `signal.location.query`, `bias.trends="off"`, `feature.explainability=true`) | Reconstructs high-salience youth cues across **8 global & diaspora regions** (Cape Town, Chicago, London, Brooklyn, Tokyo, Kingston, Mumbai, Buenos Aires) with clue attribution. |
+| **03. Sundowning, Brand & Dining Shield** | `POST /v2/insights` (`filter.exclude.tags=horror,thriller,war`, `urn:entity:brand`, `urn:entity:place`) | Blocks era peril traps, sequences `96→76→62 BPM` Iso-Principle entrainment, prescribes $5 olfactory/tea anchors, and curates **IDDSI Levels 4–6 easy-to-chew (<52°C, medication-safe) nostalgic dining & quiet hours**. |
+| **04. Intergenerational Soul Bridge** | `GET /v2/analysis/compare` (`a.signal.interests.entities` vs `b.signal.interests.entities`) | Computes shared harmonic & narrative tag co-occurrence across 60 years to generate a 3-step, zero-quiz 15-minute grandchild visit playbook. |
+| **05. Silo Breaker & Hometown Mapper** | `GET /v2/insights?filter.type=urn:demographics` + `filter.type=urn:heatmap` (`output.heatmap.boundary=urn:geohash`) | Proves generational recommender siloing across 6 age bands and maps neighborhood youth geohashes with sensory place prompts. |
+
+### Autonomous Agent Self-Correction & Model Context Protocol (`mcp/1.0`)
+- **Sparsity & Safety Self-Correction**: If a live Qloo query returns distress-tagged entities or `<2` results for a diaspora cue, Kinship’s auditor drops peril tags and autonomously retries with a widened `±5 year` diaspora window while maintaining `bias.trends="off"`.
+- **Callable MCP Tool Server**: Exposes `GET /api/mcp/tools` and `POST /api/mcp/call` for 5 clinical tools (`reconstruct_reminiscence_bump`, `bridge_generations_compare`, `prescribe_iso_sundowning_rescue`, `curate_dysphagia_nostalgic_dining`, `parse_family_intake_story`) so any Claude, OpenAI, or LangGraph care workflow can call Kinship directly.
+
+---
+
+## Quick Start (Local Development)
+
+```bash
+npm install
+cp .env.example .env   # Optionally add QLOO_API_KEY=... (also configurable live in-app via the Qloo Trace drawer!)
+npm run dev            # Starts Express + Vite + MCP Server on http://localhost:3001
+```
+
+- **With `QLOO_API_KEY`**: Live Qloo v2 responses dynamically hydrate Youth Universe cards, `/v2/analysis/compare` overlap scores, `urn:entity:place` calm venues, `urn:entity:brand` anchors, `urn:demographics`, and `urn:heatmap` geohashes.
+- **Without `QLOO_API_KEY`**: Automatically runs on Kinship’s **8-Region Verified Cultural Twin** so judges and caregivers can test every workflow immediately with zero setup friction.
+
+---
+
+## One-Click Deploy to Vercel
+
+Kinship includes native Vercel Serverless configuration (`vercel.json` + `api/index.ts`):
+
+1. Push this directory to a public GitHub repository (root `LICENSE` is standard MIT so GitHub automatically displays **MIT license** in the **About** sidebar).
+2. Import the repository in **Vercel** (Build Command: `npm run build`, Output Directory: `dist` — auto-detected from `vercel.json`).
+3. Add environment variables in Vercel Project Settings:
+   - `QLOO_API_KEY` = your Qloo API key
+   - `QLOO_BASE_URL` = `https://hackathon.api.qloo.com` (or `https://api.qloo.com`)
+4. Deploy! All `/api/*` and `/api/mcp/*` routes execute serverlessly while keeping your `QLOO_API_KEY` strictly server-side.
+
+---
+
+## License
+
+Released under the **MIT License** — see [`LICENSE`](./LICENSE).
