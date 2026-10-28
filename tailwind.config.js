@@ -1,0 +1,65 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  darkMode: 'class',
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      fontFamily: {
+        serif: ['"Fraunces"', '"Newsreader"', 'Georgia', 'Cambria', 'serif'],
+        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+      },
+      colors: {
+        parchment: {
+          50: '#FDFBF7',
+          100: '#F9F4EC',
+          200: '#F1E8D9',
+          300: '#E3D5BF',
+          400: '#CBB89B',
+          500: '#B59E7D',
+        },
+        plum: {
+          50: '#FCF3F5',
+          100: '#F7E3E8',
+          200: '#ECC5CF',
+          300: '#DDA1B1',
+          400: '#BE6B81',
+          500: '#9B3B53',
+          600: '#7C2D41',
+          700: '#632233',
+          800: '#4A1926',
+          900: '#35121B',
+        },
+        brass: {
+          50: '#FEF9EC',
+          100: '#FBF0CF',
+          200: '#F5DF9E',
+          300: '#ECC869',
+          400: '#DBA93E',
+          500: '#C58B24',
+          600: '#A36F16',
+          700: '#825610',
+        },
+        pine: {
+          50: '#EFF6F3',
+          100: '#DAEAE3',
+          200: '#B8D6C9',
+          300: '#8BBAA7',
+          400: '#5D9681',
+          500: '#3A705F',
+          600: '#2D594B',
+          700: '#224439',
+        },
+        vinyl: {
+          950: '#131116',
+          900: '#1B1820',
+          800: '#25212C',
+          700: '#332E3D',
+          600: '#463F54',
+          500: '#5C536E',
+        },
+      },
+    },
+  },
+  plugins: [],
+};
