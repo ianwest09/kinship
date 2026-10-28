@@ -12,11 +12,25 @@ curl https://kinship-app-phi.vercel.app/api/health
 
 `qloo.connected` must be `true`, with `maskedKey` showing the key's first and last four characters. If it reads `false`, the deployment is serving the offline Verified Cultural Twin instead of live Qloo: add `QLOO_API_KEY` under **Project Settings → Environment Variables** for the target environments and redeploy. The key cannot be supplied from the browser, so an environment variable is the only supported path.
 
-Because the UI states which source produced what it is showing, an unconnected deployment is never mistaken for live Qloo output — the amber banner says so explicitly.
+Because the UI states which source produced what it is showing, an unconnected deployment is never mistaken for live Qloo output — the provenance notice says so explicitly.
 
-> **Provenance is stated in the UI.** The landing view renders curated preset case studies, so it carries an amber banner reading *“Offline dataset — Qloo is not connected”* — that content is **not** Qloo output and is labelled as such. Running a reconstruction issues a real request; when Qloo answers it, the banner turns green and reads *“Live Qloo Taste AI™”*. Items actually returned by Qloo additionally carry a `Live Qloo API` badge, and the agent-trace drawer labels every step `LIVE` or `TWIN`, so a Qloo result is never visually confused with Kinship’s own interpretation.
+> **Provenance is stated in the UI.** Until a reconstruction runs, Kinship shows only its own curated material, so it carries a provenance notice reading *“Offline collection — Qloo is not connected”* — that content is **not** Qloo output and is labelled as such. Running a reconstruction issues a real request; when Qloo answers it, the notice reads *“Live Qloo Taste AI™”*. Items actually returned by Qloo additionally carry a `Live Qloo API` badge, and the agent-trace drawer labels every step `LIVE` or `TWIN`, so a Qloo result is never visually confused with Kinship’s own interpretation.
 
 Source repository: **https://github.com/ianwest09/kinship** (public, MIT licence detected at repository root).
+
+---
+
+## Design & accessibility (Loam)
+
+The interface follows the **Loam** design system: warm paper `#F4F0E8`, white card surfaces, soft charcoal `#353432`, muted sage `#64745D` and a soft blue focus indicator. Contrast was computed for every pairing rather than assumed; where a supplied reference value failed WCAG it was darkened (sage text on paper uses `#55634E` at 5.63:1, focus rings use `#6A7DAD` at 3.59:1).
+
+- **Reading preference** — Normal / Large / Largest, persisted per device. The root font is 17px and all type is rem-based, so the preference scales type *and* spacing together without breaking layout.
+- **Touch** — 44px minimum targets on coarse pointers; four-item bottom navigation on phones with safe-area padding for the gesture bar.
+- **Motion** — minimal by default, fully removed under `prefers-reduced-motion`.
+- **Dementia-inclusive copy** — no quizzes, scores or countdowns; every screen offers a neutral way out; suggestions are labelled as suggestions, never as facts about a person.
+- **Brand** — the approved logo ships as `public/kinship-logo.png` (full lockup) and `public/kinship-mark.png` (tile mark, also the favicon); the app opens with a brief, always-skippable splash.
+
+Five destinations — **Home, Discover, Together, Family, Preferences** — sit in front of the same engine. The full clinical detail (era timeline, compare diffs, blocked distress triggers, dining plan, Qloo request trace) remains one tap away under **Detailed care view**.
 
 ---
 

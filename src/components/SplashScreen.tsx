@@ -8,10 +8,11 @@ interface Props {
 /**
  * Splash screen — the first thing seen when Kinship opens.
  *
- * Deliberately calm and brief: a brand moment, not an advert. It always
- * dismisses on its own, can always be skipped immediately, holds for less
- * time when the visitor prefers reduced motion, and locks page scroll while
- * visible so nothing moves underneath it.
+ * Deliberately calm and brief: a brand moment, not an advert. It dismisses
+ * itself as soon as the first painted frame is ready (bounded between a
+ * minimum and a maximum hold), can always be skipped immediately by button or
+ * by any tap or key, holds for less time when the visitor prefers reduced
+ * motion, and locks page scroll while visible so nothing moves underneath it.
  *
  * Light mode shows the approved full lockup on warm paper. Dark mode shows
  * the mark plus a set wordmark instead, because the lockup's navy wordmark
@@ -39,9 +40,52 @@ export const SplashScreen: React.FC<Props> = ({ darkMode, onDone }) => {
     const reduce = Boolean(
       window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     );
-    const holdMs = reduce ? 900 : 1700;
-    const timer = window.setTimeout(finish, holdMs);
-    return () => window.clearTimeout(timer);
+    const minHoldMs = reduce ? 700 : 1200;
+    const maxHoldMs = reduce ? 1200 : 2600;
+    const startedAt = Date.now();
+    let contentReady = false;
+
+    const dismissIfReady = () => {
+      if (contentReady && Date.now() - startedAt >= minHoldMs) finish();
+    };
+
+    // Dismiss as soon as the first real frame is on screen (webfonts loaded and
+    // painted), but never before minHold and never after maxHold. A fixed timer
+    // has two failure modes — flashing away before first paint, or holding the
+    // visitor at a door while the app behind is already ready — and neither can
+    // be judged correctly without seeing it, so both are designed out instead.
+    const fonts = (document as Document & { fonts?: { ready: Promise<unknown> } })
+      .fonts;
+    (fonts?.ready ?? Promise.resolve())
+      .then(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      )
+      .then(() => {
+        contentReady = true;
+        dismissIfReady();
+      })
+      .catch(() => {
+        contentReady = true;
+        dismissIfReady();
+      });
+
+    const poll = window.setInterval(dismissIfReady, 120);
+    const cap = window.setTimeout(finish, maxHoldMs);
+
+    // Any interaction dismisses immediately: the splash can never be a door.
+    const interact = () => finish();
+    window.addEventListener('pointerdown', interact, { once: true });
+    window.addEventListener('keydown', interact, { once: true });
+
+    return () => {
+      window.clearInterval(poll);
+      window.clearTimeout(cap);
+      window.removeEventListener('pointerdown', interact);
+      window.removeEventListener('keydown', interact);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
