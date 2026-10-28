@@ -1,4 +1,5 @@
-// Zero-Network Web Audio Therapeutic Cadence, Iso-Principle Step-Down & Presbycusis Warmth EQ
+// Zero-network Web Audio settling cadence: a three-step tempo arc, plus an optional
+// warm EQ for hearing aids. Locally synthesised — no media files, no network.
 // Safe inside sandboxed iframes (no external MP3s or network requests required).
 
 export type HarmonicPreset =
@@ -36,7 +37,7 @@ const CHORD_VOICINGS: Record<HarmonicPreset, { stepMs: number; chords: number[][
     ],
   },
   iso_phase3_62bpm: {
-    stepMs: 2850, // ~62 BPM deep parasympathetic dusk settle
+    stepMs: 2850, // ~62 BPM slowest step, for dusk settling
     chords: [
       [130.81, 196.0, 246.94, 329.63], // Cmaj7 warm cello register
       [174.61, 220.0, 261.63, 329.63], // Fmaj7

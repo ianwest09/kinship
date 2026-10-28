@@ -832,7 +832,7 @@ export async function generateKinshipBridge(
       agentName: 'Reminiscence Bump & Family Clue Resolver',
       purpose: 'Computes the ages 10–30 reminiscence window from a birth year and resolves elder clues and grandchild favourites into Qloo entity UUIDs.',
       method: 'GET',
-      endpoint: '/search & /v2/tags',
+      endpoint: '/search',
       params: {
         query: [...resolvedElderClues, ...resolvedGrandchildSeeds].map((s) => s.name.split('(')[0].trim()).join(' | '),
         computed_bump_window: `${bump.bumpStartYear}–${bump.bumpEndYear} (Peak ${bump.peakStartYear}–${bump.peakEndYear})`,
@@ -861,20 +861,20 @@ export async function generateKinshipBridge(
     },
     {
       stepNumber: 3,
-      agentName: 'Sundowning, Iso-Principle, Brand & Senior Dining Shield',
-      purpose: 'Filters era distress triggers, sequences the 15-min Iso-Principle BPM step-down arc, and cross-walks into urn:entity:brand olfactory triggers + urn:entity:place IDDSI dining.',
+      agentName: 'Late-Afternoon Settling, Scent & Dining Shield',
+      purpose: 'Filters era distress triggers, sequences the 15-minute three-step tempo arc, and cross-walks into urn:entity:brand scent triggers + urn:entity:place dining.',
       method: 'GET',
       endpoint: '/v2/insights (Safety + urn:entity:brand + urn:entity:place)',
       params: {
         'filter.content_rating': 'G,PG,TV-G',
         'filter.exclude.tags': 'urn:tag:genre:media:horror,thriller,war,peril,bereavement',
-        'presbycusis_warm_eq': guardrails.hearingLossWarmEq ? 'enabled_150_800Hz' : 'standard',
-        'iddsi_dysphagia_level': 'Level 4–6 Easy-to-Chew (<52°C, statin-safe)',
-        circadian_mode: guardrails.circadianWindow,
+        'kinship.warm_eq (local filter, not a Qloo param)': guardrails.hearingLossWarmEq ? 'enabled_150_800Hz' : 'standard',
+        'kinship.texture (local filter, not a Qloo param)': 'Easy-to-chew textures, served warm not hot',
+        'kinship.time_of_day (local filter, not a Qloo param)': guardrails.circadianWindow,
       },
       durationMs: 38,
       mode: modeUsed,
-      summary: `Intercepted ${blockedDistressTraps.length} era distress traps; composed 96→76→62 BPM Iso-Principle arc, 3 olfactory triggers, & IDDSI nostalgic dining plan.`,
+      summary: `Intercepted ${blockedDistressTraps.length} era distress traps; composed the 96→76→62 BPM three-step tempo arc, 3 scent triggers, & a familiar-meal dining card.`,
     },
     {
       stepNumber: 4,
@@ -956,7 +956,7 @@ export async function generateKinshipBridge(
     },
   ];
 
-  // Compose 15-Minute Clinical Iso-Principle Step-Down Arc (96 BPM -> 76 BPM -> 62 BPM)
+  // Compose the 15-minute three-step tempo arc (96 BPM -> 76 BPM -> 62 BPM)
   const upbeatCue =
     reconstructedYouthUniverse.find((c) => /104 BPM|88 BPM|Swing|Tap/i.test(c.tempoBpmLabel)) ||
     reconstructedYouthUniverse[0];
@@ -1279,7 +1279,7 @@ export async function generateKinshipBridge(
     {
       dimension: '1. Era Precision (Ages 10–30 Reminiscence Window)',
       blindLlmGuess: `Generic “50s & 70s Oldies Playlist” or recency-biased remasters outside ${guardrails.elderName}’s youth.`,
-      whyBlindLlmFails: `Misses the exact ${bump.bumpStartYear}–${bump.bumpEndYear} autobiographical window (peak ${bump.peakStartYear}–${bump.peakEndYear}) that survives Alzheimer’s in the medial prefrontal cortex.`,
+      whyBlindLlmFails: `Misses the exact ${bump.bumpStartYear}–${bump.bumpEndYear} autobiographical window (peak ${bump.peakStartYear}–${bump.peakEndYear}) that many people hold on to longest.`,
       qlooTasteAiResult: `Locks release years strictly to ${bump.bumpStartYear}–${bump.bumpEndYear} (top match: ${topCue?.name || resolvedElderClues[0]?.name}, age ${topCue?.elderAgeAtRelease || 19}).`,
       qlooApiMechanism: `GET /v2/insights → filter.release_year={min:${bump.bumpStartYear}, max:${bump.bumpEndYear}} + bias.trends="off"`,
     },
@@ -1291,16 +1291,16 @@ export async function generateKinshipBridge(
       qlooApiMechanism: `signal.location.query="${geo.name.split('&')[0].trim()}" + GET /v2/insights?filter.type=urn:heatmap`,
     },
     {
-      dimension: '3. Sundowning Agitation & Dysphagia Safety',
-      blindLlmGuess: `Suggests era classics like Hitchcock’s Psycho (1960), war dramas, or sticky/scalding nostalgia foods.`,
-      whyBlindLlmFails: 'Dementia brains misinterpret screen peril as real-room danger at 4:30 PM dusk, and dry/sticky textures risk aspiration.',
-      qlooTasteAiResult: `Intercepts ${blockedDistressTraps.length} era peril traps, runs a 96→76→62 BPM Iso-Principle arc, & pairs ${seniorDiningPlan.iddsiLevelLabel} ${seniorDiningPlan.dishName.split('&')[0].trim()}.`,
+      dimension: '3. Late-Afternoon Settling & Mealtime Comfort',
+      blindLlmGuess: `Suggests era classics like Hitchcock’s Psycho (1960), war dramas, or sticky, very hot nostalgia foods.`,
+      whyBlindLlmFails: 'A generic model cannot know that screen peril can be hard to place as fictional at 4:30 PM dusk, or that dry and sticky textures are difficult to eat.',
+      qlooTasteAiResult: `Intercepts ${blockedDistressTraps.length} era peril traps, runs a 96→76→62 BPM three-step tempo arc, & pairs ${seniorDiningPlan.iddsiLevelLabel} ${seniorDiningPlan.dishName.split('&')[0].trim()}.`,
       qlooApiMechanism: `filter.exclude.tags=horror,thriller,war + urn:entity:brand + urn:entity:place`,
     },
     {
       dimension: `4. Zero-Quiz Bridge for ${guardrails.grandchildName} (Visitor)`,
       blindLlmGuess: `Advises ${guardrails.grandchildName}: “Ask ${guardrails.elderName} what she had for lunch or if she remembers your school!”`,
-      whyBlindLlmFails: 'Direct short-term memory quizzing spotlights hippocampal loss, triggering shame, withdrawal, and 60% grandchild visit dread.',
+      whyBlindLlmFails: 'Direct short-term memory quizzing puts the spotlight on what someone can no longer recall, which can lead to embarrassment and withdrawal.',
       qlooTasteAiResult: `Reports ${topBridge?.overlapPct || 93}% shared taste affinity between ${topBridge?.grandchildSeedName || 'modern favourite'} and ${topBridge?.elderAnchorName || 'youth classic'} as a starting point for side-by-side listening.`,
       qlooApiMechanism: `GET /v2/analysis/compare (a.signal vs b.signal) + filter.type=urn:demographics`,
     },
@@ -1312,7 +1312,7 @@ export async function generateKinshipBridge(
       iteration: 1,
       phase: 'OBSERVE',
       thought: `Calculated the reminiscence window (${bump.bumpStartYear}–${bump.bumpEndYear}, peak ${bump.peakStartYear}–${bump.peakEndYear}) in ${geo.name}; circadian state=${guardrails.circadianWindow}, hearingLossWarmEq=${guardrails.hearingLossWarmEq}.`,
-      toolName: 'compute_reminiscence_window & /search',
+      toolName: 'reconstruct_reminiscence_bump & /search',
       observation: `Resolved ${resolvedElderClues.length} elder seed(s) (${resolvedElderClues[0]?.entity_id}) and ${resolvedGrandchildSeeds.length} visitor seed(s) (${resolvedGrandchildSeeds[0]?.entity_id}).`,
     },
     {
@@ -1325,19 +1325,19 @@ export async function generateKinshipBridge(
     {
       iteration: 3,
       phase: 'AUDIT_SELF_CORRECT',
-      thought: `Auditing candidate set for (a) sundowning peril tags, (b) caregiver-excluded IDs (${excludedCueIds.length}), (c) >3.2 kHz presbycusis harshness, and (d) diaspora sparsity.`,
-      toolName: 'sundowning_clinical_auditor',
+      thought: `Auditing candidate set for (a) sundowning peril tags, (b) caregiver-excluded IDs (${excludedCueIds.length}), (c) >3.2 kHz harshness for hearing-aid users, and (d) diaspora sparsity.`,
+      toolName: 'prescribe_iso_sundowning_rescue',
       observation:
         liveSelfCorrectedNote ||
-        `Blocked ${blockedDistressTraps.length} era peril traps (${blockedDistressTraps.map((b) => b.name.split('(')[0].trim()).slice(0, 2).join(', ')}), enforced ${guardrails.hearingLossWarmEq ? '2.5 kHz warm EQ roll-off' : 'standard acoustic profile'}, and verified IDDSI dysphagia meal safety (<52°C).`,
+        `Blocked ${blockedDistressTraps.length} era peril traps (${blockedDistressTraps.map((b) => b.name.split('(')[0].trim()).slice(0, 2).join(', ')}), enforced ${guardrails.hearingLossWarmEq ? '2.5 kHz warm EQ roll-off' : 'standard acoustic profile'}, and applied the easy-to-eat meal card (served warm, not hot).`,
       selfCorrected: true,
     },
     {
       iteration: 4,
       phase: 'SYNTHESIZE',
-      thought: `Sequencing 15-minute Iso-Principle BPM step-down (96→76→62 BPM) + ${guardrails.grandchildName}’s 3-step zero-quiz visit playbook + IDDSI nostalgic dining card.`,
+      thought: `Sequencing the 15-minute three-step tempo arc (96→76→62 BPM) + ${guardrails.grandchildName}’s 3-step zero-quiz visit playbook + a familiar-meal dining card.`,
       toolName: 'prescribe_iso_sundowning_rescue & curate_dysphagia_nostalgic_dining',
-      observation: `Care prescription ready (${topBridge?.overlapPct || 93}% cross-generational bridge overlap; calm venue: ${seniorDiningPlan.calmVenue.name}).`,
+      observation: `Plan ready (${topBridge?.overlapPct || 93}% cross-generational bridge overlap; calm venue: ${seniorDiningPlan.calmVenue.name}).`,
     },
   ];
 
@@ -1419,7 +1419,7 @@ export function parseFamilyStoryToKinship(
     patch.circadianWindow = 'sundowning_calm';
     patch.sundowningSafeShield = true;
     receipts.push({
-      parameter: 'filter.content_rating & circadian',
+      parameter: 'filter.content_rating (Qloo) & kinship.time_of_day (local)',
       value: 'G,PG,TV-G · 4:30 PM Sundowning Calm',
       reason: 'Activated low-BPM, zero-peril evening de-escalation guardrails.',
     });
@@ -1429,7 +1429,7 @@ export function parseFamilyStoryToKinship(
     patch.plotFreeMusicalFocus = true;
     patch.dementiaStage = 'moderate_mid';
     receipts.push({
-      parameter: 'plot_complexity_guardrail',
+      parameter: 'kinship.plot_complexity (local filter)',
       value: 'Zero-Plot Song Reels & Visual Rhythm',
       reason: 'Shifted away from complex dialogue plots to pure musical & visual joy.',
     });
@@ -1438,7 +1438,7 @@ export function parseFamilyStoryToKinship(
   if (/\b(hearing aid|hard of hearing|presbycusis|shrill|ears|deaf)\b/i.test(lower)) {
     patch.hearingLossWarmEq = true;
     receipts.push({
-      parameter: 'presbycusis_warm_eq',
+      parameter: 'kinship.warm_eq (local filter)',
       value: '150–800 Hz Warmth + >3.2 kHz Roll-Off',
       reason: 'Activated hearing-aid friendly baritone/contralto timbre filter.',
     });

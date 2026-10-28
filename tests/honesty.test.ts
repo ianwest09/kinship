@@ -169,3 +169,143 @@ test('personal data is not written to logs', async () => {
     );
   }
 });
+
+/**
+ * Claim-language scan over *user-visible copy only*.
+ *
+ * The first scan in this file bans a fixed vocabulary repo-wide. That was too
+ * narrow: it passed while "clinical Iso-Principle", "statin/donepezil medication
+ * safety", "Reduces Sundowning Cortisol" and an invented "+26% dementia visual
+ * meal intake" were still being rendered to caregivers and served from the
+ * public MCP surface. This one extracts prose instead of scanning raw source.
+ */
+const PUBLIC_MCP_TOOL_NAMES = [
+  'reconstruct_reminiscence_bump',
+  'bridge_generations_compare',
+  'prescribe_iso_sundowning_rescue',
+  'curate_dysphagia_nostalgic_dining',
+  'parse_family_intake_story',
+];
+
+/**
+ * OperatorAppendixView is excluded on purpose: it is labelled in its own
+ * heading as an illustrative model over a fictional cohort, and render.test.tsx
+ * asserts those labels are present. shared/types.ts is excluded because it
+ * holds only identifiers. Neither renders claims to a family.
+ */
+const COPY_SURFACES = [
+  ...CAREGIVER_SURFACES,
+  'src/App.tsx',
+  'src/components/ReminiscenceAndBridgeView.tsx',
+  'src/components/SundowningRescueModal.tsx',
+  'src/components/KinshipQlooDrawer.tsx',
+  'src/utils/harmonicPlayer.ts',
+  'server/kinshipQlooEngine.ts',
+  'server/reminiscenceGraph.ts',
+  'server/mcpTools.ts',
+];
+
+/**
+ * CARE_HOME_COHORT is fictional operator-demo data (names, MMSE scores and
+ * stage labels for invented residents). It renders only inside
+ * OperatorAppendixView, which is labelled "Illustrative model — not measured
+ * results" / "Demo cohort (fictional)" and asserted as such in render.test.tsx.
+ * It is sliced out here so the scan covers the copy families actually read.
+ */
+function withoutFictionalCohort(source: string): string {
+  const start = source.indexOf('export const CARE_HOME_COHORT');
+  if (start === -1) return source;
+  const end = source.indexOf('export const CARE_CIRCLE_ROLES', start);
+  return end === -1 ? source.slice(0, start) : source.slice(0, start) + source.slice(end);
+}
+
+function visibleCopy(source: string): string {
+  // Template interpolations reference identifiers, not prose.
+  const flat = source.replace(/\$\{[^}]*\}/g, ' ');
+  const parts: string[] = [];
+  for (const m of flat.matchAll(/'[^'\\\n]*'|"[^"\\\n]*"|`[^`\\]*`/g)) parts.push(m[0]);
+  for (const m of flat.matchAll(/>([^<>{}]+)</g)) parts.push(m[1]);
+  return (
+    parts
+      .join('\n')
+      // Public MCP tool names are an API contract, not prose. Renaming them
+      // would break every existing integration, so they are allowed through.
+      .replace(new RegExp(PUBLIC_MCP_TOOL_NAMES.join('|'), 'g'), ' ')
+      // camelCase field names (presbycusisSafe, iddsiLevelLabel) are data-model
+      // identifiers; only their values are ever rendered.
+      .replace(/\b[a-z]+[A-Z][A-Za-z0-9]*\b/g, ' ')
+      .toLowerCase()
+  );
+}
+
+const BANNED_CLAIMS = [
+  // clinical classifications Kinship has no basis to assign
+  'iddsi', 'iso-principle', 'presbycusis', 'dysphagia', 'mmse',
+  // medication and drug-interaction claims
+  'statin', 'amlodipine', 'donepezil', 'ace-inhibitor', 'medication-aware',
+  'medication safety', 'medication-interaction',
+  // physiology presented as mechanism
+  'cortisol', 'supplementary motor', 'basal ganglia', 'olfactory bulb',
+  'amygdala', 'cranial nerve', 'limbic', 'somatosensory', 'retronasal',
+  'olfactory pathway', 'olfaction', 'thalamus',
+  // guaranteed or absolute effects
+  'aspiration', 'choking hazard', 'cough-reflex', 'instant calm',
+  'instantly feels', 'effortlessly', 'triggers instant', 'eliminates',
+  'prevents molten', 'reduces sundowning', 'clinically lowers',
+  // clinical framing of a non-clinical product
+  'clinical care', 'clinical reasoning', 'clinical tools', 'clinical coaches',
+  'clinical texture', 'clinically proven', 'patient-personalized',
+  'dementia patients', 'therapeutic', 'agitation',
+  // invented statistics and prescription framing
+  'visual meal intake', 'meal prescription', 'care prescription',
+  'verified sundowning-safe', 'sundowning-safe', 'sundowning_clinical_auditor',
+  // spelled-out neuroscience, which the earlier "mPFC" ban did not catch
+  'prefrontal', 'hippocamp', 'entorhinal', 'parasympathetic', 'cortex',
+  // invented statistics and borrowed authority
+  'visit dread', 'clinicians worldwide', 'stage 5', 'stage 6',
+];
+
+test('no clinical, medication or guaranteed-effect claims reach user-visible copy', async () => {
+  for (const [file, src] of await readAll(COPY_SURFACES)) {
+    const copy = visibleCopy(withoutFictionalCohort(src));
+    for (const phrase of BANNED_CLAIMS) {
+      assert.ok(
+        !copy.includes(phrase),
+        `${file} still renders the claim "${phrase}" in user-visible copy`
+      );
+    }
+  }
+});
+
+test('the request trace names only tools that actually exist', async () => {
+  const engine = await readFile('server/kinshipQlooEngine.ts', 'utf8');
+  const traced = [...engine.matchAll(/toolName:\s*'([^']+)'/g)].map((m) => m[1]);
+  assert.ok(traced.length >= 4, 'expected the reasoning log to name its tools');
+  for (const raw of traced) {
+    for (const part of raw.split('&').map((t) => t.trim()).filter(Boolean)) {
+      if (part === '/search') continue;
+      assert.ok(
+        PUBLIC_MCP_TOOL_NAMES.includes(part),
+        `the trace names a tool that does not exist: "${part}"`
+      );
+    }
+  }
+});
+
+test('invented parameters are labelled as local filters, not Qloo query params', async () => {
+  const engine = await readFile('server/kinshipQlooEngine.ts', 'utf8');
+  // These were previously presented inside a params block attached to
+  // GET /v2/insights, implying the Qloo API accepts them. It does not.
+  for (const invented of [
+    'presbycusis_warm_eq',
+    'iddsi_dysphagia_level',
+    'plot_complexity_guardrail',
+    'circadian_mode',
+  ]) {
+    assert.ok(!engine.includes(invented), `${invented} is still presented as an API parameter`);
+  }
+  assert.ok(
+    engine.includes('local filter, not a Qloo param'),
+    'locally applied filters must say they are not Qloo parameters'
+  );
+});

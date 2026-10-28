@@ -107,7 +107,7 @@ export const ELDER_CLUE_CATALOG: CulturalClueSeed[] = [
     originLabel: 'South African Flugelhorn & Township Jazz',
     generationRole: 'elder_clue',
     tags: ['urn:tag:genre:music:township_jazz', 'urn:tag:keyword:golden_brass', 'urn:tag:mood:sunlit_uplift'],
-    tagLabels: ['Golden Flugelhorn', 'Township Swing', 'Instant Toe-Tapping'],
+    tagLabels: ['Golden Flugelhorn', 'Township Swing', 'Easy to Tap Along To'],
     weight: 12,
     vector: { melodicWarmth: 0.92, orchestralLushness: 0.76, brassRhythmGroove: 0.99, storytellingLyricism: 0.82, musicalTheaterJoy: 0.80, gentleVisualHumor: 0.72, hearthCraftDomestic: 0.78, spiritualRootedness: 0.90 },
   },
@@ -143,7 +143,7 @@ export const ELDER_CLUE_CATALOG: CulturalClueSeed[] = [
     originLabel: '1963–1969 Melodic Harmony Classics',
     generationRole: 'elder_clue',
     tags: ['urn:tag:genre:music:merseybeat_pop', 'urn:tag:keyword:singalong_melody', 'urn:tag:mood:nostalgic_bright'],
-    tagLabels: ['Instant Lyric Recall', 'Two-Part Harmony', '1960s Youth Anthem'],
+    tagLabels: ['Easy to Sing Along To', 'Two-Part Harmony', '1960s Youth Anthem'],
     weight: 12,
     vector: { melodicWarmth: 0.96, orchestralLushness: 0.86, brassRhythmGroove: 0.78, storytellingLyricism: 0.96, musicalTheaterJoy: 0.85, gentleVisualHumor: 0.82, hearthCraftDomestic: 0.82, spiritualRootedness: 0.78 },
   },
@@ -403,7 +403,7 @@ export const YOUTH_UNIVERSE_POOL: ReconstructedCueTemplate[] = [
       'Repetitive, hymn-like piano and warm saxophone. Familiar music like this is often still reachable when words have become harder — though nobody can promise how it will land on the day.',
     dontQuizWarning: 'Avoid asking: “Do you remember what year Mannenberg came out?”',
     sensoryInvitationPrompt: '“Listen to how warm that piano rolls — does it feel like a Saturday afternoon in town?”',
-    tagLabels: ['Cape Jazz Piano', 'Hymn Cadence', 'Sundowning-Safe Instrumental'],
+    tagLabels: ['Cape Jazz Piano', 'Hymn Cadence', 'Gentle Instrumental'],
     vector: { melodicWarmth: 0.98, orchestralLushness: 0.80, brassRhythmGroove: 0.95, storytellingLyricism: 0.86, musicalTheaterJoy: 0.78, gentleVisualHumor: 0.68, hearthCraftDomestic: 0.88, spiritualRootedness: 0.98 },
   },
   {
@@ -437,10 +437,10 @@ export const YOUTH_UNIVERSE_POOL: ReconstructedCueTemplate[] = [
     sundowningSafe: true,
     plotComplexity: 'zero_plot_musical',
     whyBrainRemembers:
-      'Warm baritone frequencies (110–260 Hz) and lush orchestral strings are effortlessly decoded even with age-related high-frequency hearing loss.',
+      'Warm baritone frequencies (110–260 Hz) and lush orchestral strings sit in a range that is often easier to hear once high frequencies have dulled with age.',
     dontQuizWarning: 'Avoid asking: “Did you play this at your wedding?”',
     sensoryInvitationPrompt: '“Nobody ever had a smoother voice than Nat — shall we hum along to the chorus?”',
-    tagLabels: ['Hearing-Loss Friendly Baritone', 'Lush Strings', 'Sundowning-Safe'],
+    tagLabels: ['Hearing-Loss Friendly Baritone', 'Lush Strings', 'Gentle at Dusk'],
     vector: { melodicWarmth: 0.99, orchestralLushness: 0.96, brassRhythmGroove: 0.84, storytellingLyricism: 0.94, musicalTheaterJoy: 0.88, gentleVisualHumor: 0.78, hearthCraftDomestic: 0.90, spiritualRootedness: 0.88 },
   },
   {
@@ -455,10 +455,10 @@ export const YOUTH_UNIVERSE_POOL: ReconstructedCueTemplate[] = [
     sundowningSafe: true,
     plotComplexity: 'zero_plot_musical',
     whyBrainRemembers:
-      'That unmistakable 2-bar opening bass riff triggers supplementary motor area (SMA) finger-snapping and spontaneous lyric completion within 4 seconds.',
+      'That unmistakable 2-bar opening bass riff is often recognised in the first few seconds — the kind of hook people tap along to, or start singing without deciding to.',
     dontQuizWarning: 'Avoid testing: “What’s the next line?”',
     sensoryInvitationPrompt: '“I’ve got sunshine on a cloudy day… tap my hand on the beat with me!”',
-    tagLabels: ['Instant 4-Sec Bass Hook', 'Motor Rhythm Activation', 'Motown Sunshine'],
+    tagLabels: ['That 4-Second Bass Hook', 'Easy to Move To', 'Motown Sunshine'],
     vector: { melodicWarmth: 0.96, orchestralLushness: 0.85, brassRhythmGroove: 0.98, storytellingLyricism: 0.91, musicalTheaterJoy: 0.88, gentleVisualHumor: 0.82, hearthCraftDomestic: 0.84, spiritualRootedness: 0.90 },
   },
   // SHOWA TOKYO
@@ -488,12 +488,12 @@ export const YOUTH_UNIVERSE_POOL: ReconstructedCueTemplate[] = [
     categoryBadge: 'Primary Musical Spark (Golden Filmi Anchor)',
     releaseYear: 1960,
     geographies: ['mumbai', 'london'],
-    contentRating: 'Audio · Clean · Presbycusis Warm Baritone',
+    contentRating: 'Audio · Clean · Warm baritone',
     tempoBpmLabel: '66 BPM · Velvet Baritone, Bansuri Flute & Strings',
     sundowningSafe: true,
     plotComplexity: 'zero_plot_musical',
     whyBrainRemembers:
-      'Rafi’s warm 200–600 Hz baritone sits squarely below high-frequency presbycusis loss, effortlessly unlocking 1960s Radio Ceylon family evenings.',
+      'Rafi’s warm 200–600 Hz baritone sits in a lower range that is often easier to hear, and it carries 1960s Radio Ceylon family evenings with it.',
     dontQuizWarning: 'Never quiz film titles — hum the opening melody over warm cardamom chai.',
     sensoryInvitationPrompt: '“How velvet and unhurried is his voice? Let’s sip warm elaichi chai while this plays.”',
     tagLabels: ['66 BPM Dusk Calm', 'Hearing-Aid Friendly Baritone', 'Radio Ceylon Classic'],
@@ -526,12 +526,12 @@ export const YOUTH_UNIVERSE_POOL: ReconstructedCueTemplate[] = [
     categoryBadge: 'Gentle Musical Cinema (Zero Plot Required)',
     releaseYear: 1965,
     geographies: [],
-    contentRating: 'G · Verified Sundowning-Safe (Act I Songs)',
+    contentRating: 'G · No startling moments (Act I songs)',
     tempoBpmLabel: '3/4 Waltz · Bright Alpine Daylight',
     sundowningSafe: true,
     plotComplexity: 'zero_plot_musical',
     whyBrainRemembers:
-      'Memory-care clinicians worldwide report Act I songs hold attention even in Stage 6 dementia because bright meadows, children singing, and waltz meter require zero plot tracking.',
+      'Act I songs are simple and bright — meadows, children singing, warm strings — with no plot to follow, so they are often easy to sit with.',
     dontQuizWarning: 'Pause before Act II sirens/chase scenes during evening hours; stick to the sunlit song reels!',
     sensoryInvitationPrompt: '“Look at those green mountain meadows — ‘Raindrops on roses and whiskers on kittens’…”',
     tagLabels: ['Rated G', 'Sunlit Color Palette', 'Song-Reel Safe'],
@@ -568,7 +568,7 @@ export const YOUTH_UNIVERSE_POOL: ReconstructedCueTemplate[] = [
     sundowningSafe: true,
     plotComplexity: 'gentle_episodic',
     whyBrainRemembers:
-      'Procedural kitchen memories (kneading dough, butter in a pan, icing a cake) live in basal ganglia motor pathways that outlast declarative memory.',
+      'Kitchen movements learned long ago — kneading dough, butter in a pan, icing a cake — often outlast spoken words.',
     dontQuizWarning: 'Never quiz recipes — pair with real warm cinnamon toast or tea in the room!',
     sensoryInvitationPrompt: '“Watch her whisk that bowl — what was the best smell coming out of your childhood kitchen?”',
     tagLabels: ['TV-G', 'Procedural Motor Memory', 'Pair with Tea & Biscuit'],
@@ -604,7 +604,7 @@ export const ERA_DISTRESS_TRAPS = [
     distressTrigger: 'Shadowy window silhouettes, shrieking strings & home-intruder paranoia',
     qlooFilterTriggered: 'filter.content_rating=G,PG & filter.exclude.tags=urn:tag:genre:media:horror,thriller',
     clinicalWhyBlocked:
-      'In moderate dementia, shadows and suspense scores blur with reality — directly triggering evening “someone is outside the window” sundowning delusions.',
+      'Shadows and suspense scores can be hard to separate from the room in the evening, and that is the time of day when “someone is outside the window” fears are most common.',
   },
   {
     entity_id: 'TRAP-TWILIGHT-1961',
@@ -615,7 +615,7 @@ export const ERA_DISTRESS_TRAPS = [
     distressTrigger: 'Uncanny disorientation, eerie narration & “nobody believes me” plots',
     qlooFilterTriggered: 'filter.exclude.tags=urn:tag:genre:media:sci_fi_thriller,psychological_peril',
     clinicalWhyBlocked:
-      'Unguarded “1960s Classic TV” channels autoplay anthology suspense right at 5:00 PM, amplifying confusion and spatial disorientation.',
+      '“1960s Classic TV” channels autoplay anthology suspense around 5:00 PM, which can add to confusion at the hour that is already hardest.',
   },
   {
     entity_id: 'TRAP-WAR-NEWS-1968',
@@ -626,7 +626,7 @@ export const ERA_DISTRESS_TRAPS = [
     distressTrigger: 'Sirens, gunfire transients & separation/bereavement grief',
     qlooFilterTriggered: 'filter.exclude.tags=urn:tag:genre:media:war,violence,bereavement',
     clinicalWhyBlocked:
-      'Acoustic startle transients spike cortisol in dementia patients who can no longer contextualize screen danger as fictional.',
+      'Sudden sirens and gunfire are startling, and screen danger can be hard to place as fictional.',
   },
 ];
 
@@ -871,7 +871,7 @@ export const SENSORY_BRAND_TACTILE_POOL: Record<YouthGeographyId, SensoryTactile
       modality: 'Gustatory (Tea & Hearth)',
       eraContext: '4:00 PM British wireless tea-tray ritual',
       neuralPathway: 'the smell of tea plus the ritual of pouring it — a long-practised routine',
-      fiveDollarAction: 'Bring a real ceramic teapot and biscuit tin (hearing the tin lid pop triggers instant calm).',
+      fiveDollarAction: 'Bring a real ceramic teapot and biscuit tin — the sound of the lid is part of the routine.',
       zeroQuizInvitation: '“The sound of the biscuit tin opening means it’s proper tea time.”',
       affinityPct: 98,
     },
@@ -905,7 +905,7 @@ export const SENSORY_BRAND_TACTILE_POOL: Record<YouthGeographyId, SensoryTactile
       subtype: 'urn:entity:brand',
       modality: 'Gustatory (Tea & Hearth)',
       eraContext: '1950s–60s Brooklyn corner candy-store & Sunday table staple',
-      neuralPathway: 'Retronasal Cinnamon-Cocoa Olfactory Pathway',
+      neuralPathway: 'the smell of cinnamon and cocoa is widely tied to comfort and baking',
       fiveDollarAction: 'Serve a small square of cinnamon crumb cake or fizzy chocolate milk in a fountain glass.',
       zeroQuizInvitation: '“Powdered sugar and cinnamon crumb cake — just like Sunday company coming over.”',
       affinityPct: 97,
@@ -916,9 +916,9 @@ export const SENSORY_BRAND_TACTILE_POOL: Record<YouthGeographyId, SensoryTactile
       subtype: 'urn:entity:brand',
       modality: 'Olfactory (Scent)',
       eraContext: 'Mid-century vanity & Saturday haircut scent',
-      neuralPathway: 'Olfactory Bulb → Limbic Safety Circuit',
+      neuralPathway: 'smell reaches the memory and emotion areas of the brain without a naming step',
       fiveDollarAction: 'Open the jar briefly near bedside during evening wind-down.',
-      zeroQuizInvitation: '“That classic clean scent instantly feels like home.”',
+      zeroQuizInvitation: '“That clean scent — does it feel like home to you?”',
       affinityPct: 94,
     },
     {
@@ -927,7 +927,7 @@ export const SENSORY_BRAND_TACTILE_POOL: Record<YouthGeographyId, SensoryTactile
       subtype: 'urn:entity:brand',
       modality: 'Procedural Touch',
       eraContext: 'Broadway matinees & stoop card trading',
-      neuralPathway: 'Procedural Page-Turning & Tactile Grounding',
+      neuralPathway: 'turning pages is a long-practised hand movement that needs no words',
       fiveDollarAction: 'Keep 3 bright, large-photo vintage theater programs on the coffee table.',
       zeroQuizInvitation: '“Look at the bright costumes on this old theater cover.”',
       affinityPct: 92,
@@ -951,7 +951,7 @@ export const SENSORY_BRAND_TACTILE_POOL: Record<YouthGeographyId, SensoryTactile
       subtype: 'urn:entity:brand',
       modality: 'Olfactory (Scent)',
       eraContext: 'Evening sentō bathhouse & clean tatami scent',
-      neuralPathway: 'Alpha-Pinene Olfactory Pathway (Clinically Lowers Heart Rate)',
+      neuralPathway: 'the green scent of pine is widely used for settling, though it will not work for everyone',
       fiveDollarAction: 'Place a smooth hinoki wood block with 1 drop of cypress oil on the nightstand at 4:30 PM.',
       zeroQuizInvitation: '“Smells just like fresh warm hinoki wood in the evening bath.”',
       affinityPct: 96,
@@ -962,7 +962,7 @@ export const SENSORY_BRAND_TACTILE_POOL: Record<YouthGeographyId, SensoryTactile
       subtype: 'urn:entity:brand',
       modality: 'Procedural Touch',
       eraContext: 'Lifelong Japanese gift-wrapping & folding muscle memory',
-      neuralPathway: 'Basal Ganglia Bilateral Folding Motor Loop',
+      neuralPathway: 'folding with both hands is a rhythm the body can remember without instruction',
       fiveDollarAction: 'Hand over two soft chirimen cloths to fold and smooth together without speaking.',
       zeroQuizInvitation: '“Your hands still fold corners so neatly — feel how soft this chirimen cloth is.”',
       affinityPct: 95,
@@ -975,7 +975,7 @@ export const SENSORY_BRAND_TACTILE_POOL: Record<YouthGeographyId, SensoryTactile
       subtype: 'urn:entity:brand',
       modality: 'Gustatory (Tea & Hearth)',
       eraContext: 'Kingston & Windrush morning/evening veranda staple',
-      neuralPathway: 'Warm Spice Olfactory → Amygdala Home-Safety Memory',
+      neuralPathway: 'warm spice smells are strongly tied to home cooking and being fed',
       fiveDollarAction: 'Grate fresh nutmeg over warm cocoa milk for immediate aromatic comfort.',
       zeroQuizInvitation: '“Smell that fresh grated nutmeg and cinnamon rising off the cup.”',
       affinityPct: 98,
@@ -986,7 +986,7 @@ export const SENSORY_BRAND_TACTILE_POOL: Record<YouthGeographyId, SensoryTactile
       subtype: 'urn:entity:brand',
       modality: 'Olfactory (Scent)',
       eraContext: 'Sunday hair-combing & family dressing ritual',
-      neuralPathway: 'Cranial Nerve I → Deep Emotional Familiarity',
+      neuralPathway: 'smell can carry familiarity even when the name of a thing has gone',
       fiveDollarAction: 'Warm a drop between palms for a soothing hand or shoulder touch.',
       zeroQuizInvitation: '“Warm coconut and lavender — feels like a sunny Sunday morning.”',
       affinityPct: 95,
@@ -1010,7 +1010,7 @@ export const SENSORY_BRAND_TACTILE_POOL: Record<YouthGeographyId, SensoryTactile
       subtype: 'urn:entity:brand',
       modality: 'Gustatory (Tea & Hearth)',
       eraContext: '1950s–70s 4:30 PM Indian household & monsoon ritual',
-      neuralPathway: 'Cineole Cardamom Olfaction → Instant Home-Hearth Grounding',
+      neuralPathway: 'cardamom on a stove is a smell many people read as home',
       fiveDollarAction: 'Crush one green cardamom pod right beside them before pouring decaf warm milk tea.',
       zeroQuizInvitation: '“Smell this fresh crushed elaichi — afternoon chai is ready.”',
       affinityPct: 99,
@@ -1032,7 +1032,7 @@ export const SENSORY_BRAND_TACTILE_POOL: Record<YouthGeographyId, SensoryTactile
       subtype: 'urn:entity:brand',
       modality: 'Procedural Touch',
       eraContext: 'Gentle pleating & evening veranda warmth',
-      neuralPathway: 'Basal Ganglia Pleating & Tactile Soothing',
+      neuralPathway: 'pleating is a practised hand movement, and it keeps the hands busy',
       fiveDollarAction: 'Drape soft mulmul or pashmina gently around shoulders when dusk chill begins.',
       zeroQuizInvitation: '“Feel how feather-soft this mulmul shawl is around your shoulders.”',
       affinityPct: 94,
@@ -1045,7 +1045,7 @@ export const SENSORY_BRAND_TACTILE_POOL: Record<YouthGeographyId, SensoryTactile
       subtype: 'urn:entity:brand',
       modality: 'Gustatory (Tea & Hearth)',
       eraContext: '5:00 PM Argentine merienda afternoon table',
-      neuralPathway: 'Vanilla-Caramel Retronasal Olfaction → Domestic Safety',
+      neuralPathway: 'vanilla and caramel are widely used for comfort, and read as domestic to most people',
       fiveDollarAction: 'Serve warm manzanilla or decaf café con leche at 4:45 PM merienda time.',
       zeroQuizInvitation: '“It’s merienda time — smell that warm sweet vanilla pastry.”',
       affinityPct: 98,
@@ -1056,7 +1056,7 @@ export const SENSORY_BRAND_TACTILE_POOL: Record<YouthGeographyId, SensoryTactile
       subtype: 'urn:entity:brand',
       modality: 'Olfactory (Scent)',
       eraContext: 'Classic Latin family linen & afternoon refresh scent',
-      neuralPathway: 'Linalool Neroli Pathway (Reduces Sundowning Cortisol)',
+      neuralPathway: 'orange-blossom scent is commonly used at dusk for settling, though it is not a treatment',
       fiveDollarAction: 'Mist a cotton handkerchief lightly with orange-blossom water.',
       zeroQuizInvitation: '“Fresh azahar orange blossom — just like courtyard trees in spring.”',
       affinityPct: 96,
@@ -1067,7 +1067,7 @@ export const SENSORY_BRAND_TACTILE_POOL: Record<YouthGeographyId, SensoryTactile
       subtype: 'urn:entity:brand',
       modality: 'Procedural Touch',
       eraContext: 'Grandmother’s parlor table & tactile lacework',
-      neuralPathway: 'Somatosensory Finger-Tracing Calm',
+      neuralPathway: 'tracing a familiar shape gives the fingers something slow and predictable to do',
       fiveDollarAction: 'Place textured lacework under the teacup for gentle tactile grounding.',
       zeroQuizInvitation: '“Trace the delicate hand-stitched pattern on this cotton lace.”',
       affinityPct: 93,
@@ -1076,19 +1076,19 @@ export const SENSORY_BRAND_TACTILE_POOL: Record<YouthGeographyId, SensoryTactile
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DYSPHAGIA-SAFE NOSTALGIC SENIOR DINING & CALM CAFÉS (urn:entity:place + IDDSI)
-// Combines Qloo culinary/place taste tags with IDDSI Levels 4–6 Easy-to-Chew
-// textures, low-scald (<52°C) temperature safety, medication-aware notes
-// (grapefruit-free for statins/calcium-channel blockers, tyramine-moderate,
-// caffeine-free after 2 PM for sundowning/donepezil), and high-contrast plating.
+// FAMILIAR MEAL, EASY TO EAT & CALM CAFÉS (urn:entity:place)
+// Combines Qloo culinary/place taste tags with easy-to-chew texture ideas,
+// warm-not-hot serving temperatures and high-contrast plating. These are
+// general comfort suggestions only — texture, swallowing and medication
+// questions belong to the person’s own care team.
 // ─────────────────────────────────────────────────────────────────────────────
 export const SENIOR_DINING_BY_GEO: Record<YouthGeographyId, SeniorDiningPrescription> = {
   cape_town: {
     dishName: 'Velvet Cape Malay Bobotie Custard Crown & Cinnamon-Stewed Yellow Peach Mash',
     culinaryHeritageTag: 'urn:tag:cuisine:south_african_cape_malay',
-    iddsiLevelLabel: 'IDDSI Level 5–6 (Minced & Moist / Soft & Bite-Sized — Fork-Mashable)',
+    iddsiLevelLabel: 'Minced & moist / soft & bite-sized — fork-mashable',
     thermalAndMedSafety:
-      'Served warm at 48°C (scald-safe), zero whole raisins/almonds (aspiration-free), grapefruit-free (statin/amlodipine safe), plated on deep cobalt ceramic (+26% dementia visual meal intake).',
+      'Served warm at about 48°C rather than hot, with raisins and almonds cooked soft instead of whole, and no grapefruit. Plated on deep cobalt ceramic so the food stands out against the plate.',
     calmVenue: {
       entity_id: 'PLACE-ZA-COMPANY-GARDENS-TEA',
       name: 'Company’s Garden Heritage Tea Room & Kirstenbosch Conservatory Veranda',
@@ -1104,9 +1104,9 @@ export const SENIOR_DINING_BY_GEO: Record<YouthGeographyId, SeniorDiningPrescrip
   chicago: {
     dishName: 'Slow-Braised Pot Roast Velvet Gravy over Whipped Yukon Gold Mash & Soft Glazed Carrots',
     culinaryHeritageTag: 'urn:tag:cuisine:midwest_supper_club_comfort',
-    iddsiLevelLabel: 'IDDSI Level 6 (Soft & Bite-Sized, <1.5cm Tender Flakes in Rich Jus)',
+    iddsiLevelLabel: 'Soft & bite-sized — tender flakes under 1.5 cm in rich jus',
     thermalAndMedSafety:
-      '49°C warm service, low-sodium herb jus (hypertension/ACE-inhibitor friendly), zero tough gristle or dry crust, served on high-contrast crimson dinnerware.',
+      'Served warm at about 49°C, with a light low-salt herb jus and no tough gristle or dry crust. Served on high-contrast crimson dinnerware so the food is easy to see.',
     calmVenue: {
       entity_id: 'PLACE-US-GARFIELD-CONSERVATORY-CAFE',
       name: 'Garfield Park Conservatory Fern Room & Quiet Neighborhood Supper Booth',
@@ -1122,9 +1122,9 @@ export const SENIOR_DINING_BY_GEO: Record<YouthGeographyId, SeniorDiningPrescrip
   london: {
     dishName: 'Flaky Poached Cod Shepherd’s Pie with Buttered Parsnip-Potato Cloud & Mint Pea Velouté',
     culinaryHeritageTag: 'urn:tag:cuisine:british_high_tea_hearth',
-    iddsiLevelLabel: 'IDDSI Level 5–6 (Boneless Flaked Fish & Smooth Mash — Zero Dry Pastry)',
+    iddsiLevelLabel: 'Boneless flaked fish & smooth mash — no dry pastry',
     thermalAndMedSafety:
-      '48°C scald-safe warmth, boneless skinless fillet, decaf bergamot tea after 14:00 (protects donepezil sleep architecture), served on Wedgewood-blue rimmed plate.',
+      'Served warm at about 48°C, boneless and skinless fillet, with decaf bergamot tea after 14:00 so caffeine is not close to bedtime. Served on a Wedgewood-blue rimmed plate.',
     calmVenue: {
       entity_id: 'PLACE-UK-KEW-ORANGERY-TERRACE',
       name: 'Kew Gardens Orangery Morning Terrace & Quiet Garden Tea Pavilion',
@@ -1140,9 +1140,9 @@ export const SENIOR_DINING_BY_GEO: Record<YouthGeographyId, SeniorDiningPrescrip
   nyc_brooklyn: {
     dishName: 'Silky Ricotta Baked Manicotti in Sweet San Marzano Basil Velouté (Seed-Free)',
     culinaryHeritageTag: 'urn:tag:cuisine:classic_ny_italian_deli_comfort',
-    iddsiLevelLabel: 'IDDSI Level 6 (Fork-Tender Pasta Pillow & Whipped Whole-Milk Ricotta)',
+    iddsiLevelLabel: 'Fork-tender pasta pillow & whipped whole-milk ricotta',
     thermalAndMedSafety:
-      '48°C gentle bake (prevents molten-cheese roof-of-mouth burns), low-acid sweet tomato coulis (PPI/reflux gentle), zero stringy mozzarella choking hazard.',
+      'Baked gently and served at about 48°C so the cheese is not molten-hot, with a sweet low-acid tomato coulis and no stringy mozzarella.',
     calmVenue: {
       entity_id: 'PLACE-US-BROOKLYN-BOTANIC-PATIO',
       name: 'Brooklyn Botanic Garden Yellow Magnolia Patio & Classic Neighborhood Pastry Parlor',
@@ -1158,9 +1158,9 @@ export const SENIOR_DINING_BY_GEO: Record<YouthGeographyId, SeniorDiningPrescrip
   tokyo: {
     dishName: 'Silky Dashi Chawanmushi Savory Egg Custard & Simmered Kabocha Pumpkin (Kabocha no Nimono)',
     culinaryHeritageTag: 'urn:tag:cuisine:japanese_washoku_kissaten',
-    iddsiLevelLabel: 'IDDSI Level 4–5 (Kaigo-Shoku Custard & Tongue-Mashable Kabocha)',
+    iddsiLevelLabel: 'Kaigo-shoku custard & tongue-mashable kabocha',
     thermalAndMedSafety:
-      '47°C warm dashi service, zero sticky mochi (eliminates #1 senior dysphagia hazard), reduced-sodium bonito-kombu umami boost for age-dulled taste buds.',
+      'Served warm at about 47°C, without sticky mochi, with a reduced-salt bonito-kombu broth for flavour, since taste often dulls with age.',
     calmVenue: {
       entity_id: 'PLACE-JP-SHINJUKU-GYOEN-TEahouse',
       name: 'Shinjuku Gyoen Rakuu-tei Traditional Teahouse & Showa Kissaten Corner',
@@ -1176,9 +1176,9 @@ export const SENIOR_DINING_BY_GEO: Record<YouthGeographyId, SeniorDiningPrescrip
   kingston: {
     dishName: 'Velvet Coconut Pumpkin Soup & Butter-Mashed Yellow Yam with Mild Thyme Butter',
     culinaryHeritageTag: 'urn:tag:cuisine:jamaican_caribbean_homestyle',
-    iddsiLevelLabel: 'IDDSI Level 4–5 (Smooth Thickened Potage & Moist Whipped Yam)',
+    iddsiLevelLabel: 'Smooth thickened potage & moist whipped yam',
     thermalAndMedSafety:
-      '48°C soothing warmth, Scotch-bonnet heat omitted (aromatic pimento & thyme only — zero cough-reflex trigger), grapefruit/ugli-fruit excluded (statin-safe).',
+      'Served warm at about 48°C, with the Scotch-bonnet heat left out — aromatic pimento and thyme only — and no grapefruit or ugli fruit.',
     calmVenue: {
       entity_id: 'PLACE-JM-DEVON-HOUSE-COURTYARD',
       name: 'Devon House Shaded Mahogany Veranda & Hope Gardens Gazebo Café',
@@ -1194,9 +1194,9 @@ export const SENIOR_DINING_BY_GEO: Record<YouthGeographyId, SeniorDiningPrescrip
   mumbai: {
     dishName: 'Ghee-Tempered Moong Dal Khichdi Velvet & Warm Cardamom-Saffron Shrikhand Custard',
     culinaryHeritageTag: 'urn:tag:cuisine:mumbai_gujarati_maharashtrian_hearth',
-    iddsiLevelLabel: 'IDDSI Level 5 (Minced & Moist Slow-Simmered Lentil-Rice Porridge)',
+    iddsiLevelLabel: 'Minced & moist slow-simmered lentil-rice porridge',
     thermalAndMedSafety:
-      '48°C gentle warmth, strained cumin-hing tadka (zero whole mustard seeds/curry leaves to aspirate), probiotic strained yogurt gentle on senior digestion.',
+      'Served warm at about 48°C, with the cumin-hing tadka strained so there are no whole mustard seeds or curry leaves, and strained yogurt that is easy to eat.',
     calmVenue: {
       entity_id: 'PLACE-IN-MALABAR-HANGING-GARDENS-CAFE',
       name: 'Malabar Hill Quiet Irani Garden Veranda & Heritage Gymkhana Tea Lounge',
@@ -1212,9 +1212,9 @@ export const SENIOR_DINING_BY_GEO: Record<YouthGeographyId, SeniorDiningPrescrip
   buenos_aires: {
     dishName: 'Cremoso Polenta con Salsa Filetto Suave & Warm Vanilla Flan Casero (Smooth Caramel)',
     culinaryHeritageTag: 'urn:tag:cuisine:porteño_bodegon_confiteria',
-    iddsiLevelLabel: 'IDDSI Level 4–5 (Creamy Cornmeal Polenta & Silky Baked Custard)',
+    iddsiLevelLabel: 'Creamy cornmeal polenta & silky baked custard',
     thermalAndMedSafety:
-      '48°C scald-safe bowl, smooth tomato-basil sauce without skins/seeds, decaf warm mate cocido con leche after midday (avoids evening restlessness).',
+      'Served warm at about 48°C in a bowl, with a smooth tomato-basil sauce without skins or seeds, and decaf warm mate cocido con leche after midday so caffeine is not close to bedtime.',
     calmVenue: {
       entity_id: 'PLACE-AR-ROSEDAL-PALERMO-CONFITERIA',
       name: 'El Rosedal de Palermo Garden Confitería & Classic Barrio Café Notable',

@@ -239,7 +239,7 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
         {activeSubTab === 'react' && (
           <div className="space-y-3.5">
             <p className="text-xs text-loam-body dark:text-loam-muted-dark">
-              Shows how Kinship’s autonomous orchestrator plans cross-domain Qloo calls, screens candidates against dementia peril/presbycusis/dysphagia guardrails, and self-corrects sparse diaspora windows.
+              Shows how Kinship’s autonomous orchestrator plans cross-domain Qloo calls, screens candidates against distressing-content, hearing-comfort and easy-to-eat guardrails, and self-corrects sparse diaspora windows.
             </p>
             {reasoningLog.map((item) => (
               <div
@@ -278,7 +278,7 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
                 GET /api/mcp/tools · POST /api/mcp/call (mcp/1.0)
               </div>
               <div className="text-loam-muted">
-                Any external Claude, OpenAI, or LangGraph care agent can invoke Kinship’s 5 Qloo clinical tools directly via JSON-RPC / REST.
+                Any external Claude, OpenAI, or LangGraph care agent can invoke Kinship’s 5 Qloo tools directly via JSON-RPC / REST.
               </div>
             </div>
 
