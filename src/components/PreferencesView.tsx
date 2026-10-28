@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cpu, Eye, FileHeart, Moon, Sun, Type } from 'lucide-react';
+import { Building2, Cpu, Eye, FileHeart, Moon, Sun, Trash2, Type } from 'lucide-react';
 import { ElderGuardrails } from '../../shared/types';
 
 export type TextSize = 'normal' | 'large' | 'largest';
@@ -21,6 +21,11 @@ interface Props {
   onOpenTrace: () => void;
   onOpenDetail: () => void;
   onOpenPassport: () => void;
+  onOpenOperators: () => void;
+  onClearDeviceData: () => void;
+  clearedNote: string | null;
+  rememberOnDevice: boolean;
+  onToggleRemember: () => void;
 }
 
 /**
@@ -41,6 +46,11 @@ export const PreferencesView: React.FC<Props> = ({
   onOpenTrace,
   onOpenDetail,
   onOpenPassport,
+  onOpenOperators,
+  onClearDeviceData,
+  clearedNote,
+  rememberOnDevice,
+  onToggleRemember,
 }) => {
   return (
     <div className="space-y-7 md:space-y-8 max-w-readable">
@@ -48,7 +58,7 @@ export const PreferencesView: React.FC<Props> = ({
         <h2 className="font-serif text-3xl md:text-4xl font-semibold text-loam-ink dark:text-parchment-50 tracking-tight">
           Preferences
         </h2>
-        <p className="mt-3 text-base md:text-lg leading-relaxed text-stone-600 dark:text-stone-300">
+        <p className="mt-3 text-base md:text-lg leading-relaxed text-loam-body dark:text-loam-body-dark">
           Make Kinship comfortable for whoever is using it. Change anything at any
           time — nothing here is permanent and nothing is a test.
         </p>
@@ -70,7 +80,7 @@ export const PreferencesView: React.FC<Props> = ({
           <legend className="text-base md:text-lg font-semibold text-loam-ink dark:text-parchment-100">
             Text size
           </legend>
-          <p className="mt-1 text-sm md:text-base text-stone-600 dark:text-stone-300">
+          <p className="mt-1 text-sm md:text-base text-loam-body dark:text-loam-body-dark">
             This changes the whole screen, including spacing, so nothing gets cramped.
           </p>
           <div className="mt-3.5 grid grid-cols-3 gap-2.5" role="radiogroup" aria-label="Text size">
@@ -92,7 +102,7 @@ export const PreferencesView: React.FC<Props> = ({
                   <span className="block font-semibold text-sm md:text-base">{size.label}</span>
                   <span
                     className={`block mt-0.5 text-xs md:text-sm ${
-                      active ? 'text-plum-100' : 'text-stone-500 dark:text-stone-400'
+                      active ? 'text-plum-100' : 'text-loam-muted dark:text-loam-muted-dark'
                     }`}
                   >
                     {size.hint}
@@ -139,7 +149,7 @@ export const PreferencesView: React.FC<Props> = ({
           >
             Keeping it comfortable
           </h3>
-          <p className="mt-1.5 text-sm md:text-base text-stone-600 dark:text-stone-300">
+          <p className="mt-1.5 text-sm md:text-base text-loam-body dark:text-loam-body-dark">
             These shape what Kinship suggests. They are on by default because they
             are safer, and you can turn either off.
           </p>
@@ -176,7 +186,7 @@ export const PreferencesView: React.FC<Props> = ({
           </h3>
         </div>
 
-        <p className="text-sm md:text-base leading-relaxed text-stone-600 dark:text-stone-300">
+        <p className="text-sm md:text-base leading-relaxed text-loam-body dark:text-loam-body-dark">
           Kinship describes what people of a similar age and place tended to enjoy.
           It is a starting point for time together —{' '}
           <strong className="font-semibold text-loam-ink dark:text-parchment-100">
@@ -186,7 +196,7 @@ export const PreferencesView: React.FC<Props> = ({
           suggestion does not land, set it aside and try another.
         </p>
 
-        <p className="text-sm md:text-base leading-relaxed text-stone-600 dark:text-stone-300">
+        <p className="text-sm md:text-base leading-relaxed text-loam-body dark:text-loam-body-dark">
           Suggestions are general and educational. They are not medical advice and
           do not replace a clinician, dietitian or speech-and-language therapist.
         </p>
@@ -196,7 +206,7 @@ export const PreferencesView: React.FC<Props> = ({
             <dt className="font-semibold text-loam-ink dark:text-parchment-100">
               Where suggestions come from:
             </dt>
-            <dd className="text-stone-600 dark:text-stone-300">
+            <dd className="text-loam-body dark:text-loam-body-dark">
               {qlooStatus.connected
                 ? `Live Qloo Taste AI (${qlooStatus.maskedKey || 'connected'})`
                 : 'Kinship’s own collection — Qloo is not connected'}
@@ -204,19 +214,64 @@ export const PreferencesView: React.FC<Props> = ({
           </div>
           <div className="flex flex-wrap gap-x-2 py-1.5 border-t border-parchment-200 dark:border-vinyl-700">
             <dt className="font-semibold text-loam-ink dark:text-parchment-100">Privacy:</dt>
-            <dd className="text-stone-600 dark:text-stone-300">
-              Names, birth years and health details stay on this device. They are
-              never sent to Qloo.
+            <dd className="text-loam-body dark:text-loam-body-dark">
+              There is no account and no database. What you type is sent to the
+              Kinship server to build a request and is not stored there. Names,
+              birth years and care details are never passed on to Qloo — only
+              era, place and content filters are.
             </dd>
           </div>
           <div className="flex flex-wrap gap-x-2 py-1.5 border-t border-parchment-200 dark:border-vinyl-700">
             <dt className="font-semibold text-loam-ink dark:text-parchment-100">Motion:</dt>
-            <dd className="text-stone-600 dark:text-stone-300">
+            <dd className="text-loam-body dark:text-loam-body-dark">
               Animation is minimal, and stops entirely if your device asks for
               reduced motion.
             </dd>
           </div>
         </dl>
+      </section>
+
+      {/* Your details on this device -------------------------------------- */}
+      <section className="loam-card p-5 md:p-7 space-y-5" aria-labelledby="pref-device">
+        <div>
+          <h3
+            id="pref-device"
+            className="text-lg md:text-xl font-semibold text-loam-ink dark:text-parchment-50"
+          >
+            Your details on this device
+          </h3>
+          <p className="mt-1.5 text-sm md:text-base leading-relaxed text-loam-body dark:text-loam-body-dark">
+            Off by default. Phones in a care home are often shared, so Kinship
+            does not keep names, birth years or care notes unless you ask it to.
+          </p>
+        </div>
+
+        <ToggleRow
+          label="Remember my details in this browser"
+          hint="Saves the name, year and the songs you have added on this device only, so a closed tab or a flat battery does not lose them. Nothing is uploaded, and it never reaches Qloo."
+          checked={rememberOnDevice}
+          onChange={onToggleRemember}
+        />
+
+        <div className="pt-4 border-t border-parchment-200 dark:border-vinyl-700 flex flex-col sm:flex-row sm:items-center gap-3">
+          <button
+            type="button"
+            onClick={onClearDeviceData}
+            className="loam-btn-secondary text-sm md:text-base"
+          >
+            <Trash2 className="w-5 h-5 text-clay-600 dark:text-clay-300" aria-hidden="true" />
+            <span>Clear everything on this device</span>
+          </button>
+          <p className="text-sm md:text-base text-loam-muted dark:text-loam-muted-dark">
+            Removes saved details and returns Kinship to the sample family.
+            Reading size and evening mode are kept.
+          </p>
+        </div>
+        {clearedNote ? (
+          <p role="status" className="text-sm md:text-base font-semibold text-pine-700 dark:text-pine-300">
+            {clearedNote}
+          </p>
+        ) : null}
       </section>
 
       {/* Care-team tools ------------------------------------------------- */}
@@ -228,7 +283,7 @@ export const PreferencesView: React.FC<Props> = ({
           >
             For care teams
           </h3>
-          <p className="mt-1.5 text-sm md:text-base text-stone-600 dark:text-stone-300">
+          <p className="mt-1.5 text-sm md:text-base text-loam-body dark:text-loam-body-dark">
             Deeper detail, including the clinical reasoning and the exact Qloo
             requests behind each suggestion.
           </p>
@@ -246,6 +301,10 @@ export const PreferencesView: React.FC<Props> = ({
           <button type="button" onClick={onOpenTrace} className="loam-btn-secondary text-sm md:text-base">
             <Cpu className="w-5 h-5 text-plum-600 dark:text-plum-300" aria-hidden="true" />
             <span>Qloo request trace</span>
+          </button>
+          <button type="button" onClick={onOpenOperators} className="loam-btn-secondary text-sm md:text-base">
+            <Building2 className="w-5 h-5 text-plum-600 dark:text-plum-300" aria-hidden="true" />
+            <span>Operator and pilot appendix</span>
           </button>
         </div>
       </section>
@@ -271,7 +330,7 @@ const ToggleRow: React.FC<ToggleRowProps> = ({ label, hint, checked, onChange, i
         {icon && <span className="text-plum-600 dark:text-plum-300">{icon}</span>}
         {label}
       </label>
-      <p className="mt-1 text-sm md:text-base leading-relaxed text-stone-600 dark:text-stone-300">
+      <p className="mt-1 text-sm md:text-base leading-relaxed text-loam-body dark:text-loam-body-dark">
         {hint}
       </p>
     </div>

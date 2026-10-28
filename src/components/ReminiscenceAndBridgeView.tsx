@@ -102,7 +102,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
             <span>·</span>
             <span>{data.geographyInfo.name}</span>
           </div>
-          <p className="text-sm text-stone-700 dark:text-stone-300">
+          <p className="text-sm text-loam-body dark:text-loam-body-dark">
             {data.geographyInfo.eraCulturalPortrait}
           </p>
         </div>
@@ -140,15 +140,15 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
         <section className="rounded-3xl border border-plum-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-900 p-5 md:p-6 shadow-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-parchment-200 dark:border-vinyl-700">
             <div>
-              <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-plum-600 dark:text-brass-200">
+              <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider break-words text-plum-600 dark:text-brass-200">
                 <GitCompare className="w-4 h-4" />
                 <span>Why “Agents With Taste” Matter in Clinical Care · Live Patient-Personalized Diff</span>
               </div>
-              <h3 className="text-lg md:text-xl font-semibold text-stone-900 dark:text-parchment-50 mt-0.5">
+              <h3 className="text-lg md:text-xl font-semibold text-loam-ink dark:text-parchment-50 mt-0.5">
                 Without Qloo (Generic Prompted LLM) vs. With Qloo Taste AI™ for {data.guardrailsApplied.elderName}
               </h3>
             </div>
-            <span className="text-[0.8125rem] font-mono px-2.5 py-1 rounded-full bg-pine-50 dark:bg-vinyl-800 text-pine-700 dark:text-pine-300 self-start sm:self-auto">
+            <span className="text-meta font-mono px-2.5 py-1 rounded-full bg-pine-50 dark:bg-vinyl-800 text-pine-700 dark:text-pine-300 self-start sm:self-auto">
               Zero PII · 6 Cross-Domain Entity Types
             </span>
           </div>
@@ -159,16 +159,16 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                 key={row.dimension}
                 className="rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50/70 dark:bg-vinyl-800 p-4 space-y-2.5 text-xs"
               >
-                <div className="font-semibold text-stone-900 dark:text-parchment-50 text-sm">
+                <div className="font-semibold text-loam-ink dark:text-parchment-50 text-sm">
                   {row.dimension}
                 </div>
-                <div className="p-2.5 rounded-xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/50 space-y-1">
-                  <div className="flex items-center gap-1.5 font-semibold text-rose-800 dark:text-rose-300">
+                <div className="p-2.5 rounded-xl bg-clay-50/80 dark:bg-clay-950/30 border border-clay-200/80 dark:border-clay-900/50 space-y-1">
+                  <div className="flex items-center gap-1.5 font-semibold text-clay-800 dark:text-clay-300">
                     <XCircle className="w-3.5 h-3.5 shrink-0" />
                     <span>Blind LLM Guess:</span>
                   </div>
-                  <p className="text-stone-700 dark:text-stone-300">{row.blindLlmGuess}</p>
-                  <p className="text-[0.8125rem] text-rose-700 dark:text-rose-300 italic">
+                  <p className="text-loam-body dark:text-loam-body-dark">{row.blindLlmGuess}</p>
+                  <p className="text-meta text-clay-700 dark:text-clay-300 italic">
                     Why it fails: {row.whyBlindLlmFails}
                   </p>
                 </div>
@@ -177,7 +177,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                     <span>Kinship + Qloo Taste AI™:</span>
                   </div>
-                  <p className="text-stone-800 dark:text-parchment-100 font-medium">{row.qlooTasteAiResult}</p>
+                  <p className="text-loam-ink dark:text-parchment-100 font-medium">{row.qlooTasteAiResult}</p>
                   <div className="text-xs font-mono text-plum-700 dark:text-brass-200 pt-0.5">
                     {row.qlooApiMechanism}
                   </div>
@@ -194,14 +194,14 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
       <section className="rounded-3xl border-2 border-plum-600/35 dark:border-brass-500/40 bg-parchment-50 dark:bg-vinyl-900 p-6 md:p-7 shadow-sm space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-parchment-200 dark:border-vinyl-700">
           <div>
-            <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-plum-600 dark:text-brass-200">
+            <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider break-words text-plum-600 dark:text-brass-200">
               <Users className="w-4 h-4" />
               <span>Agent 04 · GET /v2/analysis/compare · Intergenerational Bridge</span>
             </div>
-            <h3 className="text-xl md:text-2xl font-semibold text-stone-900 dark:text-parchment-50 mt-1">
+            <h3 className="text-xl md:text-2xl font-semibold text-loam-ink dark:text-parchment-50 mt-1">
               {data.guardrailsApplied.grandchildName} ↔ {data.guardrailsApplied.elderName}: Shared Cultural DNA Across 60 Years
             </h3>
-            <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400">
+            <p className="text-xs md:text-sm text-loam-body dark:text-loam-muted-dark">
               Translates modern favorites into the exact youth-era recordings that share their harmonic, rhythmic, or domestic soul — turning awkward visits into 15 minutes of magic.
             </p>
           </div>
@@ -220,7 +220,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                     <div className="text-xs font-mono uppercase text-pine-700 dark:text-pine-300 font-semibold">
                       {data.guardrailsApplied.grandchildName} ({br.grandchildSeedYear})
                     </div>
-                    <div className="font-semibold text-sm text-stone-900 dark:text-parchment-50 truncate">
+                    <div className="font-semibold text-sm text-loam-ink dark:text-parchment-50 truncate">
                       {br.grandchildSeedName.split('(')[0].trim()}
                     </div>
                   </div>
@@ -233,25 +233,25 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                     <div className="text-xs font-mono uppercase text-plum-700 dark:text-brass-200 font-semibold">
                       {data.guardrailsApplied.elderName} ({br.elderAnchorYear} · Age {br.elderAgeThen})
                     </div>
-                    <div className="font-semibold text-sm text-stone-900 dark:text-parchment-50 truncate">
+                    <div className="font-semibold text-sm text-loam-ink dark:text-parchment-50 truncate">
                       {br.elderAnchorName.split('(')[0].trim()}
                     </div>
                   </div>
                 </div>
 
-                <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                <p className="text-xs text-loam-body dark:text-loam-body-dark leading-relaxed">
                   {br.harmonicExplanation}
                 </p>
 
                 {/* Shared Tag Bars */}
                 <div className="p-3 rounded-xl bg-parchment-50 dark:bg-vinyl-900 space-y-1.5 text-xs">
-                  <div className="font-mono text-xs text-stone-500">
+                  <div className="font-mono text-xs text-loam-muted">
                     Qloo Shared Tag Co-Occurrence (a.signal ∩ b.signal):
                   </div>
                   {br.sharedTags.map((st) => (
                     <div key={st.tag_id} className="flex items-center justify-between">
                       <span className="font-medium">{st.label}</span>
-                      <span className="font-mono text-[0.8125rem] text-plum-700 dark:text-brass-200">
+                      <span className="font-mono text-meta text-plum-700 dark:text-brass-200">
                         Elder {Math.round(st.elderAffinity * 100)}% · Youth {Math.round(st.grandchildAffinity * 100)}%
                       </span>
                     </div>
@@ -260,14 +260,14 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
 
                 {/* 3-Step 15-Minute Visit Playbook */}
                 <div className="space-y-1.5 text-xs">
-                  <div className="font-semibold text-stone-800 dark:text-parchment-100 flex items-center gap-1.5">
+                  <div className="font-semibold text-loam-ink dark:text-parchment-100 flex items-center gap-1.5">
                     <BookOpen className="w-3.5 h-3.5 text-plum-600 dark:text-brass-200" />
                     Side-by-Side 15-Minute Visit Playbook:
                   </div>
                   {br.threeStepPlaybook.map((step, idx) => (
                     <div
                       key={idx}
-                      className="p-2.5 rounded-xl bg-parchment-100/70 dark:bg-vinyl-900/60 border border-parchment-200 dark:border-vinyl-700 text-[0.8125rem] text-stone-700 dark:text-stone-300"
+                      className="p-2.5 rounded-xl bg-parchment-100/70 dark:bg-vinyl-900/60 border border-parchment-200 dark:border-vinyl-700 text-meta text-loam-body dark:text-loam-body-dark"
                     >
                       {step}
                     </div>
@@ -284,13 +284,13 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                   <button
                     type="button"
                     onClick={() => copyPrompt(br.bridge_id, br.zeroQuizBridgeQuestion)}
-                    className="inline-flex items-center gap-1 text-[0.8125rem] font-medium text-plum-700 dark:text-brass-200 hover:underline"
+                    className="inline-flex items-center gap-1 text-meta font-medium text-plum-700 dark:text-brass-200 hover:underline"
                   >
                     {copiedId === br.bridge_id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                     <span>{copiedId === br.bridge_id ? 'Copied' : 'Copy'}</span>
                   </button>
                 </div>
-                <p className="text-xs italic text-stone-800 dark:text-parchment-50">
+                <p className="text-xs italic text-loam-ink dark:text-parchment-50">
                   {br.zeroQuizBridgeQuestion}
                 </p>
               </div>
@@ -305,17 +305,19 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
       <section className="rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50 dark:bg-vinyl-900 p-6 md:p-7 shadow-sm space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-parchment-200 dark:border-vinyl-700">
           <div>
-            <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-pine-600 dark:text-pine-300">
+            <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider break-words text-pine-600 dark:text-pine-300">
               <Music className="w-4 h-4" />
               <span>
                 Agent 02 · GET /v2/insights?filter.release_year={data.bumpWindow.bumpStartYear}..{data.bumpWindow.bumpEndYear}
               </span>
             </div>
-            <h3 className="text-xl md:text-2xl font-semibold text-stone-900 dark:text-parchment-50 mt-1">
-              {data.guardrailsApplied.elderName}’s Reconstructed Youth Universe
+            <h3 className="text-xl md:text-2xl font-semibold text-loam-ink dark:text-parchment-50 mt-1">
+              Songs and films from {data.guardrailsApplied.elderName}’s growing-up years
             </h3>
-            <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400">
-              Every song, musical, and broadcast below is verified for dementia sensory comfort — paired with anti-quizzing caregiver prompts.
+            <p className="text-xs md:text-sm text-loam-body dark:text-loam-muted-dark">
+              Every item below has been through Kinship’s own safety filters —
+              no horror, war or suspense, and rated suitable for all ages — and
+              comes with a prompt that avoids quizzing.
             </p>
           </div>
           {excludedCount > 0 && (
@@ -332,7 +334,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
 
         {data.reconstructedYouthUniverse.length === 0 ? (
           <div className="rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 p-8 text-center space-y-3">
-            <p className="text-sm text-stone-600 dark:text-stone-300">
+            <p className="text-sm text-loam-body dark:text-loam-body-dark">
               All cues in this youth window were marked restless/excluded during this session.
             </p>
             <button
@@ -354,7 +356,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="px-2.5 py-0.5 rounded-full bg-brass-100 dark:bg-vinyl-700 text-brass-700 dark:text-brass-200 text-[0.8125rem] font-semibold">
+                    <span className="px-2.5 py-0.5 rounded-full bg-brass-100 dark:bg-vinyl-700 text-brass-700 dark:text-brass-200 text-meta font-semibold">
                       {cue.releaseYear} · {data.guardrailsApplied.elderName} was Age {cue.elderAgeAtRelease}
                     </span>
                     {cue.source === 'live_qloo_api' && (
@@ -363,33 +365,36 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                       </span>
                     )}
                   </div>
-                  <span className="font-mono text-xs font-bold text-pine-700 dark:text-pine-300">
-                    {cue.mpfcSalienceScore}% mPFC Salience
+                  <span
+                    className="font-mono text-xs font-bold text-pine-700 dark:text-pine-300"
+                    title="Qloo's normalised affinity for this request, shown as a percentage"
+                  >
+                    {cue.mpfcSalienceScore}% Qloo affinity
                   </span>
                 </div>
 
                 <div>
-                  <div className="text-[0.8125rem] font-mono uppercase text-plum-600 dark:text-brass-200">
+                  <div className="text-meta font-mono uppercase text-plum-600 dark:text-brass-200">
                     {cue.categoryBadge} · {cue.tempoBpmLabel}
                   </div>
-                  <h4 className="text-lg font-semibold text-stone-900 dark:text-parchment-50 mt-0.5">
+                  <h4 className="text-lg font-semibold text-loam-ink dark:text-parchment-50 mt-0.5">
                     {cue.name}
                   </h4>
                 </div>
 
-                <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                <p className="text-xs text-loam-body dark:text-loam-body-dark leading-relaxed">
                   {cue.whyBrainRemembers}
                 </p>
 
                 {/* ❌ Never Quiz vs ✅ Sensory Invitation */}
                 <div className="grid grid-cols-1 gap-2 text-xs">
-                  <div className="p-2.5 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/60 text-rose-900 dark:text-rose-200 flex items-start gap-2">
-                    <AlertOctagon className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />
+                  <div className="p-2.5 rounded-xl bg-clay-50/70 dark:bg-clay-950/30 border border-clay-200/80 dark:border-clay-900/60 text-clay-900 dark:text-clay-200 flex items-start gap-2">
+                    <AlertOctagon className="w-3.5 h-3.5 text-clay-600 shrink-0 mt-0.5" />
                     <span>
                       <strong>Zero-Quiz Rule:</strong> {cue.dontQuizWarning}
                     </span>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-pine-50 dark:bg-vinyl-900 border border-pine-100 dark:border-vinyl-700 text-stone-800 dark:text-pine-200 flex items-start gap-2">
+                  <div className="p-2.5 rounded-xl bg-pine-50 dark:bg-vinyl-900 border border-pine-100 dark:border-vinyl-700 text-loam-ink dark:text-pine-200 flex items-start gap-2">
                     <MessageCircleHeart className="w-3.5 h-3.5 text-pine-600 dark:text-pine-300 shrink-0 mt-0.5" />
                     <span>
                       <strong>Say Instead:</strong> {cue.sensoryInvitationPrompt}
@@ -399,7 +404,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
 
                 {/* Qloo Explainability Bar */}
                 <div className="pt-1">
-                  <div className="text-xs font-mono text-stone-500 mb-1">
+                  <div className="text-xs font-mono text-loam-muted mb-1">
                     Qloo feature.explainability=true (Clue Attribution):
                   </div>
                   <div className="h-2 rounded-full overflow-hidden flex bg-parchment-200 dark:bg-vinyl-700">
@@ -412,7 +417,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                       />
                     ))}
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-1 text-xs font-mono text-stone-500">
+                  <div className="flex flex-wrap gap-2 mt-1 text-xs font-mono text-loam-muted">
                     {cue.explainability.map((ex) => (
                       <span key={ex.seed_entity_id}>
                         {ex.seed_name.split('(')[0].trim()}: {Math.round(ex.normalized_score * 100)}%
@@ -422,7 +427,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                 </div>
 
                 {/* 1-Tap Streaming Launchers + Presbycusis & Zero-Ad Cliff Guardrail */}
-                <div className="pt-1 flex flex-wrap items-center justify-between gap-2 text-[0.8125rem]">
+                <div className="pt-1 flex flex-wrap items-center justify-between gap-2 text-meta">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <a
                       href={`https://open.spotify.com/search/${encodeURIComponent(cue.name.replace(/—/g, ' '))}`}
@@ -449,7 +454,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                       </span>
                     )}
                   </div>
-                  <span className="text-xs text-amber-800 dark:text-amber-300 font-medium">
+                  <span className="text-xs text-brass-800 dark:text-brass-300 font-medium">
                     ⚠ Use ad-free queue (loud ads startle)
                   </span>
                 </div>
@@ -482,26 +487,26 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                       setQuoteCue(cue);
                       setQuoteDraft('');
                     }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-plum-600 hover:bg-plum-700 text-white text-xs font-medium"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-plum-600 hover:bg-plum-700 text-white text-sm font-semibold"
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Lit Up / Sang (+Save Spark)</span>
+                    <Sparkles className="w-4 h-4" aria-hidden="true" />
+                    <span>They lit up — save this</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => onCueReaction(cue, 'calm_soothed')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pine-50 dark:bg-vinyl-900 border border-pine-500/40 text-pine-700 dark:text-pine-300 text-xs font-medium"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-pine-50 dark:bg-vinyl-900 border border-pine-500/40 text-pine-700 dark:text-pine-300 text-sm font-semibold"
                   >
-                    <Heart className="w-3.5 h-3.5" />
-                    <span>Pin to 4:30 PM Calm</span>
+                    <Heart className="w-4 h-4" aria-hidden="true" />
+                    <span>Helps the late afternoon</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => onCueReaction(cue, 'restless_skip')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-parchment-100 dark:bg-vinyl-900 text-stone-600 dark:text-stone-300 text-xs font-medium"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-parchment-100 dark:bg-vinyl-900 text-loam-body dark:text-loam-body-dark text-sm font-medium"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    <span>Restless (Exclude)</span>
+                    <RefreshCw className="w-4 h-4" aria-hidden="true" />
+                    <span>Not for them — set aside</span>
                   </button>
                 </div>
 
@@ -517,7 +522,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                     }}
                     className="rounded-xl border border-plum-300 dark:border-plum-700 bg-plum-50/70 dark:bg-plum-900/30 p-3 space-y-2"
                   >
-                    <div className="flex items-center justify-between text-[0.8125rem] font-semibold text-plum-800 dark:text-brass-200">
+                    <div className="flex items-center justify-between text-meta font-semibold text-plum-800 dark:text-brass-200">
                       <span className="flex items-center gap-1.5">
                         <PenLine className="w-3.5 h-3.5" />
                         Capture Lucid Memory Spark (Pinned to Printable Family Timeline · On-Device Only)
@@ -525,7 +530,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                       <button
                         type="button"
                         onClick={() => setQuoteCue(null)}
-                        className="text-stone-500 hover:underline"
+                        className="text-loam-muted hover:underline"
                       >
                         Dismiss
                       </button>
@@ -555,8 +560,8 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
 
         {/* Spark Log + Blocked Sundowning Traps */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
-          <div className="lg:col-span-7 rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/50 dark:bg-rose-950/20 p-4 space-y-2.5">
-            <div className="flex items-center gap-2 text-xs font-semibold text-rose-800 dark:text-rose-300">
+          <div className="lg:col-span-7 rounded-2xl border border-clay-200 dark:border-clay-900/60 bg-clay-50/50 dark:bg-clay-950/20 p-4 space-y-2.5">
+            <div className="flex items-center gap-2 text-xs font-semibold text-clay-800 dark:text-clay-300">
               <ShieldAlert className="w-4 h-4 shrink-0" />
               <span>Intercepted Era Distress Traps (What Unguarded “Oldies” Autoplay Pushes)</span>
             </div>
@@ -564,15 +569,15 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
               {data.blockedDistressTraps.map((trap) => (
                 <div
                   key={trap.entity_id}
-                  className="p-3 rounded-xl bg-white dark:bg-vinyl-800 border border-rose-100 dark:border-vinyl-700 text-[0.8125rem] space-y-1"
+                  className="p-3 rounded-xl bg-white dark:bg-vinyl-800 border border-clay-100 dark:border-vinyl-700 text-meta space-y-1"
                 >
-                  <div className="font-semibold line-through decoration-rose-500 text-stone-800 dark:text-parchment-50">
+                  <div className="font-semibold line-through decoration-clay-500 text-loam-ink dark:text-parchment-50">
                     {trap.name}
                   </div>
-                  <div className="font-mono text-xs text-rose-700 dark:text-rose-300">
+                  <div className="font-mono text-xs text-clay-700 dark:text-clay-300">
                     {Math.round(trap.rawEraAffinity * 100)}% era match · BLOCKED
                   </div>
-                  <p className="text-stone-600 dark:text-stone-400 leading-snug">
+                  <p className="text-loam-body dark:text-loam-muted-dark leading-snug">
                     {trap.clinicalWhyBlocked}
                   </p>
                 </div>
@@ -581,22 +586,25 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
           </div>
 
           <div className="lg:col-span-5 rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 p-4 space-y-2">
-            <div className="text-xs font-semibold text-stone-800 dark:text-parchment-50">
-              Live Spark Journal (Closed-Loop Qloo Signal Memory):
+            <div className="text-xs font-semibold text-loam-ink dark:text-parchment-50">
+              What you have noted (shapes the next suggestions):
             </div>
             {sparkLog.length === 0 ? (
-              <p className="text-xs text-stone-500 dark:text-stone-400">
-                Click <strong>“Lit Up / Sang”</strong> or <strong>“Pin to 4:30 PM Calm”</strong> on any cue above to train {data.guardrailsApplied.elderName}’s Memory Care Passport.
+              <p className="text-xs text-loam-muted dark:text-loam-muted-dark">
+                Tap <strong>“They lit up — save this”</strong> or{' '}
+                <strong>“Helps the late afternoon”</strong> on any item above and
+                it will be added to {data.guardrailsApplied.elderName}’s care
+                sheet.
               </p>
             ) : (
               <div className="space-y-1.5">
                 {sparkLog.slice(0, 4).map((s) => (
-                  <div key={s.id} className="text-[0.8125rem] space-y-0.5">
+                  <div key={s.id} className="text-meta space-y-0.5">
                     <div className="font-mono text-plum-700 dark:text-brass-200">
                       • {s.cueName.split('—')[0].trim()}: {s.qlooUpdateNote}
                     </div>
                     {s.lucidQuote && (
-                      <div className="pl-3 italic text-stone-700 dark:text-parchment-100">
+                      <div className="pl-3 italic text-loam-body dark:text-parchment-100">
                         “{s.lucidQuote}”
                       </div>
                     )}
@@ -613,14 +621,14 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
       {/* ===================================================================== */}
       <section className="rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-900 p-6 md:p-7 shadow-sm space-y-5">
         <div>
-          <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-brass-700 dark:text-brass-200">
+          <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider break-words text-brass-700 dark:text-brass-200">
             <Coffee className="w-4 h-4" />
             <span>Cross-Domain Sensory Leap · GET /v2/insights?filter.type=urn:entity:brand</span>
           </div>
-          <h3 className="text-xl font-semibold text-stone-900 dark:text-parchment-50 mt-1">
+          <h3 className="text-xl font-semibold text-loam-ink dark:text-parchment-50 mt-1">
             Beyond Screens: $5 Smell, Tea &amp; Procedural Touch Anchors (Stage 5–6 Ready)
           </h3>
-          <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400">
+          <p className="text-xs md:text-sm text-loam-body dark:text-loam-muted-dark">
             Olfaction is the only human sense that bypasses the thalamus and projects directly to the amygdala and entorhinal cortex — unlocking deep emotional calm even when vision or speech has faded.
           </p>
         </div>
@@ -637,20 +645,22 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                     {item.modality}
                   </span>
                   <span className="font-mono text-xs font-bold text-pine-700 dark:text-pine-300">
-                    {item.affinityPct}% Era Match
+                    {item.affinityPct}% era match (Qloo)
                   </span>
                 </div>
-                <h4 className="font-semibold text-sm text-stone-900 dark:text-parchment-50">
+                <h4 className="font-semibold text-sm text-loam-ink dark:text-parchment-50">
                   {item.name}
                 </h4>
-                <div className="text-[0.8125rem] font-mono text-plum-700 dark:text-brass-200">
-                  {item.neuralPathway}
+                {/* General reasoning, not a claim about this person. */}
+                <div className="text-meta text-plum-700 dark:text-brass-200">
+                  Why it can help: {item.neuralPathway}
                 </div>
-                <p className="text-xs text-stone-600 dark:text-stone-300">
-                  <strong>$5 Visit Prep:</strong> {item.fiveDollarAction}
+                <p className="text-sm text-loam-body dark:text-loam-body-dark">
+                  <strong className="font-semibold">Something simple to try:</strong>{' '}
+                  {item.fiveDollarAction}
                 </p>
               </div>
-              <div className="p-2.5 rounded-xl bg-white dark:bg-vinyl-900 border border-parchment-200 dark:border-vinyl-700 text-xs italic text-stone-800 dark:text-parchment-100">
+              <div className="p-2.5 rounded-xl bg-white dark:bg-vinyl-900 border border-parchment-200 dark:border-vinyl-700 text-xs italic text-loam-ink dark:text-parchment-100">
                 {item.zeroQuizInvitation}
               </div>
             </div>
@@ -665,16 +675,16 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
         <section className="rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50 dark:bg-vinyl-900 p-6 md:p-7 shadow-sm space-y-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-parchment-200 dark:border-vinyl-700">
             <div>
-              <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-pine-700 dark:text-pine-300">
+              <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider break-words text-pine-700 dark:text-pine-300">
                 <Utensils className="w-4 h-4" />
                 <span>
                   Culinary &amp; Venue Care · GET /v2/insights?filter.type=urn:entity:place + {data.seniorDiningPlan.culinaryHeritageTag}
                 </span>
               </div>
-              <h3 className="text-xl font-semibold text-stone-900 dark:text-parchment-50 mt-1">
+              <h3 className="text-xl font-semibold text-loam-ink dark:text-parchment-50 mt-1">
                 Dysphagia-Safe Nostalgic Senior Dining &amp; Quiet-Hours Outing
               </h3>
-              <p className="text-xs md:text-sm text-stone-600 dark:text-stone-400">
+              <p className="text-xs md:text-sm text-loam-body dark:text-loam-muted-dark">
                 Matches {data.guardrailsApplied.elderName}’s youth culinary heritage with IDDSI easy-to-chew textures, low-scald (&lt;52°C) temperature safety, medication-aware ingredients, and low-decibel calm cafés.
               </p>
             </div>
@@ -685,17 +695,17 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
             <div className="lg:col-span-7 rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 p-5 space-y-3">
-              <div className="text-[0.8125rem] font-mono uppercase text-plum-600 dark:text-brass-200 font-semibold">
+              <div className="text-meta font-mono uppercase text-plum-600 dark:text-brass-200 font-semibold">
                 Youth-Era Comfort Meal Prescription (Home or Care Kitchen)
               </div>
-              <h4 className="text-lg font-semibold text-stone-900 dark:text-parchment-50">
+              <h4 className="text-lg font-semibold text-loam-ink dark:text-parchment-50">
                 {data.seniorDiningPlan.dishName}
               </h4>
-              <div className="p-3 rounded-xl bg-pine-50 dark:bg-vinyl-900 border border-pine-500/25 text-xs text-stone-700 dark:text-stone-300 leading-relaxed">
+              <div className="p-3 rounded-xl bg-pine-50 dark:bg-vinyl-900 border border-pine-500/25 text-xs text-loam-body dark:text-loam-body-dark leading-relaxed">
                 <strong className="text-pine-700 dark:text-pine-300">Clinical Texture, Thermal &amp; Med Guardrails:</strong>{' '}
                 {data.seniorDiningPlan.thermalAndMedSafety}
               </div>
-              <div className="p-3 rounded-xl bg-parchment-100/80 dark:bg-vinyl-900/70 border border-parchment-200 dark:border-vinyl-700 text-xs italic text-stone-800 dark:text-parchment-100">
+              <div className="p-3 rounded-xl bg-parchment-100/80 dark:bg-vinyl-900/70 border border-parchment-200 dark:border-vinyl-700 text-xs italic text-loam-ink dark:text-parchment-100">
                 {data.seniorDiningPlan.sensoryTableInvitation}
               </div>
             </div>
@@ -703,25 +713,25 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
             <div className="lg:col-span-5 rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 p-5 flex flex-col justify-between space-y-3">
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[0.8125rem] font-mono uppercase text-pine-700 dark:text-pine-300 font-semibold">
+                  <span className="text-meta font-mono uppercase text-pine-700 dark:text-pine-300 font-semibold">
                     urn:entity:place · Calm Outing Venue
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-pine-50 dark:bg-vinyl-900 text-pine-700 dark:text-pine-300 font-mono text-[0.8125rem] font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-pine-50 dark:bg-vinyl-900 text-pine-700 dark:text-pine-300 font-mono text-meta font-bold">
                     {data.seniorDiningPlan.calmVenue.affinityPct}% Match
                     {data.seniorDiningPlan.calmVenue.source === 'live_qloo_api' ? ' · LIVE' : ''}
                   </span>
                 </div>
-                <h4 className="text-base font-semibold text-stone-900 dark:text-parchment-50">
+                <h4 className="text-base font-semibold text-loam-ink dark:text-parchment-50">
                   {data.seniorDiningPlan.calmVenue.name}
                 </h4>
                 <div className="text-xs font-mono text-brass-700 dark:text-brass-200">
                   Quiet Window: {data.seniorDiningPlan.calmVenue.quietHoursWindow}
                 </div>
-                <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                <p className="text-xs text-loam-body dark:text-loam-body-dark leading-relaxed">
                   {data.seniorDiningPlan.calmVenue.acousticComfortNote}
                 </p>
               </div>
-              <div className="text-[0.8125rem] font-mono text-stone-500 pt-2 border-t border-parchment-200 dark:border-vinyl-700">
+              <div className="text-meta font-mono text-loam-muted pt-2 border-t border-parchment-200 dark:border-vinyl-700">
                 Entity ID: {data.seniorDiningPlan.calmVenue.entity_id}
               </div>
             </div>
@@ -735,22 +745,22 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left 6 Cols: GET /v2/insights?filter.type=urn:demographics */}
         <div className="lg:col-span-6 rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50 dark:bg-vinyl-900 p-6 space-y-4">
-          <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-plum-600 dark:text-brass-200">
+          <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider break-words text-plum-600 dark:text-brass-200">
             <BarChart3 className="w-4 h-4" />
             <span>Agent 05A · GET /v2/insights?filter.type=urn:demographics</span>
           </div>
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-parchment-50">
+          <h3 className="text-lg font-semibold text-loam-ink dark:text-parchment-50">
             Why Streaming Algorithms Isolate Families — And How Qloo Bridges Them
           </h3>
-          <p className="text-xs text-stone-600 dark:text-stone-400">
+          <p className="text-xs text-loam-body dark:text-loam-muted-dark">
             Standard recommender engines silo users by age cohort. Qloo’s demographic insights expose the exact generational split below, while <code className="font-mono">/v2/analysis/compare</code> leaps across the gap via shared underlying harmonic &amp; sensory tags.
           </p>
 
           <div className="space-y-2.5 pt-1">
             {data.demographicBridgeProof.map((band) => (
               <div key={band.ageBucket} className="space-y-1 text-xs">
-                <div className="flex items-center justify-between font-mono text-[0.8125rem]">
-                  <span className="font-semibold text-stone-700 dark:text-parchment-100">{band.label}</span>
+                <div className="flex items-center justify-between font-mono text-meta">
+                  <span className="font-semibold text-loam-body dark:text-parchment-100">{band.label}</span>
                   <span>
                     <span className="text-pine-700 dark:text-pine-300">
                       Youth {band.grandchildSeedSkew > 0 ? '+' : ''}
@@ -767,13 +777,17 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                   <div className="bg-parchment-200 dark:bg-vinyl-700 rounded-full overflow-hidden flex justify-end">
                     <div
                       style={{ width: `${Math.round(Math.abs(band.grandchildSeedSkew) * 100)}%` }}
-                      className={band.grandchildSeedSkew >= 0 ? 'bg-pine-600' : 'bg-stone-400/50'}
+                      className={band.grandchildSeedSkew >= 0
+                        ? 'bg-pine-600 dark:bg-pine-300'
+                        : 'bg-clay-500 dark:bg-clay-300'}
                     />
                   </div>
                   <div className="bg-parchment-200 dark:bg-vinyl-700 rounded-full overflow-hidden">
                     <div
                       style={{ width: `${Math.round(Math.abs(band.elderClueSkew) * 100)}%` }}
-                      className={band.elderClueSkew >= 0 ? 'bg-plum-600' : 'bg-stone-400/50'}
+                      className={band.elderClueSkew >= 0
+                        ? 'bg-plum-600 dark:bg-brass-300'
+                        : 'bg-clay-500 dark:bg-clay-300'}
                     />
                   </div>
                 </div>
@@ -784,14 +798,14 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
 
         {/* Right 6 Cols: GET /v2/insights?filter.type=urn:heatmap */}
         <div className="lg:col-span-6 rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-parchment-50 dark:bg-vinyl-900 p-6 space-y-4">
-          <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-pine-600 dark:text-pine-300">
+          <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider break-words text-pine-600 dark:text-pine-300">
             <MapPin className="w-4 h-4" />
             <span>Agent 05B · GET /v2/insights?filter.type=urn:heatmap (urn:geohash)</span>
           </div>
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-parchment-50">
+          <h3 className="text-lg font-semibold text-loam-ink dark:text-parchment-50">
             {data.geographyInfo.name}: Youth Place-Memory Hotspots
           </h3>
-          <p className="text-xs text-stone-600 dark:text-stone-400">
+          <p className="text-xs text-loam-body dark:text-loam-muted-dark">
             High-<code className="font-mono">affinity_rank</code> neighborhood pockets where {data.guardrailsApplied.elderName}’s youth music &amp; cinema culture lived — paired with zero-quiz sensory place prompts.
           </p>
 
@@ -801,15 +815,17 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                 key={spot.geohash}
                 className="rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 p-3.5 space-y-1.5"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-semibold text-sm text-stone-900 dark:text-parchment-50">
+                {/* A geohash is one unbreakable token; without wrap and min-w-0
+                    it pushes the row wider than a 320px phone. */}
+                <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                  <span className="font-semibold text-sm text-loam-ink dark:text-parchment-50 min-w-0 break-words">
                     {spot.districtName}
                   </span>
-                  <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-pine-50 dark:bg-vinyl-900 text-pine-700 dark:text-pine-300">
+                  <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-pine-50 dark:bg-vinyl-900 text-pine-700 dark:text-pine-300 break-all">
                     geohash:{spot.geohash} · rank {(spot.affinityRank * 100).toFixed(1)}%
                   </span>
                 </div>
-                <div className="text-[0.8125rem] text-stone-500 dark:text-stone-400">
+                <div className="text-meta text-loam-muted dark:text-loam-muted-dark">
                   {spot.culturalLandmarkNote}
                 </div>
                 <div className="text-xs italic text-plum-700 dark:text-brass-200">

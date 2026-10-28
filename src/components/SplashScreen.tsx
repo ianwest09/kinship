@@ -130,7 +130,7 @@ export const SplashScreen: React.FC<Props> = ({ darkMode, onDone }) => {
 
       <p
         className={`font-serif text-lg md:text-xl italic ${
-          darkMode ? 'text-stone-300' : 'text-stone-600'
+          darkMode ? 'text-loam-body-dark' : 'text-loam-body'
         }`}
       >
         No right answers. Just time together.

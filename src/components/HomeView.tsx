@@ -44,12 +44,12 @@ export const HomeView: React.FC<Props> = ({
         <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-semibold text-loam-ink dark:text-parchment-50 tracking-tight">
           Find a familiar feeling.
         </h2>
-        <p className="mt-5 text-lg md:text-xl leading-relaxed text-stone-600 dark:text-stone-300">
+        <p className="mt-5 text-lg md:text-xl leading-relaxed text-loam-body dark:text-loam-body-dark">
           Explore music, films and cultural touchstones that may bring you closer.
         </p>
 
         {eraLabel && (
-          <p className="mt-4 text-base text-stone-500 dark:text-stone-400">
+          <p className="mt-4 text-base text-loam-muted dark:text-loam-muted-dark">
             Right now Kinship is looking at roughly{' '}
             <span className="font-semibold text-loam-ink dark:text-parchment-100">{eraLabel}</span>{' '}
             — the years when {firstName} was growing up
@@ -58,16 +58,20 @@ export const HomeView: React.FC<Props> = ({
         )}
 
         <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:items-center">
-          <button type="button" onClick={onExplore} className="loam-btn-primary text-base md:text-lg">
-            <Compass className="w-5 h-5" aria-hidden="true" />
-            <span>Start exploring</span>
+          <button type="button" onClick={onOpenTogether} className="loam-btn-primary text-base md:text-lg">
+            <Heart className="w-5 h-5" aria-hidden="true" />
+            <span>Share a familiar moment</span>
             <ArrowRight className="w-5 h-5" aria-hidden="true" />
           </button>
-          <button type="button" onClick={onOpenTogether} className="loam-btn-secondary text-base">
-            <Music className="w-5 h-5 text-plum-600 dark:text-plum-300" aria-hidden="true" />
-            <span>Listen together</span>
+          <button type="button" onClick={onExplore} className="loam-btn-secondary text-base">
+            <Compass className="w-5 h-5 text-plum-600 dark:text-plum-300" aria-hidden="true" />
+            <span>Explore what’s familiar</span>
           </button>
         </div>
+        <p className="mt-3 text-meta text-loam-muted dark:text-loam-muted-dark">
+          Nothing to set up first, and nothing to get wrong. You can skip or stop
+          at any point.
+        </p>
       </section>
 
       {/* Featured card --------------------------------------------------- */}
@@ -89,16 +93,16 @@ export const HomeView: React.FC<Props> = ({
             >
               Start with music
             </h3>
-            <p className="mt-2 text-base md:text-lg text-stone-600 dark:text-stone-300 leading-relaxed">
+            <p className="mt-2 text-base md:text-lg text-loam-body dark:text-loam-body-dark leading-relaxed">
               Explore songs and artists from a meaningful era.
             </p>
           </div>
         </div>
 
         <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-4">
-          <button type="button" onClick={onExplore} className="loam-btn-primary">
+          <button type="button" onClick={onExplore} className="loam-btn-secondary">
+            <Music className="w-5 h-5 text-plum-600 dark:text-plum-300" aria-hidden="true" />
             <span>Explore familiar music</span>
-            <ArrowRight className="w-5 h-5" aria-hidden="true" />
           </button>
           <p className="text-base italic font-serif text-plum-700 dark:text-plum-300">
             No right answers. Just time together.
@@ -110,7 +114,7 @@ export const HomeView: React.FC<Props> = ({
       <section aria-labelledby="home-more-heading" className="space-y-4">
         <h3
           id="home-more-heading"
-          className="text-base font-semibold text-stone-600 dark:text-stone-300"
+          className="text-base font-semibold text-loam-body dark:text-loam-body-dark"
         >
           Or take a different route
         </h3>
@@ -149,7 +153,7 @@ export const HomeView: React.FC<Props> = ({
               <h3 className="text-base md:text-lg font-semibold text-loam-ink dark:text-parchment-50">
                 If late afternoon feels unsettled
               </h3>
-              <p className="mt-1 text-sm md:text-base text-stone-600 dark:text-stone-300 leading-relaxed">
+              <p className="mt-1 text-sm md:text-base text-loam-body dark:text-loam-body-dark leading-relaxed">
                 A short, slow-settling sound you can play together. Start it, or don’t — it will wait.
               </p>
             </div>
@@ -165,7 +169,7 @@ export const HomeView: React.FC<Props> = ({
       </section>
 
       {!ready && (
-        <p role="status" className="text-sm text-stone-500 dark:text-stone-400">
+        <p role="status" className="text-sm text-loam-muted dark:text-loam-muted-dark">
           Getting things ready… Everything here can be skipped or changed at any time.
         </p>
       )}
@@ -196,7 +200,7 @@ const HomeLink: React.FC<HomeLinkProps> = ({ label, hint, icon, onClick }) => (
       <span className="block font-semibold text-base md:text-lg text-loam-ink dark:text-parchment-50">
         {label}
       </span>
-      <span className="block mt-1 text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
+      <span className="block mt-1 text-sm text-loam-body dark:text-loam-body-dark leading-relaxed">
         {hint}
       </span>
     </span>

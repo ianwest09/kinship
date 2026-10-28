@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { ChevronDown, Compass, Music, Sparkles } from 'lucide-react';
+import { ChevronDown, Compass, Music, Sparkles, Undo2 } from 'lucide-react';
 import { KinshipPrescriptionResponse, ReminiscenceCue } from '../../shared/types';
 
 interface Props {
   data: KinshipPrescriptionResponse;
   onListenTogether: (cue: ReminiscenceCue) => void;
   onNotForUs: (cue: ReminiscenceCue) => void;
+  /** Puts a set-aside suggestion straight back. */
+  onUndoNotForUs: (cue: ReminiscenceCue) => void;
   onOpenDetail: () => void;
 }
 
@@ -33,8 +35,8 @@ function filterFor(cue: ReminiscenceCue): FilterId {
 }
 
 /**
- * The stored categoryBadge is written for clinicians and judges
- * ("Primary Musical Spark (mPFC Anchor)"). Families get plain language.
+ * The stored categoryBadge is written for the technical trace view ("Primary
+ * musical spark", "Sundowning calm anchor"). Families get plain language.
  */
 function plainCategory(cue: ReminiscenceCue): string {
   const badge = `${cue.categoryBadge || ''} ${cue.subtype}`.toLowerCase();
@@ -60,9 +62,14 @@ export const DiscoverView: React.FC<Props> = ({
   data,
   onListenTogether,
   onNotForUs,
+  onUndoNotForUs,
   onOpenDetail,
 }) => {
   const [filter, setFilter] = useState<FilterId>('all');
+  // "Not for us today" used to make a card vanish with no feedback and no way
+  // back except a reset hidden in the detailed care view. One mis-tap on a phone
+  // silently narrowed everything that followed.
+  const [setAside, setSetAside] = useState<ReminiscenceCue | null>(null);
 
   const cues = useMemo(() => {
     const primary = data.reconstructedYouthUniverse?.length
@@ -86,7 +93,7 @@ export const DiscoverView: React.FC<Props> = ({
         <h2 className="font-serif text-3xl md:text-4xl font-semibold text-loam-ink dark:text-parchment-50 tracking-tight">
           Discover
         </h2>
-        <p className="mt-3 text-base md:text-lg leading-relaxed text-stone-600 dark:text-stone-300">
+        <p className="mt-3 text-base md:text-lg leading-relaxed text-loam-body dark:text-loam-body-dark">
           Songs, films and small familiar things from around {eraLabel}, near{' '}
           {data.geographyInfo.name}. Pick anything that looks nice. Nothing needs
           to be recognised, and nothing needs to be right.
@@ -116,7 +123,7 @@ export const DiscoverView: React.FC<Props> = ({
               }`}
             >
               {f.label}
-              <span className={active ? 'text-plum-100' : 'text-stone-500 dark:text-stone-400'}>
+              <span className={active ? 'text-plum-100' : 'text-loam-muted dark:text-loam-muted-dark'}>
                 {' '}
                 {count}
               </span>
@@ -125,13 +132,38 @@ export const DiscoverView: React.FC<Props> = ({
         })}
       </div>
 
+      {setAside && (
+        <div
+          role="status"
+          className="loam-card p-4 md:p-5 flex flex-col sm:flex-row sm:items-center gap-3 justify-between bg-parchment-50 dark:bg-vinyl-900"
+        >
+          <p className="text-sm md:text-base text-loam-body dark:text-loam-body-dark">
+            <span className="font-semibold text-loam-ink dark:text-parchment-100">
+              {setAside.name}
+            </span>{' '}
+            is set aside. It will not be suggested again — unless you put it back.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              onUndoNotForUs(setAside);
+              setSetAside(null);
+            }}
+            className="loam-btn-secondary shrink-0 px-4 py-2.5 text-sm md:text-base"
+          >
+            <Undo2 className="w-4 h-4 text-plum-600 dark:text-plum-300" aria-hidden="true" />
+            <span>Put it back</span>
+          </button>
+        </div>
+      )}
+
       {visible.length === 0 ? (
         <div className="loam-card p-8 text-center">
           <Sparkles className="w-8 h-8 mx-auto text-plum-400" aria-hidden="true" />
           <p className="mt-3 text-lg font-serif text-loam-ink dark:text-parchment-50">
             Nothing here just yet
           </p>
-          <p className="mt-2 text-base text-stone-600 dark:text-stone-300">
+          <p className="mt-2 text-base text-loam-body dark:text-loam-body-dark">
             Try a different filter, or add a song or film they liked in{' '}
             <span className="font-semibold">Add what you know</span>.
           </p>
@@ -141,7 +173,7 @@ export const DiscoverView: React.FC<Props> = ({
           {visible.map((cue) => (
             <li key={cue.entity_id || cue.name} className="loam-card p-5 md:p-6 flex flex-col">
               <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm">
-                <span className="px-2.5 py-1 rounded-full bg-parchment-100 dark:bg-vinyl-800 text-stone-600 dark:text-stone-300 font-semibold">
+                <span className="px-2.5 py-1 rounded-full bg-parchment-100 dark:bg-vinyl-800 text-loam-body dark:text-loam-body-dark font-semibold">
                   {plainCategory(cue)}
                 </span>
                 <span className="px-2.5 py-1 rounded-full bg-brass-100 dark:bg-vinyl-800 text-brass-700 dark:text-brass-300 font-semibold">
@@ -158,7 +190,7 @@ export const DiscoverView: React.FC<Props> = ({
                 {cue.name}
               </h3>
 
-              <p className="mt-1.5 text-sm md:text-base text-stone-500 dark:text-stone-400">
+              <p className="mt-1.5 text-sm md:text-base text-loam-muted dark:text-loam-muted-dark">
                 {plainCategory(cue) === 'Music' || cue.subtype === 'urn:entity:artist'
                   ? 'They would have been '
                   : 'Showing when they were '}
@@ -173,17 +205,17 @@ export const DiscoverView: React.FC<Props> = ({
 
               {/* Plain-language explanation, collapsed by default. */}
               <details className="mt-4 group">
-                <summary className="flex items-center gap-2 cursor-pointer list-none text-sm md:text-base font-semibold text-stone-600 dark:text-stone-300 hover:text-plum-700 dark:hover:text-plum-300">
+                <summary className="flex items-center gap-2 cursor-pointer list-none text-sm md:text-base font-semibold text-loam-body dark:text-loam-body-dark hover:text-plum-700 dark:hover:text-plum-300">
                   <ChevronDown
                     className="w-4 h-4 transition-transform group-open:rotate-180"
                     aria-hidden="true"
                   />
                   <span>Why this might feel familiar</span>
                 </summary>
-                <div className="mt-3 pl-6 space-y-2.5 text-sm md:text-base leading-relaxed text-stone-600 dark:text-stone-300">
+                <div className="mt-3 pl-6 space-y-2.5 text-sm md:text-base leading-relaxed text-loam-body dark:text-loam-body-dark">
                   {cue.whyBrainRemembers && <p>{cue.whyBrainRemembers}</p>}
                   {cue.dontQuizWarning && (
-                    <p className="text-stone-500 dark:text-stone-400">
+                    <p className="text-loam-muted dark:text-loam-muted-dark">
                       <span className="font-semibold">A gentle note:</span> {cue.dontQuizWarning}{' '}
                       An invitation works better than a question.
                     </p>
@@ -193,7 +225,7 @@ export const DiscoverView: React.FC<Props> = ({
                       {cue.tagLabels.slice(0, 5).map((t) => (
                         <span
                           key={t}
-                          className="px-2 py-0.5 rounded-md bg-parchment-100 dark:bg-vinyl-800 text-xs md:text-sm text-stone-600 dark:text-stone-300"
+                          className="px-2 py-0.5 rounded-md bg-parchment-100 dark:bg-vinyl-800 text-xs md:text-sm text-loam-body dark:text-loam-body-dark"
                         >
                           {t}
                         </span>
@@ -214,14 +246,17 @@ export const DiscoverView: React.FC<Props> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => onNotForUs(cue)}
+                  onClick={() => {
+                    onNotForUs(cue);
+                    setSetAside(cue);
+                  }}
                   className="loam-btn-quiet text-sm md:text-base"
                 >
                   Not for us today
                 </button>
               </div>
 
-              <p className="mt-3 text-xs md:text-sm text-stone-500 dark:text-stone-400">
+              <p className="mt-3 text-xs md:text-sm text-loam-muted dark:text-loam-muted-dark">
                 {cue.source === 'live_qloo_api'
                   ? 'Suggested by Qloo, live.'
                   : 'From Kinship’s own collection — not a Qloo result.'}{' '}
@@ -237,7 +272,7 @@ export const DiscoverView: React.FC<Props> = ({
           <h3 className="text-base md:text-lg font-semibold text-loam-ink dark:text-parchment-50">
             Looking for the fuller picture?
           </h3>
-          <p className="mt-1 text-sm md:text-base text-stone-600 dark:text-stone-300">
+          <p className="mt-1 text-sm md:text-base text-loam-body dark:text-loam-body-dark">
             Era timeline, shared-taste comparisons, blocked distress triggers, meal
             and outing ideas, and the Qloo request trace.
           </p>
