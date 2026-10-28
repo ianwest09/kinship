@@ -51,9 +51,9 @@ export const HomeView: React.FC<Props> = ({
         {eraLabel && (
           <p className="mt-4 text-base text-stone-500 dark:text-stone-400">
             Right now Kinship is looking at roughly{' '}
-            <span className="font-semibold text-loam-ink dark:text-parchment-100">{eraLabel}</span> —
-            the years around {firstName}
-            {guardrails.youthGeography ? ' and the places they grew up' : ''}.
+            <span className="font-semibold text-loam-ink dark:text-parchment-100">{eraLabel}</span>{' '}
+            — the years when {firstName} was growing up
+            {guardrails.youthGeography ? ', and the places they knew' : ''}.
           </p>
         )}
 
