@@ -25,6 +25,8 @@ import {
   type Progress,
 } from "../shared/moment";
 
+import { Onboarding } from "./components/Onboarding";
+
 type Page =
   "home" | "profile" | "working" | "moment" | "saved" | "how" | "privacy";
 const labels = [
@@ -66,6 +68,7 @@ function readSaved(): Moment[] {
   }
 }
 export function App() {
+  const [onboardingComplete, setOnboardingComplete] = useState(false);
   const [page, setPage] = useState<Page>("home");
   const [profile, setProfile] = useState<Profile>(emptyProfile);
   const [status, setStatus] = useState<{
@@ -189,6 +192,14 @@ export function App() {
     { id: "how" as Page, label: "How Kinship works", icon: CircleHelp },
     { id: "privacy" as Page, label: "Privacy & settings", icon: ShieldCheck },
   ];
+  if (!onboardingComplete) {
+    return (
+      <Onboarding
+        demo={status !== null && !status.qlooConfigured}
+        onContinue={() => setOnboardingComplete(true)}
+      />
+    );
+  }
   return (
     <div className="app-shell">
       <a className="skip" href="#main">

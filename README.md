@@ -21,6 +21,7 @@ A Qloo hackathon key is obtained through the [Qloo hackathon developer guide](ht
 
 ## What works
 
+- An optional first-screen introduction with name, surname, age, country of birth and country of residence fields. Use fictional details only: these inputs are discarded when continuing or skipping, not saved, sent or used to personalise suggestions. The screen appears again on refresh.
 - A short profile with optional references, interests, language, activity, duration, atmosphere, exclusions and practical preferences; no account or diagnosis field.
 - A streamed, five-step status display reporting completed, skipped and failed operations. Failed Qloo calls offer retry or an explicitly non-Qloo suggestion.
 - Conservative entity resolution, Qloo Insights requests, provenance, and a clearly labelled general fallback. No synthetic IDs or affinity scores are used in the active workflow.
@@ -42,7 +43,7 @@ A Qloo relationship is not proof that an individual likes, remembers or has expe
 
 ## Privacy and limitations
 
-- The form is transmitted to the Kinship server for the current request, and is not intentionally stored in a Kinship database. When configured, references are sent to Qloo and preferences plus verified entities to Gemini; their own processing and retention policies apply. Do not submit sensitive data. There are no accounts, analytics, audio recording or location collection.
+- The cultural-interest form is transmitted to the Kinship server for the current request, and is not intentionally stored in a Kinship database. When configured, references are sent to Qloo and preferences plus verified entities to Gemini; their own processing and retention policies apply. Do not submit sensitive data. There are no accounts, analytics, audio recording or geolocation access.
 - Saved cards remain in the browser's local storage until removed, cleared, or browser data is deleted. The privacy screen clears Kinship-prefixed local storage. If local storage is blocked, the session can continue but saves do not persist.
 - The interface and template prose are currently English only; a preferred language does not translate the activity. Practical preferences must be reviewed by the caregiver and are not mechanically enforced beyond the conservative suppression of cultural results.
 - Exclusion checks are literal, not a complete safety filter; the caregiver must review each suggestion. Metadata returned by Qloo is not enough to verify themes or availability. Qloo may not resolve a song title as a supported Insights seed. The app intentionally falls back rather than inventing a match.

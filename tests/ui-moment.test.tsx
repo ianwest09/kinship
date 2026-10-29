@@ -25,8 +25,11 @@ test("profile to result and save/remove journey through the real HTTP API (DOM s
     configurable: true,
   });
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = (input, init) =>
-    originalFetch(new URL(String(input), base), init);
+  const requestBodies: string[] = [];
+  globalThis.fetch = (input, init) => {
+    if (typeof init?.body === "string") requestBodies.push(init.body);
+    return originalFetch(new URL(String(input), base), init);
+  };
   const root = createRoot(dom.window.document.getElementById("root")!);
   const click = async (text: string) => {
     const button = [...dom.window.document.querySelectorAll("button")].find(
@@ -45,8 +48,31 @@ test("profile to result and save/remove journey through the real HTTP API (DOM s
     });
     assert.match(
       dom.window.document.body.textContent || "",
+      /A little introduction/,
+    );
+    const exampleDetails: Record<string, string> = {
+      "onboarding-name": "FictionalName",
+      "onboarding-surname": "FictionalSurname",
+      "onboarding-age": "72",
+      "onboarding-birth-country": "FictionalBirthland",
+      "onboarding-residence-country": "FictionalResidence",
+    };
+    for (const [id, value] of Object.entries(exampleDetails)) {
+      const input = dom.window.document.getElementById(
+        id,
+      ) as HTMLInputElement | null;
+      assert.ok(input, `missing onboarding field ${id}`);
+      assert.ok(dom.window.document.querySelector(`label[for="${id}"]`));
+      assert.equal(input.required, false);
+      input.value = value;
+    }
+    await click("Continue to Kinship");
+    assert.match(
+      dom.window.document.body.textContent || "",
       /Make room for a.*meaningful moment/,
     );
+    assert.equal(dom.window.localStorage.length, 0);
+    assert.equal(dom.window.document.getElementById("onboarding-name"), null);
     await click("Explore an example");
     for (
       let i = 0;
@@ -68,6 +94,21 @@ test("profile to result and save/remove journey through the real HTTP API (DOM s
         .length,
       1,
     );
+    for (const value of [
+      "FictionalName",
+      "FictionalSurname",
+      "FictionalBirthland",
+      "FictionalResidence",
+    ]) {
+      assert.ok(
+        !requestBodies.some((body) => body.includes(value)),
+        `onboarding value ${value} was sent`,
+      );
+      assert.ok(
+        !JSON.stringify(dom.window.localStorage).includes(value),
+        `onboarding value ${value} was stored`,
+      );
+    }
     await click("Saved moments");
     assert.match(dom.window.document.body.textContent || "", /SAVED MOMENT/);
     await click("Remove");
@@ -75,6 +116,14 @@ test("profile to result and save/remove journey through the real HTTP API (DOM s
       JSON.parse(dom.window.localStorage.getItem("kinship.moments.v1") || "[]")
         .length,
       0,
+    );
+    await act(async () => {
+      root.render(<App key="new-session" />);
+    });
+    await click("Skip for now");
+    assert.match(
+      dom.window.document.body.textContent || "",
+      /Make room for a.*meaningful moment/,
     );
   } finally {
     await act(async () => root.unmount());
