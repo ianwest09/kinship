@@ -1,156 +1,73 @@
-# Kinship — The Dementia “Reminiscence Bump” & Intergenerational Bridge Agent
+# Kinship: Moments of Connection
 
-> **Qloo Agentic Hackathon (“Agents, but with taste.”)** · Built on **Qloo Taste AI™ v2** (`artist`, `movie`, `tv_show`, `brand`, `place`, `demographics`, `heatmap`, `/v2/analysis/compare`) + **Model Context Protocol (`mcp/1.0`)** · **MIT Licensed** · **Zero Cloud PHI / Zero PII**
+*A familiar interest. A meaningful moment. A little closer together.*
 
-## Live Demo
+Kinship is a small, mobile-first companion for families and caregivers to turn explicitly supplied cultural interests into an invitation to spend time together. It is not a medical device, memory test, treatment, or substitute for professional care. A person may decline, change or stop an activity at any time. **This prototype is for fictional information only; do not enter real patient, personal or medical information.**
 
-**https://kinship-app-phi.vercel.app** — publicly reachable, no login, no deployment protection, hosted on Vercel. `QLOO_API_KEY` is only ever held server-side as an encrypted Vercel environment variable; the browser can neither read it nor set it.
+## Start locally
 
-```bash
-curl https://kinship-app-phi.vercel.app/api/health
+Requires Node.js 22 or later and npm.
+
+```sh
+npm ci
+cp .env.example .env
+# Optionally set QLOO_API_KEY and GEMINI_API_KEY in .env on the server only
+npm run dev
 ```
 
-`qloo.connected` must be `true`, with `maskedKey` showing the key's first and last four characters. If it reads `false`, the deployment is serving the offline Verified Cultural Twin instead of live Qloo: add `QLOO_API_KEY` under **Project Settings → Environment Variables** for the target environments and redeploy. The key cannot be supplied from the browser, so an environment variable is the only supported path.
+Open `http://localhost:3000`. Without a Qloo key, the banner identifies **demonstration mode** and no Qloo calls are made. “Explore an example” uses a fictional profile. You can also use the form without an account. `npm run build` and `npm start` run the production build locally. Do not commit `.env`; `.env.example` has placeholders only. Restart the server after changing secrets.
 
-Because the UI states which source produced what it is showing, an unconnected deployment is never mistaken for live Qloo output — the provenance notice says so explicitly.
+A Qloo hackathon key is obtained through the [Qloo hackathon developer guide](https://docs.qloo.com/reference/qloo-llm-hackathon-developer-guide). The server uses the documented `https://hackathon.api.qloo.com` host. A Gemini API key and access to `gemini-2.5-flash` are optional. Model availability, quotas, and free-tier terms depend on the provider and account; no billing is set up by this project. Never enter secrets in the browser or a public repository.
 
-> **Provenance is stated in the UI.** Until a reconstruction runs, Kinship shows only its own curated material, so it carries a provenance notice reading *“Offline collection — Qloo is not connected”* — that content is **not** Qloo output and is labelled as such. Running a reconstruction issues a real request; when Qloo answers it, the notice reads *“Live Qloo Taste AI™”*. Items actually returned by Qloo additionally carry a `Live Qloo API` badge, and the agent-trace drawer labels every step `LIVE` or `TWIN`, so a Qloo result is never visually confused with Kinship’s own interpretation.
+## What works
 
-Source repository: **https://github.com/ianwest09/kinship** (public, MIT licence detected at repository root).
+- An optional first-screen introduction with name, surname, age, country of birth and country of residence fields. Use fictional details only: these inputs are discarded when continuing or skipping, not saved, sent or used to personalise suggestions. The screen appears again on refresh.
+- A short profile with optional references, interests, language, activity, duration, atmosphere, exclusions and practical preferences; no account or diagnosis field.
+- A streamed, five-step status display reporting completed, skipped and failed operations. Failed Qloo calls offer retry or an explicitly non-Qloo suggestion.
+- Conservative entity resolution, Qloo Insights requests, provenance, and a clearly labelled general fallback. No synthetic IDs or affinity scores are used in the active workflow.
+- A structured Gemini template selection when configured; a labelled deterministic template fallback otherwise. The generated card contains an opening, shared activity, invitations, closing and stop/adapt advice.
+- Save, remove and clear moments in browser local storage, with session-only fallback if storage is unavailable. Local storage is limited to 20 saved cards.
+- Responsive layouts, labelled controls, keyboard focus, touch targets, reduced-motion support, and no autoplay.
 
----
+## How the agent uses Qloo
 
-## Design & accessibility (Loam)
+The server emits actual workflow events as newline-delimited JSON over `POST /api/moment`:
 
-The interface follows the **Loam** design system: warm paper `#F4F0E8`, white card surfaces, soft charcoal `#353432`, muted sage `#64745D` and a soft blue focus indicator. Contrast was computed for every pairing rather than assumed; where a supplied reference value failed WCAG it was darkened (sage text on paper uses `#55634E` at 5.63:1, focus rings use `#6A7DAD` at 3.59:1).
+1. Normalise the supplied profile. It does not infer preferences from age, diagnosis, ethnicity or location.
+2. Split up to three comma-, semicolon- or newline-separated cultural references. For each non-excluded reference, call Qloo's documented **GET `/search`** with `query` and `take`, using `X-Api-Key`. Only a single exact, case-insensitive name match with a supported returned type and ID is accepted; ambiguous and fuzzy matches are not guessed. A search 404 is treated as no match.
+3. With verified IDs, call documented **GET `/v2/insights`** with `filter.type`, `signal.interests.entities`, and `take`. Listening asks for artists; looking asks for movies; other activities use the first seed's supported type. Multiple verified seeds are submitted together, not separately compared. Returned ID, name, type and seed names are retained. Neither `/recommendations` nor `/recs` is used. See the [hackathon guide](https://docs.qloo.com/reference/qloo-llm-hackathon-developer-guide), [search reference](https://docs.qloo.com/reference/get-search) and [entity type parameter guide](https://docs.qloo.com/reference/available-parameters-by-entity-type).
+4. If configured, Gemini receives the preferences and verified candidate entities and returns structured JSON selecting one of two prewritten activity variants. The server validates the selection and assembles the card from controlled templates; Gemini does **not** generate free-form final prose or establish facts about Qloo entities. Invalid output, timeout or provider errors use a labelled template fallback. No internal reasoning is shown.
+5. Exact exclusion phrases are checked against the assembled card. If the card contains one, the workflow stops and offers recovery. The check cannot understand synonyms or context; a caregiver must review the whole suggestion and any cultural item. Because name-only Qloo results cannot verify subject matter, language or practical suitability, cultural recommendations are suppressed when any exclusion, preferred language or practical preference is supplied. The result then clearly says it is a general suggestion.
 
-- **Reading preference** — Normal / Large / Largest, persisted per device. The root font is 17px and all type is rem-based, so the preference scales type *and* spacing together without breaking layout.
-- **Touch** — 44px minimum targets on coarse pointers; four-item bottom navigation on phones with safe-area padding for the gesture bar.
-- **Motion** — minimal by default, fully removed under `prefers-reduced-motion`.
-- **Dementia-inclusive copy** — no quizzes, scores or countdowns; every screen offers a neutral way out; suggestions are labelled as suggestions, never as facts about a person.
-- **Brand** — the approved logo ships as `public/kinship-logo.png` (full lockup) and `public/kinship-mark.png` (tile mark, also the favicon); the app opens with a brief, always-skippable splash.
+A Qloo relationship is not proof that an individual likes, remembers or has experienced an item. When no sufficiently relevant match is found, the general suggestion uses only the supplied interests; demonstration mode is never described as a successful live lookup. Cultural-item links are search links, not assertions that content is available or licensed.
 
-Five destinations — **Home, Discover, Together, Family, Preferences** — sit in front of the same engine. The full clinical detail (era timeline, compare diffs, blocked distress triggers, dining plan, Qloo request trace) remains one tap away under **Detailed care view**.
+## Privacy and limitations
 
----
+- The cultural-interest form is transmitted to the Kinship server for the current request, and is not intentionally stored in a Kinship database. When configured, references are sent to Qloo and preferences plus verified entities to Gemini; their own processing and retention policies apply. Do not submit sensitive data. There are no accounts, analytics, audio recording or geolocation access.
+- Saved cards remain in the browser's local storage until removed, cleared, or browser data is deleted. The privacy screen clears Kinship-prefixed local storage. If local storage is blocked, the session can continue but saves do not persist.
+- The interface and template prose are currently English only; a preferred language does not translate the activity. Practical preferences must be reviewed by the caregiver and are not mechanically enforced beyond the conservative suppression of cultural results.
+- Exclusion checks are literal, not a complete safety filter; the caregiver must review each suggestion. Metadata returned by Qloo is not enough to verify themes or availability. Qloo may not resolve a song title as a supported Insights seed. The app intentionally falls back rather than inventing a match.
+- Gemini currently chooses from two controlled templates rather than producing fully free-form personalised prose. “Try another suggestion” switches the template and, where possible, the returned Qloo reference; it is not a guarantee of a wholly different activity.
+- A provider key being configured is not a claim of successful access. Live status is attributed only to a successfully returned and selected Qloo Insights entity.
 
-## Why Kinship Exists
+## Architecture and deployment
 
-Over **57 million families worldwide** navigate Alzheimer’s and related dementias. Two heartbreaks strike almost every household and memory-care community every single day:
+`src/App.tsx` and `src/index.css` contain the UI; `shared/moment.ts` defines the data model; `server/moment/` contains the Qloo client, Gemini client, orchestration and suitability checks; `server/apiRouter.ts` exposes the current API. The original repository's clinical-style prototype, its unused modules and historical reports remain in the tree for reference, but the active entrypoint and API no longer expose those routes or claims. Historical reports do **not** describe the current application.
 
-1. **4:30 PM “Sundowning” Agitation**: As daylight fades, circadian confusion triggers acute homesickness (*“I want to go home”*), pacing, and distress. Caregivers or smart-TV autoplay routinely put on generic “oldies” or 1960s films — accidentally playing suspense/war triggers (*Psycho*, *The Birds*, loud streaming ad breaks) that dementia brains perceive as real-room danger.
-2. **Intergenerational Visit Dread**: Over **60% of teens and Gen-Z grandchildren** dread visiting a grandparent with dementia because standard conversation (*“Do you remember my school? What did you have for lunch?”*) inadvertently quizzes damaged short-term hippocampal memory — causing shame and silence.
+The existing Vite/React + Express structure is retained rather than migrating to Next.js. `vercel.json` routes `/api/*` to `api/index.ts` and serves the Vite output. For Vercel-compatible hosting, import the repository, use `npm run build` and output directory `dist`, and set server-side environment variables through the host's secret settings. Check current provider free-tier limits and streaming/function time limits before deployment; if billing is required, use local hosting or another genuinely free host instead. No deployment or paid service has been activated. Streaming can be buffered by some hosts, in which case progress may arrive together at the end.
 
-### The Neurological Breakthrough + Why Only Qloo Taste AI™ Can Solve It
+## Checks
 
-Neuroscience proves that while Alzheimer’s erodes recent hippocampal memory, **autobiographical, musical, olfactory, and culinary memories formed between ages 10 and 30 — the “Reminiscence Bump” — survive into late-stage disease inside the medial prefrontal cortex (mPFC)** (Petr Janata, UC Davis).
-
-A generic prompted LLM **cannot** solve this safely:
-- Generic LLMs guess US/UK Top-40 stereotypes, suffer recency bias, hallucinate release years, recommend peril-heavy era classics, and tell grandchildren to ask memory-testing questions.
-- **Kinship** uses **Qloo Taste AI™’s 250M+ entity cultural graph** with **zero patient PII** to reconstruct an elder’s exact ages 10–30 cultural universe in their youth hometown, filter out distress triggers, compose a 15-minute clinical **Iso-Principle BPM step-down (`96 → 76 → 62 BPM`)**, pair **IDDSI Levels 4–6 dysphagia-safe youth comfort meals & quiet cafés**, and run **`GET /v2/analysis/compare`** to reveal the hidden musical/story DNA connecting a 19-year-old grandchild’s favorites (*Laufey*, *Olivia Dean*, *Studio Ghibli*, *Tems*) with their grandparent’s 1950s–1970s youth touchstones.
-
----
-
-## Full-Surface Qloo v2 API Architecture
-
-Kinship orchestrates **6 entity/insight domains** and **all core Qloo v2 endpoints** inside a 4-iteration autonomous ReAct agent loop (`OBSERVE → TOOL_CALL → AUDIT_SELF_CORRECT → SYNTHESIZE`):
-
-| Agent / Tool | Qloo v2 Endpoint & Parameters | Clinical Care Role |
-|---|---|---|
-| **01. Clue & Bump Resolver** | `GET /search` · `GET /v2/tags` | Resolves 1–2 surviving family clues + grandchild favorites into Qloo UUIDs and locks the `[birthYear+10, birthYear+30]` mPFC window. |
-| **02. Youth-Universe Reconstructor** | `GET /v2/insights` (`urn:entity:artist`, `movie`, `tv_show`, `filter.release_year`, `signal.location.query`, `bias.trends="off"`, `feature.explainability=true`) | Reconstructs high-salience youth cues across **8 global & diaspora regions** (Cape Town, Chicago, London, Brooklyn, Tokyo, Kingston, Mumbai, Buenos Aires) with clue attribution. |
-| **03. Sundowning, Brand & Dining Shield** | `GET /v2/insights` (`filter.exclude.tags=horror,thriller,war`, `urn:entity:brand`, `urn:entity:place`) | Blocks era peril traps, sequences `96→76→62 BPM` Iso-Principle entrainment, prescribes $5 olfactory/tea anchors, and curates **IDDSI Levels 4–6 easy-to-chew (<52°C, medication-safe) nostalgic dining & quiet hours**. |
-| **04. Intergenerational Soul Bridge** | `GET /v2/analysis/compare` (`a.signal.interests.entities` vs `b.signal.interests.entities`) | Computes shared harmonic & narrative tag co-occurrence across 60 years to generate a 3-step, zero-quiz 15-minute grandchild visit playbook. |
-| **05. Silo Breaker & Hometown Mapper** | `GET /v2/insights?filter.type=urn:demographics` + `filter.type=urn:heatmap` (`output.heatmap.boundary=urn:geohash`) | Proves generational recommender siloing across 6 age bands and maps neighborhood youth geohashes with sensory place prompts. |
-
-### Autonomous Agent Self-Correction & Model Context Protocol (`mcp/1.0`)
-- **Sparsity & Safety Self-Correction**: If a live Qloo query returns distress-tagged entities or `<2` results for a diaspora cue, Kinship’s auditor drops peril tags and autonomously retries with a widened `±5 year` diaspora window while maintaining `bias.trends="off"`.
-- **Callable MCP Tool Server**: Exposes `GET /api/mcp/tools` and `POST /api/mcp/call` for 5 clinical tools (`reconstruct_reminiscence_bump`, `bridge_generations_compare`, `prescribe_iso_sundowning_rescue`, `curate_dysphagia_nostalgic_dining`, `parse_family_intake_story`) so any Claude, OpenAI, or LangGraph care workflow can call Kinship directly.
-
----
-
-## Quick Start (Local Development)
-
-Requires **Node.js 20.12 or newer** (Node 22 recommended; `process.loadEnvFile` is used to read `.env`).
-
-```bash
-npm install
-npm run typecheck      # tsc --noEmit
-npm run build          # vite build -> dist/
-
-cp .env.example .env   # optional; see note below
-npm run dev            # Express + Vite middleware + MCP server
-```
-
-`npm run dev` (and `npm run start`) bind **`process.env.PORT`, defaulting to `3000`**. To use another port, set it explicitly:
-
-```bash
-PORT=3001 npm run dev
-```
-
-### About `.env`
-
-`.env` is loaded by [`server/loadEnv.ts`](./server/loadEnv.ts), which is imported first by both server entrypoints. Two behaviours worth knowing:
-
-- Variables **already present in the real environment take precedence** over `.env`, so platform-injected values (e.g. Vercel encrypted env vars) always win.
-- If `.env` is absent the server starts normally — this is the normal case in production.
-
-For production-style serving of the built bundle:
-
-```bash
+```sh
+npm run typecheck
 npm run build
-PORT=3001 QLOO_API_KEY=<your-key> npm run start
+npm test
 ```
 
-`npm run start` serves `dist/` only when `NODE_ENV=production` **and** `dist/index.html` exists; otherwise it falls back to Vite middleware mode. Always run `npm run build` first.
+The current test suite exercises the no-key path, mocked successful Qloo responses, ambiguous and empty matches, timeout, malformed Gemini output, exclusions, and a DOM-simulated example-to-save/remove journey against the real local HTTP API. The DOM simulation sets a 360px viewport but does **not** validate browser rendering or layout. There is no lint script configured. The prior prototype's tests remain available as `npm run test:legacy`; many assert the retired UI and routes and are not acceptance tests for this version. On this build the old suite was run and reported 20 failures, mostly obsolete expectations.
 
-### Data source modes
-
-- **With `QLOO_API_KEY`**: live Qloo v2 responses hydrate Youth Universe cards, `/v2/analysis/compare` overlap scores, `urn:entity:place` calm venues, `urn:entity:brand` anchors, `urn:demographics`, and `urn:heatmap` geohashes. Responses report `mode: "live_qloo_api"`.
-- **Without `QLOO_API_KEY`**: Kinship runs on its offline **8-Region Verified Cultural Twin** dataset so every workflow can be exercised with zero setup. Responses report `mode: "verified_cultural_twin"`, and the UI labels this state explicitly.
-
-Check which mode you are in at any time via `GET /api/health` (`qloo.connected`) or the `mode` field on any bridge response. **The offline dataset is curated by us, not returned by Qloo** — the two are not interchangeable as evidence.
-
-> `QLOO_API_KEY` must be supplied as a real environment variable or via `.env`. It is never committed, never sent to the browser, and there is no in-app field for pasting it.
-
-
----
-
-## One-Click Deploy to Vercel
-
-Kinship includes native Vercel Serverless configuration (`vercel.json` + `api/index.ts`):
-
-1. Push this directory to a public GitHub repository (root `LICENSE` is standard MIT so GitHub automatically displays **MIT license** in the **About** sidebar).
-2. Import the repository in **Vercel**. Build Command `npm run build` and Output Directory `dist` are read from `vercel.json`.
-3. **Leave Root Directory empty (repository root).** This is the single most common misconfiguration: `package.json` lives at the repository root, so setting Root Directory to `src` makes Vercel run `npm install` in a folder with no manifest and the build fails with `ENOENT` (exit 254). `src/` holds only the Vite frontend.
-4. Add environment variables in Vercel Project Settings:
-   - `QLOO_API_KEY` = your Qloo API key (encrypted; production, preview, development)
-   - `QLOO_BASE_URL` = `https://hackathon.api.qloo.com` (or `https://api.qloo.com`)
-5. If the deployment must be reachable by the public, turn **off** Deployment Protection (Settings → Deployment Protection → Vercel Authentication). With protection enabled, every `*.vercel.app` URL redirects to a Vercel login.
-6. Deploy. All `/api/*` and `/api/mcp/*` routes execute serverlessly while `QLOO_API_KEY` stays strictly server-side.
-
-### Verifying a deployment
-
-```bash
-curl https://<your-deployment>/api/health
-```
-
-Confirm `qloo.connected` is `true` and `maskedKey` shows your key's first and last four characters. If it is `false`, the deployment is serving the offline Verified Cultural Twin rather than live Qloo — check that `QLOO_API_KEY` is set for the target environment, then redeploy.
-
-Also worth checking after deploy:
-
-```bash
-curl https://<your-deployment>/api/mcp/tools          # 5 tools
-curl -X POST https://<your-deployment>/api/kinship-bridge \
-  -H 'Content-Type: application/json' \
-  -d '{"guardrails":{"elderName":"Test","birthYear":1944,"youthGeography":"cape_town","dementiaStage":"moderate_mid","circadianWindow":"afternoon_bridge","sundowningSafeShield":true,"plotFreeMusicalFocus":true,"grandchildName":"Test"}}'
-```
-
-The response's `mode` field must read `live_qloo_api`, not `verified_cultural_twin`.
-
-
----
+Live Qloo/Gemini calls require valid credentials and outbound access to the provider hosts. They were not verified in the build environment. A real mobile-browser layout and touch test is still needed; the available headless Chromium could not start because system NSS libraries were missing. Do not treat the mocked Qloo test or the DOM simulation as live-provider or browser-layout verification.
 
 ## License
 
-Released under the **MIT License** — see [`LICENSE`](./LICENSE).
+MIT; see [LICENSE](LICENSE).

@@ -43,7 +43,7 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Kinship v3 (Qloo Reminiscence Bridge + MCP Server) listening on http://0.0.0.0:${PORT}`);
+    console.log(`Kinship: Moments of Connection listening on http://0.0.0.0:${PORT}`);
   });
 }
 

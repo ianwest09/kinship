@@ -1,15 +1,16 @@
 {
-  "name": "kinship-qloo-reminiscence",
+  "name": "kinship-moments-of-connection",
   "version": "3.0.0",
   "license": "MIT",
-  "description": "Kinship — Dementia Reminiscence Bump, Sundowning Iso-Principle & Intergenerational Bridge Agent powered by Qloo Taste AI",
+  "description": "A supportive cultural connection companion for families and caregivers.",
   "type": "module",
   "scripts": {
     "dev": "tsx server/index.ts",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test \"tests/*.test.ts\" \"tests/*.test.tsx\"",
-    "start": "NODE_ENV=production tsx server/index.ts"
+    "test": "node --import tsx --test tests/moment.test.ts tests/ui-moment.test.tsx",
+    "start": "NODE_ENV=production tsx server/index.ts",
+    "test:legacy": "node --import tsx --test \"tests/*.test.ts\" \"tests/*.test.tsx\""
   },
   "dependencies": {
     "express": "^4.21.2",
