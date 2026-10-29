@@ -13,7 +13,17 @@ async function startServer() {
 
   const distPath = path.resolve(__dirname, '../dist');
   if (process.env.NODE_ENV === 'production' && fs.existsSync(path.join(distPath, 'index.html'))) {
-    app.use(express.static(distPath));
+    app.use(
+      express.static(distPath, {
+        immutable: true,
+        maxAge: '1y',
+        setHeaders: (res, filePath) => {
+          if (path.basename(filePath) === 'index.html') {
+            res.setHeader('Cache-Control', 'no-cache');
+          }
+        },
+      })
+    );
     app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });

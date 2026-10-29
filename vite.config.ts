@@ -6,5 +6,10 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     allowedHosts: true,
+    hmr: {
+      // The preview is served over HTTPS through a reverse proxy, so the
+      // browser must use the proxy's secure WebSocket port for HMR.
+      clientPort: 443,
+    },
   },
 });
