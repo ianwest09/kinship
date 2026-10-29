@@ -32,6 +32,7 @@ import {
   YOUTH_GEOGRAPHIES,
 } from '../server/reminiscenceGraph';
 import { HomeView } from './components/HomeView';
+import { ExampleFamilyNote } from './components/ExampleFamilyNote';
 import { SplashScreen } from './components/SplashScreen';
 import { DiscoverView } from './components/DiscoverView';
 import { SharedMomentView } from './components/SharedMomentView';
@@ -68,6 +69,7 @@ import {
   DEFAULT_ROUTE,
   hashHasPassportPayload,
   parseRouteFromHash,
+  ROUTE_IDS,
   type RouteId,
 } from './utils/routing';
 
@@ -161,29 +163,6 @@ function dropStoredFamily() {
   }
 }
 
-/**
- * Primary bottom navigation on phones: four roomy destinations.
- *
- * Five items would give each ~72px at 360px wide, which clips "Preferences".
- * Preferences, Passport and the detailed view stay one tap away from the header
- * and from the Home and Preferences screens, so nothing is orphaned.
- */
-const MOBILE_NAV: Array<{ id: ActiveTab; label: string; icon: React.ReactNode }> = [
-  { id: 'home', label: 'Home', icon: <HomeIcon className="w-5 h-5" aria-hidden="true" /> },
-  { id: 'discover', label: 'Discover', icon: <Compass className="w-5 h-5" aria-hidden="true" /> },
-  { id: 'together', label: 'Together', icon: <Heart className="w-5 h-5" aria-hidden="true" /> },
-  { id: 'family', label: 'Family', icon: <Users className="w-5 h-5" aria-hidden="true" /> },
-];
-
-const DESKTOP_NAV: Array<{ id: ActiveTab; label: string }> = [
-  { id: 'home', label: 'Home' },
-  { id: 'discover', label: 'Discover' },
-  { id: 'together', label: 'Together' },
-  { id: 'family', label: 'Family' },
-  { id: 'passport', label: 'Passport' },
-  { id: 'settings', label: 'Preferences' },
-];
-
 const TAB_TITLES: Record<ActiveTab, string> = {
   home: 'Home',
   discover: 'Discover',
@@ -194,6 +173,50 @@ const TAB_TITLES: Record<ActiveTab, string> = {
   operators: 'Operator and pilot appendix',
   settings: 'Preferences',
 };
+
+/**
+ * Primary bottom navigation on phones: four roomy destinations.
+ *
+ * Five items would give each ~72px at 360px wide, which clips "Preferences".
+ * Preferences, Passport and the detailed view stay one tap away from the header
+ * and from the Home and Preferences screens, so nothing is orphaned.
+ *
+ * Both bars take their order from ROUTE_IDS rather than listing it themselves,
+ * so the navigation follows the same sequence Home describes and cannot drift
+ * from it when a screen is added.
+ */
+const PHONE_DESTINATIONS: RouteId[] = ['home', 'discover', 'together', 'family'];
+const DESKTOP_DESTINATIONS: RouteId[] = [...PHONE_DESTINATIONS, 'passport', 'settings'];
+
+const NAV_LABELS: Partial<Record<RouteId, string>> = {
+  home: 'Home',
+  discover: 'Discover',
+  // Short labels only: "Share a moment" wraps to two lines in a 90px column at
+  // 360px wide. The full sentence is the screen's own title in TAB_TITLES.
+  together: 'Together',
+  family: 'Family',
+  passport: 'Passport',
+  settings: 'Preferences',
+};
+
+const NAV_ICONS: Partial<Record<RouteId, React.ReactNode>> = {
+  home: <HomeIcon className="w-5 h-5" aria-hidden="true" />,
+  discover: <Compass className="w-5 h-5" aria-hidden="true" />,
+  together: <Heart className="w-5 h-5" aria-hidden="true" />,
+  family: <Users className="w-5 h-5" aria-hidden="true" />,
+};
+
+function inJourneyOrder(destinations: RouteId[]): RouteId[] {
+  return ROUTE_IDS.filter((id) => destinations.includes(id));
+}
+
+const MOBILE_NAV: Array<{ id: ActiveTab; label: string; icon: React.ReactNode }> = inJourneyOrder(
+  PHONE_DESTINATIONS
+).map((id) => ({ id, label: NAV_LABELS[id] ?? TAB_TITLES[id], icon: NAV_ICONS[id] }));
+
+const DESKTOP_NAV: Array<{ id: ActiveTab; label: string }> = inJourneyOrder(
+  DESKTOP_DESTINATIONS
+).map((id) => ({ id, label: NAV_LABELS[id] ?? TAB_TITLES[id] }));
 
 function readStored<T extends string>(key: string, allowed: readonly T[]): T | null {
   try {
@@ -682,6 +705,17 @@ export const App: React.FC = () => {
     navigate('together');
   };
 
+  /**
+   * Is the family on screen still one of the bundled samples?
+   *
+   * `activePresetId` starts as the first preset and is cleared by every handler
+   * that takes a detail from the reader — typing a story, moving the birth
+   * year, toggling a clue — so a non-null id means nothing here came from them
+   * yet. That is the moment the app has to say so, because it otherwise shows
+   * a full set of suggestions for a stranger before it has asked a question.
+   */
+  const usingExampleFamily = activePresetId !== null;
+
   return (
     <div className="min-h-screen flex flex-col">
       <a href="#kinship-main" className="loam-skip-link">
@@ -870,11 +904,25 @@ export const App: React.FC = () => {
           </details>
         )}
 
+        {/* Whose suggestions these are. Home carries the same fact inside its
+            own introduction, where it belongs next to the era line; stacking a
+            second strip above the welcome message would put the plumbing ahead
+            of the purpose again. Everywhere else this is the only place the
+            reader is told the family on screen is a sample. */}
+        {usingExampleFamily && activeTab !== 'home' && (
+          <ExampleFamilyNote
+            elderName={guardrails.elderName}
+            birthYear={guardrails.birthYear}
+            onAddYourOwn={activeTab === 'family' ? undefined : () => navigate('family')}
+          />
+        )}
+
         {activeTab === 'home' && (
           <HomeView
             guardrails={guardrails}
             bumpWindow={prescription?.bumpWindow ?? null}
             ready={Boolean(prescription)}
+            usingExampleFamily={usingExampleFamily}
             onExplore={() => navigate('discover')}
             onOpenTogether={() => navigate('together')}
             onOpenFamily={() => navigate('family')}

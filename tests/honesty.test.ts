@@ -16,6 +16,7 @@ import { readdir, readFile } from 'node:fs/promises';
 
 const CAREGIVER_SURFACES = [
   'src/components/HomeView.tsx',
+  'src/components/ExampleFamilyNote.tsx',
   'src/components/DiscoverView.tsx',
   'src/components/SharedMomentView.tsx',
   'src/components/PreferencesView.tsx',
