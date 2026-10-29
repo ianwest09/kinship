@@ -32,6 +32,15 @@ export type RouteId =
   | 'operators'
   | 'settings';
 
+/**
+ * Every screen, in the order a family actually moves through them.
+ *
+ * This is the journey order, not an arbitrary list: look around at what is
+ * familiar, sit together with it, add what you know so it becomes theirs, hand
+ * a printed sheet to whoever is helping, then the deeper views and preferences.
+ * Navigation and the Home screen both take their order from here, so the two
+ * cannot disagree about what comes next.
+ */
 export const ROUTE_IDS: readonly RouteId[] = [
   'home',
   'discover',

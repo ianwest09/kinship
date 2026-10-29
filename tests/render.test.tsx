@@ -33,6 +33,8 @@ import { FamilyIntakePanel } from '../src/components/FamilyIntakePanel';
 import { ReminiscenceAndBridgeView } from '../src/components/ReminiscenceAndBridgeView';
 import { SundowningRescueModal } from '../src/components/SundowningRescueModal';
 import { KinshipQlooDrawer } from '../src/components/KinshipQlooDrawer';
+import { ExampleFamilyNote } from '../src/components/ExampleFamilyNote';
+import { ROUTE_IDS, type RouteId } from '../src/utils/routing';
 
 import { generateKinshipBridge } from '../server/kinshipQlooEngine';
 import { parseFamilyStoryToKinship } from '../server/kinshipQlooEngine';
@@ -116,6 +118,7 @@ const homeProps = {
   guardrails: data.guardrailsApplied,
   bumpWindow: data.bumpWindow,
   ready: true,
+  usingExampleFamily: false,
   onExplore: noop,
   onOpenTogether: noop,
   onOpenFamily: noop,
@@ -123,12 +126,97 @@ const homeProps = {
   onOpenRescue: noop,
 };
 
+/**
+ * The four destinations Home offers, as the reader sees them, each tagged with
+ * the route it leads to so the order can be checked against ROUTE_IDS.
+ */
+const HOME_STEPS: Array<[RouteId, string]> = [
+  ['discover', 'Explore what’s familiar'],
+  ['together', 'Share a moment'],
+  ['family', 'Add what you know'],
+  ['passport', 'Care passport'],
+];
+
 test('Home offers exactly one primary action, in plain language', () => {
   const html = renderToString(<HomeView {...homeProps} />);
   assert.equal(count(html, 'loam-btn-primary'), 1, 'Home must have a single primary button');
-  assert.match(html, /Share a familiar moment/);
   assert.match(html, /Explore what’s familiar/);
   assert.match(html, /Nothing to set up first/);
+});
+
+test('Home offers each destination once, not twice under two labels', () => {
+  const html = renderToString(<HomeView {...homeProps} />);
+  for (const [, label] of HOME_STEPS) {
+    assert.equal(
+      count(html, `>${label}</span>`),
+      1,
+      `"${label}" should be offered exactly once on Home`
+    );
+  }
+});
+
+test('Home presents its destinations in the journey order', () => {
+  const html = renderToString(<HomeView {...homeProps} />);
+  const positions = HOME_STEPS.map(([, label]) => html.indexOf(`>${label}</span>`));
+  assert.ok(positions.every((at) => at > -1), 'a Home destination was not rendered');
+  const routes = HOME_STEPS.map(([route]) => route);
+  const expected = [...routes].sort((a, b) => ROUTE_IDS.indexOf(a) - ROUTE_IDS.indexOf(b));
+  assert.deepEqual(routes, expected, 'Home lists its destinations out of journey order');
+  assert.deepEqual(
+    positions,
+    [...positions].sort((a, b) => a - b),
+    'Home renders its destinations out of the order it lists them'
+  );
+});
+
+test('the phone navigation follows the same journey order as Home', () => {
+  const html = renderToString(<App />);
+  const navRoutes: RouteId[] = ['home', 'discover', 'together', 'family'];
+  const labels = { home: 'Home', discover: 'Discover', together: 'Together', family: 'Family' };
+  const positions = navRoutes.map((r) => html.indexOf(`>${labels[r]}</span>`));
+  assert.ok(positions.every((at) => at > -1), 'a bottom-nav label was not rendered');
+  assert.deepEqual(
+    navRoutes,
+    [...navRoutes].sort((a, b) => ROUTE_IDS.indexOf(a) - ROUTE_IDS.indexOf(b)),
+    'bottom nav is not in journey order'
+  );
+  assert.deepEqual(
+    positions,
+    [...positions].sort((a, b) => a - b),
+    'bottom nav renders in a different order from the journey'
+  );
+});
+
+test('Home says so when the family on screen is an example', () => {
+  const example = renderToString(<HomeView {...homeProps} usingExampleFamily />);
+  assert.match(example, /is an example family/, 'the sample family is presented as the reader’s own');
+  assert.match(example, /Add what you know and these suggestions become theirs/);
+  assert.match(example, /Nothing to set up first/, 'the example must not create a setup barrier');
+
+  const own = renderToString(<HomeView {...homeProps} usingExampleFamily={false} />);
+  assert.ok(!own.includes('is an example family'), 'a family’s own details were called an example');
+});
+
+test('the example note names the sample and offers the way to change it', () => {
+  const html = renderToString(
+    <ExampleFamilyNote
+      elderName={preset.guardrails.elderName}
+      birthYear={preset.guardrails.birthYear}
+      onAddYourOwn={noop}
+    />
+  );
+  assert.match(html, /Showing an example family\./);
+  assert.match(html, new RegExp(preset.guardrails.elderName));
+  assert.match(html, new RegExp(String(preset.guardrails.birthYear)));
+  assert.match(html, /not\s+anyone you know|a sample, not/);
+  assert.match(html, />Add what you know</);
+
+  // On the screen the action leads to, the button is omitted rather than
+  // left in place to do nothing.
+  const noAction = renderToString(
+    <ExampleFamilyNote elderName={preset.guardrails.elderName} birthYear={preset.guardrails.birthYear} />
+  );
+  assert.ok(!noAction.includes('loam-btn-secondary'), 'the note offered a button that goes nowhere');
 });
 
 test('Home explains the era without turning it into a test', () => {

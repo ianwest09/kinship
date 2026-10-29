@@ -6,6 +6,8 @@ interface Props {
   guardrails: ElderGuardrails;
   bumpWindow: ReminiscenceBumpWindow | null;
   ready: boolean;
+  /** True while the loaded family is still one of the bundled samples. */
+  usingExampleFamily: boolean;
   onExplore: () => void;
   onOpenTogether: () => void;
   onOpenFamily: () => void;
@@ -16,13 +18,20 @@ interface Props {
 /**
  * Home — a welcoming, uncluttered starting point.
  *
- * One obvious next action ("Explore familiar music"), three quiet ways onward,
- * and no scores, timers or prompts that could turn memory into a test.
+ * One obvious next action, then the rest of the app in the order a family
+ * actually moves through it: look around, sit together, add what you know,
+ * print something to hand over. Each destination appears exactly once. It used
+ * to appear twice under two different labels — two buttons to Discover and two
+ * to Share a moment — so the screen offered five controls pointing at four
+ * places and no first step.
+ *
+ * No scores, timers or prompts that could turn memory into a test.
  */
 export const HomeView: React.FC<Props> = ({
   guardrails,
   bumpWindow,
   ready,
+  usingExampleFamily,
   onExplore,
   onOpenTogether,
   onOpenFamily,
@@ -57,67 +66,63 @@ export const HomeView: React.FC<Props> = ({
           </p>
         )}
 
-        <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:items-center">
-          <button type="button" onClick={onOpenTogether} className="loam-btn-primary text-base md:text-lg">
-            <Heart className="w-5 h-5" aria-hidden="true" />
-            <span>Share a familiar moment</span>
-            <ArrowRight className="w-5 h-5" aria-hidden="true" />
-          </button>
-          <button type="button" onClick={onExplore} className="loam-btn-secondary text-base">
-            <Compass className="w-5 h-5 text-plum-600 dark:text-plum-300" aria-hidden="true" />
-            <span>Explore what’s familiar</span>
-          </button>
-        </div>
-        <p className="mt-3 text-meta text-loam-muted dark:text-loam-muted-dark">
-          Nothing to set up first, and nothing to get wrong. You can skip or stop
-          at any point.
+        <p className="mt-4 text-meta text-loam-muted dark:text-loam-muted-dark">
+          {usingExampleFamily
+            ? `Nothing to set up first — ${firstName} is an example family, so you can look around before telling Kinship anything. Add what you know and these suggestions become theirs.`
+            : 'Nothing to set up first, and nothing to get wrong. You can skip or stop at any point.'}
         </p>
       </section>
 
-      {/* Featured card --------------------------------------------------- */}
-      <section
-        aria-labelledby="home-featured-heading"
-        className="loam-card p-6 md:p-9 shadow-card"
-      >
-        <div className="flex items-start gap-4 md:gap-5">
-          <span
-            aria-hidden="true"
-            className="shrink-0 w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-plum-100 dark:bg-vinyl-800 text-plum-600 dark:text-plum-300 flex items-center justify-center"
-          >
-            <Music className="w-7 h-7 md:w-8 md:h-8" />
-          </span>
-          <div className="min-w-0">
-            <h3
-              id="home-featured-heading"
-              className="font-serif text-2xl md:text-3xl font-semibold text-loam-ink dark:text-parchment-50"
+      {/* The journey, in order. One primary action, then the other three
+          destinations once each — the same order the navigation uses, so the
+          screen and the tab bar cannot disagree about what comes next. */}
+      <section aria-labelledby="home-journey-heading" className="space-y-4">
+        <h3
+          id="home-journey-heading"
+          className="text-base font-semibold text-loam-body dark:text-loam-body-dark"
+        >
+          Where to start
+        </h3>
+
+        <div className="loam-card p-6 md:p-8 shadow-card space-y-5">
+          <div className="flex items-start gap-4 md:gap-5">
+            <span
+              aria-hidden="true"
+              className="shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-plum-100 dark:bg-vinyl-800 text-plum-600 dark:text-plum-300 flex items-center justify-center"
             >
-              Start with music
-            </h3>
-            <p className="mt-2 text-base md:text-lg text-loam-body dark:text-loam-body-dark leading-relaxed">
-              Explore songs and artists from a meaningful era.
+              <Music className="w-6 h-6 md:w-7 md:h-7" />
+            </span>
+            <div className="min-w-0">
+              <h4 className="font-serif text-xl md:text-2xl font-semibold text-loam-ink dark:text-parchment-50">
+                Start with music
+              </h4>
+              <p className="mt-1.5 text-base md:text-lg text-loam-body dark:text-loam-body-dark leading-relaxed">
+                Songs and films from the years they grew up in. Pick anything
+                that looks nice — nothing needs to be recognised.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <button
+              type="button"
+              onClick={onExplore}
+              className="loam-btn-primary text-base md:text-lg"
+            >
+              <Compass className="w-5 h-5" aria-hidden="true" />
+              <span>Explore what’s familiar</span>
+              <ArrowRight className="w-5 h-5" aria-hidden="true" />
+            </button>
+            <p className="text-base italic font-serif text-plum-700 dark:text-plum-300">
+              No right answers. Just time together.
             </p>
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-4">
-          <button type="button" onClick={onExplore} className="loam-btn-secondary">
-            <Music className="w-5 h-5 text-plum-600 dark:text-plum-300" aria-hidden="true" />
-            <span>Explore familiar music</span>
-          </button>
-          <p className="text-base italic font-serif text-plum-700 dark:text-plum-300">
-            No right answers. Just time together.
-          </p>
-        </div>
-      </section>
-
-      {/* Quiet ways onward ------------------------------------------------ */}
-      <section aria-labelledby="home-more-heading" className="space-y-4">
-        <h3
-          id="home-more-heading"
-          className="text-base font-semibold text-loam-body dark:text-loam-body-dark"
-        >
-          Or take a different route
-        </h3>
+        <p className="text-meta text-loam-muted dark:text-loam-muted-dark">
+          Then, in whatever order suits you — none of these is required, and
+          none of them locks the next one.
+        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <HomeLink
@@ -128,7 +133,7 @@ export const HomeView: React.FC<Props> = ({
           />
           <HomeLink
             label="Add what you know"
-            hint="Family and carers can add songs, places and small details that help."
+            hint="A song, a town, what the grandchildren love — and everything here becomes theirs."
             icon={<Users className="w-6 h-6" aria-hidden="true" />}
             onClick={onOpenFamily}
           />
