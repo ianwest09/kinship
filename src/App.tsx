@@ -1,1195 +1,902 @@
-import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
-  Compass,
-  Cpu,
-  Disc3,
-  FileHeart,
+  ArrowLeft,
+  ArrowRight,
+  Bookmark,
+  Check,
+  ChevronRight,
+  CircleHelp,
+  Clock3,
   Heart,
-  Home as HomeIcon,
-  Moon,
-  MoonStar,
-  Settings,
-  Sun,
-  Users,
-} from 'lucide-react';
+  Leaf,
+  LoaderCircle,
+  Plus,
+  RefreshCw,
+  ShieldCheck,
+  Sparkles,
+  Trash2,
+  X,
+} from "lucide-react";
 import {
-  CareHomeCohortRecord,
-  CulturalClueSeed,
-  ElderGuardrails,
-  FamilyNarrativeParseResult,
-  FamilyPreset,
-  KinshipPrescriptionResponse,
-  QlooEntitySubtype,
-  ReminiscenceCue,
-  SparkJournalEntry,
-  YouthGeographyId,
-} from '../shared/types';
-import {
-  CARE_HOME_COHORT,
-  ELDER_CLUE_CATALOG,
-  FAMILY_PRESETS,
-  GRANDCHILD_SEED_CATALOG,
-  YOUTH_GEOGRAPHIES,
-} from '../server/reminiscenceGraph';
-import { HomeView } from './components/HomeView';
-import { ExampleFamilyNote } from './components/ExampleFamilyNote';
-import { SplashScreen } from './components/SplashScreen';
-import { DiscoverView } from './components/DiscoverView';
-import { SharedMomentView } from './components/SharedMomentView';
-import { PreferencesView, TextSize } from './components/PreferencesView';
-// Home, Discover and Share a moment stay in the entry chunk: they are the first
-// journey. Everything below is one tap deeper, so it loads on demand. The entry
-// bundle previously carried every screen, both overlays and the offline engine,
-// so a first-time visitor on a mid-range phone downloaded all of it before the
-// welcome message could appear.
-const FamilyIntakePanel = lazy(() =>
-  import('./components/FamilyIntakePanel').then((m) => ({ default: m.FamilyIntakePanel }))
-);
-const ReminiscenceAndBridgeView = lazy(() =>
-  import('./components/ReminiscenceAndBridgeView').then((m) => ({
-    default: m.ReminiscenceAndBridgeView,
-  }))
-);
-const MemoryCarePassportView = lazy(() =>
-  import('./components/MemoryCarePassportView').then((m) => ({ default: m.MemoryCarePassportView }))
-);
-const OperatorAppendixView = lazy(() =>
-  import('./components/OperatorAppendixView').then((m) => ({ default: m.OperatorAppendixView }))
-);
-const SundowningRescueModal = lazy(() =>
-  import('./components/SundowningRescueModal').then((m) => ({ default: m.SundowningRescueModal }))
-);
-const KinshipQlooDrawer = lazy(() =>
-  import('./components/KinshipQlooDrawer').then((m) => ({ default: m.KinshipQlooDrawer }))
-);
-import { decodeKinshipPassportHash } from './utils/qrAndPassport';
-import {
-  buildRouteHash,
-  combineRouteAndPayload,
-  DEFAULT_ROUTE,
-  hashHasPassportPayload,
-  parseRouteFromHash,
-  ROUTE_IDS,
-  type RouteId,
-} from './utils/routing';
+  emptyProfile,
+  exampleProfile,
+  type Moment,
+  type Profile,
+  type Progress,
+} from "../shared/moment";
 
-/** Screens double as URL routes, so the type is shared with the router. */
-type ActiveTab = RouteId;
-
-type ElderClueState = {
-  entity_id?: string;
-  name: string;
-  subtype: QlooEntitySubtype;
-  weight: number;
-};
-
-type GrandchildSeedState = {
-  entity_id?: string;
-  name: string;
-  subtype: QlooEntitySubtype;
-};
-
-function resolvePresetElderClues(preset: FamilyPreset): ElderClueState[] {
-  return preset.elderClueIds
-    .map((id) => ELDER_CLUE_CATALOG.find((c) => c.entity_id === id))
-    .filter((c): c is CulturalClueSeed => Boolean(c))
-    .map((c) => ({ entity_id: c.entity_id, name: c.name, subtype: c.subtype, weight: c.weight }));
-}
-
-function resolvePresetGrandchildSeeds(preset: FamilyPreset): GrandchildSeedState[] {
-  return preset.grandchildSeedIds
-    .map((id) => GRANDCHILD_SEED_CATALOG.find((c) => c.entity_id === id))
-    .filter((c): c is CulturalClueSeed => Boolean(c))
-    .map((c) => ({ entity_id: c.entity_id, name: c.name, subtype: c.subtype }));
-}
-
-const INITIAL_PRESET = FAMILY_PRESETS[0];
-
-const TEXT_SIZE_KEY = 'kinship.textSize';
-const EVENING_KEY = 'kinship.eveningMode';
-const REMEMBER_KEY = 'kinship.remember';
-const FAMILY_KEY = 'kinship.family.v1';
-
-/**
- * What a family has typed, kept on their own device.
- *
- * Names, birth years, dementia stage and the quotes people save are sensitive,
- * and a phone in a care home is often shared — so this is opt-in, off by
- * default, and turning it off deletes the record rather than merely hiding it.
- * Without it a refresh, a closed tab or a flat battery threw away everything a
- * tired carer had just typed.
- */
-type StoredFamily = {
-  guardrails: ElderGuardrails;
-  elderClues: ElderClueState[];
-  grandchildSeeds: GrandchildSeedState[];
-  boostedCueIds: string[];
-  excludedCueIds: string[];
-  sparkLog: SparkJournalEntry[];
-  savedAt: string;
-};
-
-function readStoredFamily(): StoredFamily | null {
-  if (typeof window === 'undefined') return null;
+type Page =
+  "home" | "profile" | "working" | "moment" | "saved" | "how" | "privacy";
+const labels = [
+  "Understanding the selected interests",
+  "Looking up cultural references through Qloo",
+  "Exploring related interests with Qloo Insights",
+  "Preparing a suitable shared activity",
+  "Checking preferences and exclusions",
+];
+const storageKey = "kinship.moments.v1";
+const activities: { value: Profile["activity"]; label: string }[] = [
+  { value: "listening", label: "Listening" },
+  { value: "looking", label: "Looking" },
+  { value: "conversation", label: "Conversation" },
+  { value: "hands-on", label: "Hands-on" },
+  { value: "quiet", label: "Quiet time" },
+];
+const atmospheres: Profile["atmosphere"][] = [
+  "calm",
+  "cheerful",
+  "reflective",
+  "playful",
+];
+function readSaved(): Moment[] {
   try {
-    if (window.localStorage.getItem(REMEMBER_KEY) !== 'on') return null;
-    const raw = window.localStorage.getItem(FAMILY_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<StoredFamily>;
-    // Never trust stored JSON to have the shape we wrote: a malformed record
-    // must fall back to the sample family, not crash the app on load.
-    if (!parsed || typeof parsed !== 'object' || !parsed.guardrails) return null;
-    if (typeof parsed.guardrails.elderName !== 'string') return null;
-    return {
-      guardrails: { ...INITIAL_PRESET.guardrails, ...parsed.guardrails },
-      elderClues: Array.isArray(parsed.elderClues) ? parsed.elderClues : [],
-      grandchildSeeds: Array.isArray(parsed.grandchildSeeds) ? parsed.grandchildSeeds : [],
-      boostedCueIds: Array.isArray(parsed.boostedCueIds) ? parsed.boostedCueIds : [],
-      excludedCueIds: Array.isArray(parsed.excludedCueIds) ? parsed.excludedCueIds : [],
-      sparkLog: Array.isArray(parsed.sparkLog) ? parsed.sparkLog : [],
-      savedAt: typeof parsed.savedAt === 'string' ? parsed.savedAt : '',
-    };
+    const data = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    return Array.isArray(data)
+      ? data
+          .filter(
+            (x) =>
+              x &&
+              typeof x.title === "string" &&
+              typeof x.activity === "string",
+          )
+          .slice(0, 20)
+      : [];
   } catch {
-    return null;
+    return [];
   }
 }
-
-function dropStoredFamily() {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.removeItem(FAMILY_KEY);
-  } catch {
-    /* private mode or a full quota — nothing to delete */
-  }
-}
-
-const TAB_TITLES: Record<ActiveTab, string> = {
-  home: 'Home',
-  discover: 'Discover',
-  together: 'Share a moment',
-  family: 'Add what you know',
-  passport: 'Bedside care passport',
-  detail: 'Detailed care view',
-  operators: 'Operator and pilot appendix',
-  settings: 'Preferences',
-};
-
-/**
- * Primary bottom navigation on phones: four roomy destinations.
- *
- * Five items would give each ~72px at 360px wide, which clips "Preferences".
- * Preferences, Passport and the detailed view stay one tap away from the header
- * and from the Home and Preferences screens, so nothing is orphaned.
- *
- * Both bars take their order from ROUTE_IDS rather than listing it themselves,
- * so the navigation follows the same sequence Home describes and cannot drift
- * from it when a screen is added.
- */
-const PHONE_DESTINATIONS: RouteId[] = ['home', 'discover', 'together', 'family'];
-const DESKTOP_DESTINATIONS: RouteId[] = [...PHONE_DESTINATIONS, 'passport', 'settings'];
-
-const NAV_LABELS: Partial<Record<RouteId, string>> = {
-  home: 'Home',
-  discover: 'Discover',
-  // Short labels only: "Share a moment" wraps to two lines in a 90px column at
-  // 360px wide. The full sentence is the screen's own title in TAB_TITLES.
-  together: 'Together',
-  family: 'Family',
-  passport: 'Passport',
-  settings: 'Preferences',
-};
-
-const NAV_ICONS: Partial<Record<RouteId, React.ReactNode>> = {
-  home: <HomeIcon className="w-5 h-5" aria-hidden="true" />,
-  discover: <Compass className="w-5 h-5" aria-hidden="true" />,
-  together: <Heart className="w-5 h-5" aria-hidden="true" />,
-  family: <Users className="w-5 h-5" aria-hidden="true" />,
-};
-
-function inJourneyOrder(destinations: RouteId[]): RouteId[] {
-  return ROUTE_IDS.filter((id) => destinations.includes(id));
-}
-
-const MOBILE_NAV: Array<{ id: ActiveTab; label: string; icon: React.ReactNode }> = inJourneyOrder(
-  PHONE_DESTINATIONS
-).map((id) => ({ id, label: NAV_LABELS[id] ?? TAB_TITLES[id], icon: NAV_ICONS[id] }));
-
-const DESKTOP_NAV: Array<{ id: ActiveTab; label: string }> = inJourneyOrder(
-  DESKTOP_DESTINATIONS
-).map((id) => ({ id, label: NAV_LABELS[id] ?? TAB_TITLES[id] }));
-
-function readStored<T extends string>(key: string, allowed: readonly T[]): T | null {
-  try {
-    const value = window.localStorage.getItem(key) as T | null;
-    return value && allowed.includes(value) ? value : null;
-  } catch {
-    return null;
-  }
-}
-
-export const App: React.FC = () => {
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    try {
-      const stored = window.localStorage.getItem(EVENING_KEY);
-      if (stored === 'on') return true;
-      if (stored === 'off') return false;
-    } catch {
-      /* storage unavailable — fall through to the default */
-    }
-    return false;
-  });
-  const [textSize, setTextSize] = useState<TextSize>(
-    () => readStored<TextSize>(TEXT_SIZE_KEY, ['normal', 'large', 'largest']) ?? 'normal'
-  );
-  const [splashOpen, setSplashOpen] = useState(true);
-  const [sundowningModalOpen, setSundowningModalOpen] = useState(false);
-  const [traceDrawerOpen, setTraceDrawerOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
-    if (typeof window === 'undefined') return DEFAULT_ROUTE;
-    const fromHash = parseRouteFromHash(window.location.hash);
-    if (fromHash) return fromHash;
-    // A printed bedside QR still points at `#kinship=<payload>`; that legacy
-    // link keeps landing on the full results view, exactly as before.
-    return hashHasPassportPayload(window.location.hash) ? 'detail' : DEFAULT_ROUTE;
-  });
-
-  /**
-   * Move to a screen and record it in the history stack, so the phone's back
-   * button returns to the previous screen instead of leaving Kinship, and a
-   * refresh comes back to where the person was.
-   */
-  const routeRef = useRef<ActiveTab>(activeTab);
-  const navigate = useCallback((next: ActiveTab, options?: { replace?: boolean }) => {
-    if (routeRef.current === next) return;
-    routeRef.current = next;
-    setActiveTab(next);
-    if (typeof window === 'undefined') return;
-    // Keep a copied passport payload in the address bar on the passport screen
-    // only, so that URL stays shareable by hand without cluttering every route.
-    const url =
-      next === 'passport'
-        ? combineRouteAndPayload(next, window.location.hash)
-        : buildRouteHash(next);
-    if (window.location.hash === url) return;
-    if (options?.replace) window.history.replaceState(null, '', url);
-    else window.history.pushState(null, '', url);
-  }, []);
-
-  // Back / forward: follow the URL, and close any overlay so a person who
-  // presses back is never left looking at a dialog they cannot get behind.
+export function App() {
+  const [page, setPage] = useState<Page>("home");
+  const [profile, setProfile] = useState<Profile>(emptyProfile);
+  const [status, setStatus] = useState<{
+    qlooConfigured: boolean;
+    geminiConfigured: boolean;
+  } | null>(null);
+  const [progress, setProgress] = useState<Progress[]>([]);
+  const [moment, setMoment] = useState<Moment | null>(null);
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState<Moment[]>(readSaved);
+  const [storageMessage, setStorageMessage] = useState("");
+  const [isSaved, setIsSaved] = useState(false);
+  const [alternate, setAlternate] = useState(false);
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const syncFromUrl = () => {
-      const fromHash = parseRouteFromHash(window.location.hash);
-      const next =
-        fromHash ?? (hashHasPassportPayload(window.location.hash) ? 'detail' : DEFAULT_ROUTE);
-      routeRef.current = next;
-      setActiveTab(next);
-      setSundowningModalOpen(false);
-      setTraceDrawerOpen(false);
-    };
-    window.addEventListener('popstate', syncFromUrl);
-    window.addEventListener('hashchange', syncFromUrl);
-    return () => {
-      window.removeEventListener('popstate', syncFromUrl);
-      window.removeEventListener('hashchange', syncFromUrl);
-    };
-  }, []);
-  const [focusCue, setFocusCue] = useState<ReminiscenceCue | null>(null);
-
-  const [presets] = useState<FamilyPreset[]>(FAMILY_PRESETS);
-  const [elderCatalog] = useState<CulturalClueSeed[]>(ELDER_CLUE_CATALOG);
-  const [grandchildCatalog] = useState<CulturalClueSeed[]>(GRANDCHILD_SEED_CATALOG);
-  const [geographies] = useState<
-    Array<{ id: YouthGeographyId; name: string; country: string; eraCulturalPortrait: string }>
-  >(
-    Object.values(YOUTH_GEOGRAPHIES).map((g) => ({
-      id: g.id,
-      name: g.name,
-      country: g.country,
-      eraCulturalPortrait: g.eraCulturalPortrait,
-    }))
-  );
-  const [cohort] = useState<CareHomeCohortRecord[]>(CARE_HOME_COHORT);
-
-  // Read once, before the first render, so a returning family never sees the
-  // sample data flash past before their own appears.
-  const [restored] = useState<StoredFamily | null>(() => readStoredFamily());
-  const [rememberOnDevice, setRememberOnDevice] = useState<boolean>(
-    () => restored !== null
-  );
-  const [clearedNote, setClearedNote] = useState<string | null>(null);
-
-  const [activePresetId, setActivePresetId] = useState<string | null>(
-    restored ? null : INITIAL_PRESET.id
-  );
-  const [guardrails, setGuardrails] = useState<ElderGuardrails>(
-    restored?.guardrails ?? INITIAL_PRESET.guardrails
-  );
-  const [elderClues, setElderClues] = useState<ElderClueState[]>(() =>
-    restored?.elderClues?.length ? restored.elderClues : resolvePresetElderClues(INITIAL_PRESET)
-  );
-  const [grandchildSeeds, setGrandchildSeeds] = useState<GrandchildSeedState[]>(() =>
-    restored?.grandchildSeeds?.length
-      ? restored.grandchildSeeds
-      : resolvePresetGrandchildSeeds(INITIAL_PRESET)
-  );
-  const [boostedCueIds, setBoostedCueIds] = useState<string[]>(restored?.boostedCueIds ?? []);
-  const [excludedCueIds, setExcludedCueIds] = useState<string[]>(restored?.excludedCueIds ?? []);
-  const [sparkLog, setSparkLog] = useState<SparkJournalEntry[]>(restored?.sparkLog ?? []);
-
-  const [qlooStatus, setQlooStatus] = useState({
-    connected: false,
-    baseUrl: 'https://hackathon.api.qloo.com',
-    maskedKey: '',
-  });
-  const [prescription, setPrescription] = useState<KinshipPrescriptionResponse | null>(null);
-  // Set when a request to the Kinship API failed and the offline collection was
-  // used instead. Silently swapping in fallback data leaves a family wondering
-  // why the suggestions changed, and gives them no way to try again.
-  const [engineFailed, setEngineFailed] = useState(false);
-  const [reloadToken, setReloadToken] = useState(0);
-  const requestSeqRef = useRef(0);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-    try {
-      window.localStorage.setItem(EVENING_KEY, darkMode ? 'on' : 'off');
-    } catch {
-      /* ignore */
-    }
-  }, [darkMode]);
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-textsize', textSize);
-    try {
-      window.localStorage.setItem(TEXT_SIZE_KEY, textSize);
-    } catch {
-      /* ignore */
-    }
-  }, [textSize]);
-
-  useEffect(() => {
-    fetch('/api/health')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j) => {
-        if (j?.qloo) setQlooStatus(j.qloo);
+    fetch("/api/status")
+      .then((r) => {
+        if (!r.ok) throw Error();
+        return r.json();
       })
-      .catch(() => {
-        // Offline / sandboxed viewer fallback
+      .then(setStatus)
+      .catch(() => setStatus(null));
+  }, []);
+  const go = (p: Page) => {
+    setPage(p);
+    window.scrollTo({ top: 0 });
+  };
+  const update = <K extends keyof Profile>(key: K, value: Profile[K]) =>
+    setProfile((p) => ({ ...p, [key]: value }));
+  const run = async (p: Profile, skipQloo = false, alt = false) => {
+    setProfile(p);
+    setProgress([]);
+    setError("");
+    setStorageMessage("");
+    setIsSaved(false);
+    setAlternate(alt);
+    go("working");
+    try {
+      const response = await fetch("/api/moment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile: p, skipQloo, alternate: alt }),
       });
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const decoded = decodeKinshipPassportHash(window.location.hash);
-    if (decoded) {
-      setActivePresetId(null);
-      setGuardrails((prev) => ({
-        ...prev,
-        birthYear: decoded.birthYear,
-        youthGeography: decoded.youthGeography,
-        dementiaStage: decoded.dementiaStage,
-      }));
-      if (decoded.elderNames.length > 0) {
-        setElderClues(
-          decoded.elderNames.map((n) => ({ name: n, subtype: 'urn:entity:artist', weight: 10 }))
-        );
-      }
-      if (decoded.grandchildNames.length > 0) {
-        setGrandchildSeeds(
-          decoded.grandchildNames.map((n) => ({ name: n, subtype: 'urn:entity:artist' }))
-        );
-      }
-      // Preserve the pre-Loam behaviour: a scanned passport lands on the full
-      // results view rather than the calm family surfaces. `replace` keeps the
-      // scanned link as the first history entry, so one back press still leaves
-      // the page instead of bouncing between two identical states.
-      navigate('detail', { replace: true });
-    }
-  }, []);
-
-  // Return to the top when changing screen, so a new destination never opens
-  // half-scrolled.
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }, [activeTab]);
-
-  const runKinshipEngine = useCallback(
-    async (
-      nextGuardrails: ElderGuardrails,
-      nextElder: ElderClueState[],
-      nextGrandchild: GrandchildSeedState[],
-      nextBoosts: string[],
-      nextExcludes: string[]
-    ) => {
-      const seq = ++requestSeqRef.current;
-      const payload = {
-        guardrails: nextGuardrails,
-        elderClues: nextElder,
-        grandchildSeeds: nextGrandchild,
-        boostedCueIds: nextBoosts,
-        excludedCueIds: nextExcludes,
+      if (!response.ok || !response.body)
+        throw Error("The connection could not be started. Please try again.");
+      const reader = response.body.getReader(),
+        decoder = new TextDecoder();
+      let buffer = "",
+        gotResult = false;
+      const handle = (line: string) => {
+        if (!line.trim()) return;
+        const e = JSON.parse(line);
+        if (e.type === "progress")
+          setProgress((prev) => [...prev.filter((x) => x.step !== e.step), e]);
+        else if (e.type === "result") {
+          gotResult = true;
+          setMoment(e.moment);
+          go("moment");
+        } else if (e.type === "error") setError(e.message);
       };
-      try {
-        const res = await fetch('/api/kinship-bridge', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json: KinshipPrescriptionResponse = await res.json();
-        if (seq === requestSeqRef.current) {
-          setPrescription(json);
-          setEngineFailed(false);
-        }
-      } catch {
-        // Deliberate fallback, not a hidden one: the notice below tells the
-        // family which collection they are looking at and offers a retry.
-        // Imported here rather than at module scope so the engine only reaches
-        // the browser when the API is genuinely unavailable.
-        const { generateKinshipBridge: generateOffline } = await import(
-          '../server/kinshipQlooEngine'
-        );
-        const fallback = await generateOffline(payload);
-        if (seq === requestSeqRef.current) {
-          setPrescription(fallback);
-          setEngineFailed(true);
-        }
+      while (true) {
+        const { done, value } = await reader.read();
+        buffer += decoder.decode(value, { stream: !done });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        lines.forEach(handle);
+        if (done) break;
       }
-    },
-    []
-  );
-
-  useEffect(() => {
-    runKinshipEngine(guardrails, elderClues, grandchildSeeds, boostedCueIds, excludedCueIds);
-    // reloadToken lets the retry button re-run without any other input changing.
-  }, [
-    guardrails,
-    elderClues,
-    grandchildSeeds,
-    boostedCueIds,
-    excludedCueIds,
-    reloadToken,
-    runKinshipEngine,
-  ]);
-
-  // Save as the family types, so an interrupted session is not a lost one.
-  // Writing is skipped entirely when the switch is off, and switching off
-  // deletes what is already there.
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      window.localStorage.setItem(REMEMBER_KEY, rememberOnDevice ? 'on' : 'off');
+      if (buffer.trim()) handle(buffer);
+      if (!gotResult)
+        setError(
+          (prev) =>
+            prev || "The activity could not be completed. Please try again.",
+        );
     } catch {
-      /* ignore */
+      setError("The connection was interrupted. Please try again.");
     }
-    if (!rememberOnDevice) {
-      dropStoredFamily();
-      return;
-    }
+  };
+  const save = () => {
+    if (!moment) return;
+    const next = [moment, ...saved].slice(0, 20);
+    setSaved(next);
+    setIsSaved(true);
     try {
-      const record: StoredFamily = {
-        guardrails,
-        elderClues,
-        grandchildSeeds,
-        boostedCueIds,
-        excludedCueIds,
-        sparkLog,
-        savedAt: new Date().toISOString(),
-      };
-      window.localStorage.setItem(FAMILY_KEY, JSON.stringify(record));
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      setStorageMessage("Saved on this device.");
     } catch {
-      /* quota or private mode — the session still works, it just will not persist */
-    }
-  }, [
-    rememberOnDevice,
-    guardrails,
-    elderClues,
-    grandchildSeeds,
-    boostedCueIds,
-    excludedCueIds,
-    sparkLog,
-  ]);
-
-  /** Delete everything Kinship has written on this device, and say so. */
-  const handleClearDeviceData = useCallback(() => {
-    dropStoredFamily();
-    try {
-      window.localStorage.removeItem(REMEMBER_KEY);
-    } catch {
-      /* ignore */
-    }
-    setRememberOnDevice(false);
-    setActivePresetId(INITIAL_PRESET.id);
-    setGuardrails(INITIAL_PRESET.guardrails);
-    setElderClues(resolvePresetElderClues(INITIAL_PRESET));
-    setGrandchildSeeds(resolvePresetGrandchildSeeds(INITIAL_PRESET));
-    setBoostedCueIds([]);
-    setExcludedCueIds([]);
-    setSparkLog([]);
-    setClearedNote('Cleared. Nothing is stored on this device now.');
-  }, []);
-
-  const handleToggleRemember = useCallback(() => {
-    setRememberOnDevice((on) => {
-      if (on) dropStoredFamily();
-      setClearedNote(null);
-      return !on;
-    });
-  }, []);
-
-  const handleSelectPreset = (p: FamilyPreset) => {
-    setActivePresetId(p.id);
-    setGuardrails(p.guardrails);
-    setElderClues(resolvePresetElderClues(p));
-    setGrandchildSeeds(resolvePresetGrandchildSeeds(p));
-    setBoostedCueIds([]);
-    setExcludedCueIds([]);
-    setSparkLog([]);
-  };
-
-  const handleUpdateGuardrails = (patch: Partial<ElderGuardrails>) => {
-    setActivePresetId(null);
-    setGuardrails((prev) => ({ ...prev, ...patch }));
-  };
-
-  const handleToggleElderClue = (seed: CulturalClueSeed) => {
-    setActivePresetId(null);
-    setElderClues((prev) => {
-      const exists = prev.some((c) => c.name === seed.name);
-      if (exists) return prev.length > 1 ? prev.filter((c) => c.name !== seed.name) : prev;
-      return [...prev, { entity_id: seed.entity_id, name: seed.name, subtype: seed.subtype, weight: 10 }];
-    });
-  };
-
-  const handleToggleGrandchildSeed = (seed: CulturalClueSeed) => {
-    setActivePresetId(null);
-    setGrandchildSeeds((prev) => {
-      const exists = prev.some((c) => c.name === seed.name);
-      if (exists) return prev.length > 1 ? prev.filter((c) => c.name !== seed.name) : prev;
-      return [...prev, { entity_id: seed.entity_id, name: seed.name, subtype: seed.subtype }];
-    });
-  };
-
-  const handleApplyNarrative = async (text: string): Promise<FamilyNarrativeParseResult> => {
-    let parsed: FamilyNarrativeParseResult;
-    try {
-      const r = await fetch('/api/parse-story', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, currentGuardrails: guardrails }),
-      });
-      if (!r.ok) throw new Error('offline');
-      parsed = await r.json();
-    } catch {
-      const { parseFamilyStoryToKinship: parseOffline } = await import(
-        '../server/kinshipQlooEngine'
-      );
-      parsed = parseOffline(text, guardrails);
-    }
-
-    setActivePresetId(null);
-    setGuardrails((prev) => ({ ...prev, ...parsed.guardrailPatch }));
-    if (parsed.elderClues.length > 0) {
-      setElderClues(
-        parsed.elderClues.map((c) => ({
-          entity_id: c.entity_id,
-          name: c.name,
-          subtype: c.subtype,
-          weight: 10,
-        }))
+      setStorageMessage(
+        "Device storage is unavailable. This moment is saved only for this session.",
       );
     }
-    if (parsed.grandchildSeeds.length > 0) {
-      setGrandchildSeeds(
-        parsed.grandchildSeeds.map((c) => ({
-          entity_id: c.entity_id,
-          name: c.name,
-          subtype: c.subtype,
-        }))
+  };
+  const remove = (i: number) => {
+    const next = saved.filter((_, index) => index !== i);
+    setSaved(next);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(next));
+    } catch {
+      setStorageMessage(
+        "Device storage is unavailable; changes apply to this session only.",
       );
     }
-    setBoostedCueIds([]);
-    setExcludedCueIds([]);
-    return parsed;
   };
-
-  const handleCueReaction = (
-    cue: ReminiscenceCue,
-    reaction: 'lit_up_sang' | 'calm_soothed' | 'restless_skip',
-    lucidQuote?: string
-  ) => {
-    if (reaction === 'restless_skip') {
-      setExcludedCueIds((prev) => Array.from(new Set([...prev, cue.entity_id])));
-      setSparkLog((prev) => [
-        {
-          id: `${Date.now()}`,
-          cueId: cue.entity_id,
-          cueName: cue.name,
-          eraYearPinned: cue.releaseYear,
-          reaction,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          qlooUpdateNote: 'Added to filter.exclude.entities to prevent restlessness',
-        },
-        ...prev,
-      ]);
-      return;
+  const clear = () => {
+    setSaved([]);
+    try {
+      Object.keys(localStorage)
+        .filter((k) => k.startsWith("kinship."))
+        .forEach((k) => localStorage.removeItem(k));
+      setStorageMessage("Kinship data on this device was cleared.");
+    } catch {
+      setStorageMessage(
+        "Device storage is unavailable. Session data was cleared.",
+      );
     }
-
-    // If attaching a lucid quote to the just-logged cue, update or prepend cleanly
-    if (lucidQuote) {
-      setSparkLog((prev) => {
-        const idx = prev.findIndex((p) => p.cueId === cue.entity_id && !p.lucidQuote);
-        if (idx >= 0) {
-          const copy = [...prev];
-          copy[idx] = { ...copy[idx], lucidQuote };
-          return copy;
-        }
-        return [
-          {
-            id: `${Date.now()}`,
-            cueId: cue.entity_id,
-            cueName: cue.name,
-            eraYearPinned: cue.releaseYear,
-            lucidQuote,
-            reaction: 'lit_up_sang',
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            qlooUpdateNote: 'Saved lucid family memory spark + boosted weight=25',
-          },
-          ...prev,
-        ];
-      });
-      return;
-    }
-
-    const boostWeight = reaction === 'lit_up_sang' ? 25 : 18;
-    setBoostedCueIds((prev) => Array.from(new Set([...prev, cue.entity_id])));
-    setElderClues((prev) => {
-      const filtered = prev.filter((p) => p.entity_id !== cue.entity_id && p.name !== cue.name);
-      return [
-        { entity_id: cue.entity_id, name: cue.name, subtype: cue.subtype, weight: boostWeight },
-        ...filtered,
-      ];
-    });
-    setSparkLog((prev) => [
-      {
-        id: `${Date.now()}`,
-        cueId: cue.entity_id,
-        cueName: cue.name,
-        eraYearPinned: cue.releaseYear,
-        reaction,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        qlooUpdateNote:
-          reaction === 'lit_up_sang'
-            ? 'Boosted signal.interests.entities weight=25 (Strong MEAM Spark!)'
-            : 'Pinned to 4:30 PM Sundowning Calm Anchor (weight=18)',
-      },
-      ...prev,
-    ]);
+    setProfile(emptyProfile);
+    setMoment(null);
   };
-
-  /**
-   * Put a set-aside suggestion back. Setting something aside is meant to be
-   * consequence-free, and a mis-tap on a phone is easy; without this the only
-   * way back was a reset buried in the detailed care view.
-   */
-  const handleUndoCueReaction = (cue: ReminiscenceCue) => {
-    setExcludedCueIds((prev) => prev.filter((id) => id !== cue.entity_id));
-    setSparkLog((prev) => prev.filter((entry) => entry.cueId !== cue.entity_id));
-  };
-
-  const openTogetherWith = (cue: ReminiscenceCue | null) => {
-    setFocusCue(cue);
-    navigate('together');
-  };
-
-  /**
-   * Is the family on screen still one of the bundled samples?
-   *
-   * `activePresetId` starts as the first preset and is cleared by every handler
-   * that takes a detail from the reader — typing a story, moving the birth
-   * year, toggling a clue — so a non-null id means nothing here came from them
-   * yet. That is the moment the app has to say so, because it otherwise shows
-   * a full set of suggestions for a stranger before it has asked a question.
-   */
-  const usingExampleFamily = activePresetId !== null;
-
+  const nav = [
+    { id: "profile" as Page, label: "Create a moment", icon: Plus },
+    { id: "saved" as Page, label: "Saved moments", icon: Bookmark },
+    { id: "how" as Page, label: "How Kinship works", icon: CircleHelp },
+    { id: "privacy" as Page, label: "Privacy & settings", icon: ShieldCheck },
+  ];
   return (
-    <div className="min-h-screen flex flex-col">
-      <a href="#kinship-main" className="loam-skip-link">
+    <div className="app-shell">
+      <a className="skip" href="#main">
         Skip to content
       </a>
-
-      {/* Header — approved Kinship identity preserved: Disc3 mark + Fraunces
-          wordmark, retuned from plum to Loam sage. */}
-      <header className="sticky top-0 z-30 border-b border-parchment-300 dark:border-vinyl-700 bg-parchment-100/95 dark:bg-vinyl-950/95 backdrop-blur-md no-print">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={() => navigate('home')}
-            className="flex items-center gap-3 rounded-2xl -ml-1 pl-1 pr-2 py-1 text-left hover:bg-parchment-200/70 dark:hover:bg-vinyl-900 transition-colors"
-            aria-label="Kinship — go to home"
-          >
-            <img
-              src="/kinship-mark.png"
-              alt=""
-              aria-hidden="true"
-              draggable={false}
-              className="w-10 h-10 md:w-11 md:h-11 shrink-0 select-none"
-            />
-            <span className="min-w-0">
-              <span className="loam-wordmark block text-[1.6rem] md:text-[1.8rem] text-loam-ink dark:text-parchment-50">
-                kinship
-              </span>
-              <span className="hidden sm:block text-xs md:text-sm text-loam-muted dark:text-loam-muted-dark leading-tight">
-                Familiar music &amp; films to share
-              </span>
-            </span>
-          </button>
-
-          {/* Desktop navigation */}
-          <nav
-            aria-label="Main"
-            className="hidden md:flex items-center gap-1 p-1 rounded-2xl bg-parchment-200/70 dark:bg-vinyl-900 border border-parchment-300 dark:border-vinyl-700"
-          >
-            {DESKTOP_NAV.map((item) => {
-              const active = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => navigate(item.id)}
-                  aria-current={active ? 'page' : undefined}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                    active
-                      ? 'bg-loam-card dark:bg-vinyl-800 text-plum-700 dark:text-plum-300 shadow-soft'
-                      : 'text-loam-body dark:text-loam-muted-dark hover:text-loam-ink dark:hover:text-parchment-100'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => setSundowningModalOpen(true)}
-              className="hidden lg:inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-brass-600 hover:bg-brass-700 text-white text-sm font-semibold shadow-soft transition-colors"
-            >
-              <MoonStar className="w-4 h-4" aria-hidden="true" />
-              <span>Settling sounds</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setTraceDrawerOpen(true)}
-              className="hidden md:inline-flex items-center gap-2 px-3 py-2.5 rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-loam-card dark:bg-vinyl-900 text-sm font-medium text-loam-body dark:text-loam-body-dark hover:border-plum-400 transition-colors"
-              title="Inspect the Qloo API calls behind these suggestions"
-            >
-              <Cpu className="w-4 h-4 text-plum-600 dark:text-plum-300" aria-hidden="true" />
-              <span className="hidden lg:inline">Qloo trace</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigate('settings')}
-              className="md:hidden p-2.5 rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-loam-card dark:bg-vinyl-900 hover:border-plum-400 transition-colors"
-              aria-label="Preferences and accessibility"
-              aria-current={activeTab === 'settings' ? 'page' : undefined}
-            >
-              <Settings
-                className={`w-5 h-5 ${
-                  activeTab === 'settings'
-                    ? 'text-plum-600 dark:text-plum-300'
-                    : 'text-loam-body dark:text-loam-body-dark'
-                }`}
-                aria-hidden="true"
-              />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setDarkMode((d) => !d)}
-              className="p-2.5 rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-loam-card dark:bg-vinyl-900 hover:border-plum-400 transition-colors"
-              aria-label={darkMode ? 'Switch to day mode' : 'Switch to evening mode'}
-              aria-pressed={darkMode}
-            >
-              {darkMode ? (
-                <Sun className="w-5 h-5 text-brass-500" aria-hidden="true" />
-              ) : (
-                <Moon className="w-5 h-5 text-loam-body" aria-hidden="true" />
-              )}
-            </button>
-          </div>
-        </div>
+      <header className="topbar">
+        <button
+          className="brand"
+          onClick={() => go("home")}
+          aria-label="Kinship home"
+        >
+          <span className="brand-mark">
+            <Heart size={19} fill="currentColor" />
+          </span>
+          <span>
+            kinship<span className="brand-dot">.</span>
+          </span>
+        </button>
+        <span className="top-tagline">A little closer together.</span>
+        <button className="top-saved" onClick={() => go("saved")}>
+          <Bookmark size={17} /> <span>Saved moments</span>
+        </button>
       </header>
-
-      {/* Main content */}
-      <main
-        id="kinship-main"
-        className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-8 md:pb-12"
-      >
-        <Suspense fallback={<ScreenLoading label="Opening…" />}>
-        <h1 className="sr-only">{TAB_TITLES[activeTab]}</h1>
-
-        {/* Data provenance. Qloo's SAFE_USE guidance requires a result to be
-            visibly distinguished from Kinship's own interpretation, so this
-            stays on every screen — but as one line with the detail behind a
-            disclosure. Four lines of API language above the welcome message
-            meant a first-time reader met the plumbing before the purpose. */}
-        {prescription && (
-          <details
-            className={`loam-provenance mb-6 no-print ${
-              prescription.mode === 'live_qloo_api' ? 'is-live' : 'is-offline'
-            }`}
-          >
-            <summary className="loam-provenance-summary">
-              <span
-                aria-hidden="true"
-                className={`loam-provenance-dot ${
-                  prescription.mode === 'live_qloo_api' ? 'bg-pine-500' : 'bg-brass-500'
-                }`}
-              />
-              <span className="font-semibold">
-                {prescription.mode === 'live_qloo_api'
-                  ? 'Live Qloo Taste AI™'
-                  : 'Kinship’s own collection — Qloo is not connected'}
+      <div className="layout">
+        <aside className="sidebar">
+          <div>
+            <p className="side-label">YOUR SPACE</p>
+            <nav aria-label="Main navigation">
+              {nav.map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => go(id)}
+                  className={
+                    page === id ||
+                    (id === "profile" && ["working", "moment"].includes(page))
+                      ? "nav-item active"
+                      : "nav-item"
+                  }
+                >
+                  <Icon size={19} />
+                  <span>{label}</span>
+                  {page === id && (
+                    <ChevronRight className="nav-chevron" size={15} />
+                  )}
+                </button>
+              ))}
+            </nav>
+          </div>
+          <div className="side-note">
+            <span className="side-note-icon">
+              <Leaf size={18} />
+            </span>
+            <p>
+              Little moments
+              <br />
+              <strong>matter.</strong>
+            </p>
+            <small>There’s no right way to connect.</small>
+          </div>
+        </aside>
+        <main id="main" className="main" tabIndex={-1}>
+          {status && !status.qlooConfigured && (
+            <div className="demo-banner">
+              <span className="banner-dot" />{" "}
+              <strong>DEMONSTRATION MODE</strong>
+              <span>
+                {" "}
+                — sample results; live Qloo integration is not active.
               </span>
-              <span className="loam-provenance-hint">
-                {prescription.mode === 'live_qloo_api'
-                  ? 'Where these suggestions came from'
-                  : 'Why these suggestions are not Qloo results'}
-              </span>
-            </summary>
-            <div className="loam-provenance-body text-sm md:text-base leading-relaxed">
-              {prescription.mode === 'live_qloo_api' ? (
-                <p>
-                  These suggestions were returned by the Qloo API for this
-                  request. They describe what people of a similar age and place
-                  tended to enjoy — not predictions about any individual.
-                </p>
-              ) : (
-                <p>
-                  These suggestions come from Kinship’s own curated collection,{' '}
-                  <em>not</em> from the Qloo API. They exist so every workflow can
-                  be explored without a credential, and must not be read as Qloo
-                  output. Set{' '}
-                  <code className="font-mono text-[0.9em]">QLOO_API_KEY</code>{' '}
-                  server-side for live results.
-                </p>
-              )}
-              {engineFailed && (
-                <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-                  <span className="font-semibold text-clay-700 dark:text-clay-300">
-                    The request to Kinship did not complete, so this is the
-                    offline collection.
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEngineFailed(false);
-                      setReloadToken((t) => t + 1);
-                    }}
-                    className="loam-btn-secondary px-4 py-2 text-sm md:text-base"
-                  >
-                    <span>Try again</span>
+            </div>
+          )}
+          {page === "home" && (
+            <>
+              <div className="home-heading">
+                <div>
+                  <div className="eyebrow">
+                    <span /> A LITTLE SPACE FOR CONNECTION
+                  </div>
+                  <h1>
+                    Make room for a <br />
+                    <em>meaningful moment.</em>
+                  </h1>
+                  <p className="lead">
+                    Discover familiar interests and turn them into simple
+                    experiences you can share.
+                  </p>
+                  <div className="hero-actions">
+                    <button
+                      className="btn primary"
+                      onClick={() => go("profile")}
+                    >
+                      Create a moment <ArrowRight size={19} />
+                    </button>
+                    <button
+                      className="btn text-button"
+                      onClick={() => {
+                        setProfile(exampleProfile);
+                        run(exampleProfile);
+                      }}
+                    >
+                      Explore an example <ArrowRight size={17} />
+                    </button>
+                  </div>
+                  <p className="reassurance">
+                    <Heart size={16} /> A suggestion, not a memory test. The
+                    example uses fictional interests.
+                  </p>
+                </div>
+                <div className="hero-art">
+                  <img
+                    src="/moment-illustration.png"
+                    alt="Illustration of two people tending leaves together"
+                  />
+                  <div className="art-caption">
+                    <span className="art-heart">
+                      <Heart size={17} fill="currentColor" />
+                    </span>
+                    <div>
+                      <strong>Connection can be simple.</strong>
+                      <small>Start with something familiar.</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <section className="steps-section">
+                <div className="section-heading">
+                  <div>
+                    <p className="eyebrow muted">A GENTLER WAY TO BEGIN</p>
+                    <h2>Made for moments like these.</h2>
+                  </div>
+                  <button className="inline-link" onClick={() => go("how")}>
+                    How it works <ArrowRight size={16} />
                   </button>
+                </div>
+                <div className="step-grid">
+                  <article>
+                    <span className="step-icon peach">
+                      <Leaf size={20} />
+                    </span>
+                    <span className="step-number">01</span>
+                    <h3>Share an interest</h3>
+                    <p>Start with something they enjoy, however small.</p>
+                  </article>
+                  <article>
+                    <span className="step-icon sage">
+                      <Sparkles size={20} />
+                    </span>
+                    <span className="step-number">02</span>
+                    <h3>Find a little inspiration</h3>
+                    <p>We’ll help shape it into a thoughtful idea.</p>
+                  </article>
+                  <article>
+                    <span className="step-icon sand">
+                      <Heart size={20} />
+                    </span>
+                    <span className="step-number">03</span>
+                    <h3>Enjoy time together</h3>
+                    <p>Follow their lead. There’s no right or wrong way.</p>
+                  </article>
+                </div>
+              </section>
+              <div className="home-footer">
+                <span>
+                  <ShieldCheck size={17} /> Your privacy matters
+                </span>
+                <span>Made for connection, not clinical care.</span>
+              </div>
+            </>
+          )}
+          {page === "profile" && (
+            <div className="content narrow">
+              <button className="back" onClick={() => go("home")}>
+                <ArrowLeft size={17} /> Back to welcome
+              </button>
+              <p className="eyebrow muted">LET’S BEGIN</p>
+              <h1>
+                A little about their interests<span className="period">.</span>
+              </h1>
+              <p className="page-intro">
+                A few details can help shape a moment. Share only what you know;
+                every field is optional.
+              </p>
+              <div className="notice">
+                <Heart size={18} />
+                <span>
+                  These are interests shared by a family member or caregiver,
+                  never assumed from age, diagnosis or background. Please use
+                  fictional information only in this prototype.
+                </span>
+              </div>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  run(profile);
+                }}
+              >
+                <div className="form-card">
+                  <div className="field">
+                    <label htmlFor="references">
+                      A cultural favourite <span>optional</span>
+                    </label>
+                    <p>
+                      A musician, artist, song, film, programme, book or other
+                      cultural reference. Separate multiple references with
+                      commas.
+                    </p>
+                    <input
+                      id="references"
+                      value={profile.references}
+                      onChange={(e) => update("references", e.target.value)}
+                      placeholder="e.g. Miriam Makeba"
+                      maxLength={500}
+                    />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="interests">
+                      Other known interests <span>optional</span>
+                    </label>
+                    <p>
+                      Think gardening, cooking, nature, crafts, or anything
+                      else.
+                    </p>
+                    <input
+                      id="interests"
+                      value={profile.interests}
+                      onChange={(e) => update("interests", e.target.value)}
+                      placeholder="e.g. gardening, cooking"
+                      maxLength={500}
+                    />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="language">
+                      Preferred language <span>optional</span>
+                    </label>
+                    <input
+                      id="language"
+                      value={profile.language}
+                      onChange={(e) => update("language", e.target.value)}
+                      placeholder="If known"
+                      maxLength={100}
+                    />
+                    <p>
+                      Suggestions are currently written in English. Cultural
+                      matches are omitted when their language cannot be
+                      verified.
+                    </p>
+                  </div>
+                </div>
+                <div className="form-card">
+                  <fieldset className="field">
+                    <legend>What kind of moment?</legend>
+                    <p>Choose what feels right today.</p>
+                    <div className="choice-row">
+                      {activities.map((a) => (
+                        <button
+                          type="button"
+                          key={a.value}
+                          aria-pressed={profile.activity === a.value}
+                          className={
+                            "chip " +
+                            (profile.activity === a.value ? "selected" : "")
+                          }
+                          onClick={() => update("activity", a.value)}
+                        >
+                          {a.label}
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <fieldset className="field">
+                    <legend>How much time?</legend>
+                    <div className="choice-row">
+                      {([5, 10, 15] as const).map((n) => (
+                        <button
+                          type="button"
+                          key={n}
+                          aria-pressed={profile.duration === n}
+                          className={
+                            "chip " + (profile.duration === n ? "selected" : "")
+                          }
+                          onClick={() => update("duration", n)}
+                        >
+                          {n} minutes
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <fieldset className="field">
+                    <legend>Choose an atmosphere</legend>
+                    <div className="choice-row">
+                      {atmospheres.map((a) => (
+                        <button
+                          type="button"
+                          key={a}
+                          aria-pressed={profile.atmosphere === a}
+                          className={
+                            "chip capitalize " +
+                            (profile.atmosphere === a ? "selected" : "")
+                          }
+                          onClick={() => update("atmosphere", a)}
+                        >
+                          {a}
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+                </div>
+                <div className="form-card">
+                  <div className="field">
+                    <label htmlFor="avoid">
+                      Anything to avoid? <span>optional</span>
+                    </label>
+                    <p>
+                      Topics, music, imagery or activities. Separate items with
+                      commas.
+                    </p>
+                    <textarea
+                      id="avoid"
+                      value={profile.avoid}
+                      onChange={(e) => update("avoid", e.target.value)}
+                      placeholder="e.g. loud music, competitive games"
+                      maxLength={500}
+                    />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="practical">
+                      Practical preferences <span>optional</span>
+                    </label>
+                    <textarea
+                      id="practical"
+                      value={profile.practical}
+                      onChange={(e) => update("practical", e.target.value)}
+                      placeholder="Anything else that would make this feel comfortable"
+                      maxLength={500}
+                    />
+                  </div>
+                </div>
+                <p className="privacy-inline">
+                  <ShieldCheck size={17} /> Your entries are sent to the server
+                  to create a suggestion. If configured, cultural references go
+                  to Qloo and preferences to Gemini. Do not enter personal or
+                  medical details.
                 </p>
+                <button className="btn primary large" type="submit">
+                  Create connection moment <ArrowRight size={19} />
+                </button>
+              </form>
+            </div>
+          )}
+          {page === "working" && (
+            <div className="content narrow">
+              <button className="back" onClick={() => go("profile")}>
+                <ArrowLeft size={17} /> Return to profile
+              </button>
+              <p className="eyebrow muted">A MOMENT IN THE MAKING</p>
+              <h1>
+                Thoughtfully putting
+                <br />
+                <em>the pieces together.</em>
+              </h1>
+              <p className="page-intro">
+                We’re working with the details you shared. This may take a
+                little while.
+              </p>
+              <div className="progress-card" aria-live="polite">
+                {labels.map((label, i) => {
+                  const p = progress.find((x) => x.step === i + 1);
+                  return (
+                    <div className="progress-row" key={label}>
+                      <span className={"progress-icon " + (p?.status || "")}>
+                        {p?.status === "done" ? (
+                          <Check size={17} />
+                        ) : p?.status === "working" ? (
+                          <LoaderCircle size={17} />
+                        ) : p?.status === "error" ? (
+                          <X size={17} />
+                        ) : (
+                          i + 1
+                        )}
+                      </span>
+                      <div>
+                        <strong>{label}</strong>
+                        <small>{p?.detail || "Waiting"}</small>
+                      </div>
+                      <span className="progress-status">
+                        {p?.status === "done"
+                          ? "Complete"
+                          : p?.status === "skipped"
+                            ? "Skipped"
+                            : p?.status === "error"
+                              ? "Unable"
+                              : p?.status === "working"
+                                ? "In progress"
+                                : ""}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              {error && (
+                <div className="error-box" role="alert">
+                  <strong>We couldn’t complete this moment.</strong>
+                  <p>{error}</p>
+                  <div className="button-row">
+                    <button
+                      className="btn primary"
+                      onClick={() => run(profile, false, alternate)}
+                    >
+                      Try again <RefreshCw size={16} />
+                    </button>
+                    <button
+                      className="btn secondary"
+                      onClick={() => run(profile, true, alternate)}
+                    >
+                      Continue without Qloo
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
-          </details>
-        )}
-
-        {/* Whose suggestions these are. Home carries the same fact inside its
-            own introduction, where it belongs next to the era line; stacking a
-            second strip above the welcome message would put the plumbing ahead
-            of the purpose again. Everywhere else this is the only place the
-            reader is told the family on screen is a sample. */}
-        {usingExampleFamily && activeTab !== 'home' && (
-          <ExampleFamilyNote
-            elderName={guardrails.elderName}
-            birthYear={guardrails.birthYear}
-            onAddYourOwn={activeTab === 'family' ? undefined : () => navigate('family')}
-          />
-        )}
-
-        {activeTab === 'home' && (
-          <HomeView
-            guardrails={guardrails}
-            bumpWindow={prescription?.bumpWindow ?? null}
-            ready={Boolean(prescription)}
-            usingExampleFamily={usingExampleFamily}
-            onExplore={() => navigate('discover')}
-            onOpenTogether={() => navigate('together')}
-            onOpenFamily={() => navigate('family')}
-            onOpenPassport={() => navigate('passport')}
-            onOpenRescue={() => setSundowningModalOpen(true)}
-          />
-        )}
-
-        {prescription && activeTab === 'discover' && (
-          <DiscoverView
-            data={prescription}
-            onListenTogether={openTogetherWith}
-            onNotForUs={(cue) => handleCueReaction(cue, 'restless_skip')}
-            onUndoNotForUs={handleUndoCueReaction}
-            onOpenDetail={() => navigate('detail')}
-          />
-        )}
-
-        {prescription && activeTab === 'together' && (
-          <SharedMomentView
-            data={prescription}
-            focusCue={focusCue}
-            warmEq={Boolean(guardrails.hearingLossWarmEq)}
-            onCueReaction={handleCueReaction}
-            onOpenRescue={() => setSundowningModalOpen(true)}
-            onBackToDiscover={() => navigate('discover')}
-          />
-        )}
-
-        {prescription && activeTab === 'family' && (
-          <FamilyIntakePanel
-            presets={presets}
-            activePresetId={activePresetId}
-            elderCatalog={elderCatalog}
-            grandchildCatalog={grandchildCatalog}
-            geographies={geographies}
-            guardrails={guardrails}
-            bumpWindow={prescription.bumpWindow}
-            elderClues={elderClues}
-            grandchildSeeds={grandchildSeeds}
-            onSelectPreset={handleSelectPreset}
-            onUpdateGuardrails={handleUpdateGuardrails}
-            onToggleElderClue={handleToggleElderClue}
-            onAddCustomElderClue={(name, subtype) => {
-              setActivePresetId(null);
-              setElderClues((prev) => [...prev, { name, subtype, weight: 10 }]);
-            }}
-            onRemoveElderClue={(name) =>
-              setElderClues((prev) => (prev.length > 1 ? prev.filter((c) => c.name !== name) : prev))
-            }
-            onToggleGrandchildSeed={handleToggleGrandchildSeed}
-            onAddCustomGrandchildSeed={(name, subtype) => {
-              setActivePresetId(null);
-              setGrandchildSeeds((prev) => [...prev, { name, subtype }]);
-            }}
-            onRemoveGrandchildSeed={(name) =>
-              setGrandchildSeeds((prev) => (prev.length > 1 ? prev.filter((c) => c.name !== name) : prev))
-            }
-            onSelectCareCircleRole={(role) => {
-              setActivePresetId(null);
-              setGuardrails((prev) => ({ ...prev, grandchildName: role.visitorLabel }));
-              const mapped = role.seedIds
-                .map((id) => grandchildCatalog.find((g) => g.entity_id === id))
-                .filter((g): g is CulturalClueSeed => Boolean(g))
-                .map((g) => ({ entity_id: g.entity_id, name: g.name, subtype: g.subtype }));
-              if (mapped.length > 0) setGrandchildSeeds(mapped);
-            }}
-            onApplyNarrative={handleApplyNarrative}
-            onOpenBridgeView={() => navigate('discover')}
-          />
-        )}
-
-        {prescription && activeTab === 'detail' && (
-          <ReminiscenceAndBridgeView
-            data={prescription}
-            sparkLog={sparkLog}
-            excludedCount={excludedCueIds.length}
-            onResetExcludes={() => setExcludedCueIds([])}
-            onCueReaction={handleCueReaction}
-            onOpenSharedMoment={openTogetherWith}
-          />
-        )}
-
-        {prescription && activeTab === 'passport' && (
-          <MemoryCarePassportView
-            data={prescription}
-            sparkLog={sparkLog}
-            elderClues={elderClues}
-            grandchildSeeds={grandchildSeeds}
-            onOpenTrace={() => setTraceDrawerOpen(true)}
-            onOpenOperators={() => navigate('operators')}
-          />
-        )}
-
-        {/* Operator and reviewer material. Needs no engine result, so it is
-            available even while suggestions are still loading. */}
-        {activeTab === 'operators' && (
-          <OperatorAppendixView
-            cohort={cohort}
-            onOpenTrace={() => setTraceDrawerOpen(true)}
-            onOpenPassport={() => navigate('passport')}
-          />
-        )}
-
-        {activeTab === 'settings' && (
-          <PreferencesView
-            onOpenOperators={() => navigate('operators')}
-            rememberOnDevice={rememberOnDevice}
-            onToggleRemember={handleToggleRemember}
-            onClearDeviceData={handleClearDeviceData}
-            clearedNote={clearedNote}
-            textSize={textSize}
-            onTextSizeChange={setTextSize}
-            darkMode={darkMode}
-            onToggleDarkMode={() => setDarkMode((d) => !d)}
-            guardrails={guardrails}
-            onUpdateGuardrails={handleUpdateGuardrails}
-            qlooStatus={qlooStatus}
-            onOpenTrace={() => setTraceDrawerOpen(true)}
-            onOpenDetail={() => navigate('detail')}
-            onOpenPassport={() => navigate('passport')}
-          />
-        )}
-
-        {/* Loading state — calm, no spinner urgency, no countdown. */}
-        {!prescription &&
-          activeTab !== 'home' &&
-          activeTab !== 'settings' &&
-          activeTab !== 'operators' && (
-          <div className="loam-card p-8 md:p-10 text-center" role="status">
-            <Disc3 className="w-8 h-8 mx-auto text-plum-400 animate-pulse" aria-hidden="true" />
-            <p className="mt-4 text-lg md:text-xl font-serif text-loam-ink dark:text-parchment-50">
-              Getting things ready…
-            </p>
-            <p className="mt-2 text-base text-loam-body dark:text-loam-body-dark">
-              This usually takes a moment. You can go to{' '}
-              <button
-                type="button"
-                onClick={() => navigate('home')}
-                className="font-semibold underline decoration-plum-400 underline-offset-4 hover:decoration-plum-600"
-              >
-                Home
-              </button>{' '}
-              while it works.
-            </p>
-          </div>
-        )}
-        </Suspense>
-      </main>
-
-      {/* Footer. Visible at every width — the clinical and provenance
-          disclaimer must not be hidden on the phone people actually use. The
-          extra bottom padding clears the fixed mobile navigation. */}
-      <footer className="border-t border-parchment-300 dark:border-vinyl-700 py-6 pb-28 md:pb-6 px-4 sm:px-6 text-center text-sm text-loam-body dark:text-loam-muted-dark space-y-4 no-print">
-        <div className="flex items-center justify-center gap-2.5">
-          <img
-            src="/kinship-mark.png"
-            alt=""
-            aria-hidden="true"
-            draggable={false}
-            className="w-8 h-8 select-none"
-          />
-          <span className="loam-wordmark text-xl text-loam-ink dark:text-parchment-100">
-            kinship
-          </span>
-        </div>
-        <p className="max-w-3xl mx-auto leading-relaxed">
-          <strong className="font-semibold text-loam-ink dark:text-parchment-100">
-            Educational prompts only — not medical advice.
-          </strong>{' '}
-          Suggestions about sound, settling routines, food texture, serving temperature
-          and timing are general educational prompts. They are
-          not individualised clinical guidance and must not replace assessment by a
-          clinician, dietitian or speech-and-language therapist. Qloo results describe
-          aggregate cultural affinities; they are not evidence about any individual’s
-          identity, health or behaviour. Kinship persists no personal data and sends no
-          names, birth years or health information to Qloo.
-        </p>
-        <p className="text-xs md:text-sm text-loam-muted dark:text-loam-muted-dark">
-          Kinship v3 · Qloo Taste AI™ Agentic Hackathon · MIT licensed
-        </p>
-      </footer>
-
-      {/* Mobile bottom navigation — thumb-reachable, above the gesture bar. */}
-      <nav
-        aria-label="Main"
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-parchment-300 dark:border-vinyl-700 bg-parchment-50/98 dark:bg-vinyl-900/98 backdrop-blur-md pb-safe no-print"
-      >
-        <ul className="grid grid-cols-4">
-          {MOBILE_NAV.map((item) => {
-            const active = activeTab === item.id;
-            return (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  onClick={() => navigate(item.id)}
-                  aria-current={active ? 'page' : undefined}
-                  className={`w-full flex flex-col items-center justify-center gap-1 pt-2.5 pb-2 text-xs leading-tight font-semibold transition-colors ${
-                    active
-                      ? 'text-plum-700 dark:text-plum-300'
-                      : 'text-loam-muted dark:text-loam-muted-dark'
-                  }`}
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`flex items-center justify-center w-9 h-7 rounded-full transition-colors ${
-                      active ? 'bg-plum-100 dark:bg-vinyl-700' : ''
-                    }`}
-                  >
-                    {item.icon}
+          )}
+          {page === "moment" && moment && (
+            <div className="content narrow">
+              <button className="back" onClick={() => go("profile")}>
+                <ArrowLeft size={17} /> Return to profile
+              </button>
+              <p className="eyebrow muted">A MOMENT FOR THE TWO OF YOU</p>
+              <h1>
+                Here’s a little idea<span className="period">.</span>
+              </h1>
+              <p className="page-intro">
+                Take what feels right, leave what doesn’t. The moment is yours
+                to make.
+              </p>
+              <article className="moment-card">
+                <div className="moment-top">
+                  <span className="moment-badge">
+                    <Sparkles size={16} /> YOUR CONNECTION MOMENT
                   </span>
-                  <span>{item.label}</span>
+                  <span className="duration">
+                    <Clock3 size={16} /> {moment.duration} minutes
+                  </span>
+                </div>
+                <h2>{moment.title}</h2>
+                <p className="moment-why">{moment.why}</p>
+                <div className="moment-divider" />
+                <div className="moment-part">
+                  <span>01</span>
+                  <div>
+                    <h3>Begin gently</h3>
+                    <blockquote>“{moment.opening}”</blockquote>
+                  </div>
+                </div>
+                <div className="moment-part">
+                  <span>02</span>
+                  <div>
+                    <h3>Do something together</h3>
+                    <p>{moment.activity}</p>
+                  </div>
+                </div>
+                <div className="moment-part">
+                  <span>03</span>
+                  <div>
+                    <h3>Let conversation come naturally</h3>
+                    {moment.invitations.map((x) => (
+                      <p key={x} className="prompt">
+                        “{x}”
+                      </p>
+                    ))}
+                  </div>
+                </div>
+                <div className="moment-part">
+                  <span>04</span>
+                  <div>
+                    <h3>When you’re ready to close</h3>
+                    <p>“{moment.closing}”</p>
+                  </div>
+                </div>
+                <div className="care-note">
+                  <Heart size={19} />
+                  <div>
+                    <strong>Follow their lead</strong>
+                    <p>{moment.adaptation}</p>
+                  </div>
+                </div>
+              </article>
+              <div className="source-note">
+                <strong>
+                  {moment.source === "qloo"
+                    ? "Qloo Insights result"
+                    : moment.source === "demo"
+                      ? "Demonstration mode · illustrative suggestion"
+                      : "General suggestion · not Qloo-derived"}
+                </strong>
+                <p>{moment.note}</p>
+                {moment.reference && (
+                  <p>
+                    Verified result: {moment.reference.name} (
+                    {moment.reference.type
+                      .replace("urn:entity:", "")
+                      .replace("_", " ")}
+                    ) · informed by {moment.reference.seedNames?.join(", ")}.{" "}
+                    <a
+                      href={
+                        "https://www.google.com/search?q=" +
+                        encodeURIComponent(moment.reference.name)
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Search for this item ↗
+                    </a>
+                  </p>
+                )}
+                <p>
+                  {moment.model} Exclusion checks match exact phrases, not
+                  meaning; please review the activity and any cultural item
+                  first.
+                </p>
+              </div>
+              <div className="result-actions">
+                <button
+                  className="btn primary"
+                  onClick={save}
+                  disabled={isSaved}
+                >
+                  <Bookmark size={18} />
+                  {isSaved ? "Saved" : "Save this moment"}
                 </button>
-              </li>
-            );
-          })}
-        </ul>
+                <button
+                  className="btn secondary"
+                  onClick={() => run(profile, false, !alternate)}
+                >
+                  <RefreshCw size={17} /> Try another suggestion
+                </button>
+                <button
+                  className="btn text-button"
+                  onClick={() => go("profile")}
+                >
+                  Return to profile
+                </button>
+              </div>
+              {storageMessage && (
+                <p role="status" className="storage-message">
+                  {storageMessage}
+                </p>
+              )}
+              <button className="stop-action" onClick={() => go("profile")}>
+                <X size={17} /> Stop or change activity
+              </button>
+            </div>
+          )}
+          {page === "saved" && (
+            <div className="content narrow">
+              <p className="eyebrow muted">KEPT CLOSE BY</p>
+              <h1>
+                Saved moments<span className="period">.</span>
+              </h1>
+              <p className="page-intro">
+                A little collection to return to, stored only on this device.
+              </p>
+              {storageMessage && (
+                <p role="status" className="storage-message">
+                  {storageMessage}
+                </p>
+              )}
+              {saved.length ? (
+                <div className="saved-list">
+                  {saved.map((m, i) => (
+                    <article className="saved-card" key={i}>
+                      <span className="moment-badge">
+                        <Heart size={15} /> SAVED MOMENT
+                      </span>
+                      <h2>{m.title}</h2>
+                      <p>{m.activity}</p>
+                      <div className="button-row">
+                        <button
+                          className="btn secondary"
+                          onClick={() => {
+                            setMoment(m);
+                            setIsSaved(true);
+                            go("moment");
+                          }}
+                        >
+                          View moment <ArrowRight size={16} />
+                        </button>
+                        <button
+                          className="icon-button"
+                          aria-label={`Remove saved moment ${i + 1}`}
+                          onClick={() => remove(i)}
+                        >
+                          <Trash2 size={18} /> Remove
+                        </button>
+                      </div>
+                    </article>
+                  ))}
+                  <button className="stop-action" onClick={clear}>
+                    <Trash2 size={17} /> Clear all Kinship data
+                  </button>
+                </div>
+              ) : (
+                <div className="empty-card">
+                  <span className="step-icon sage">
+                    <Bookmark size={22} />
+                  </span>
+                  <h2>Nothing saved just yet</h2>
+                  <p>When an idea feels right, save it here for another day.</p>
+                  <button className="btn primary" onClick={() => go("profile")}>
+                    Create a moment <ArrowRight size={17} />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          {page === "how" && (
+            <div className="content narrow">
+              <p className="eyebrow muted">A LITTLE MORE ABOUT KINSHIP</p>
+              <h1>
+                Small moments, made together<span className="period">.</span>
+              </h1>
+              <div className="info-card">
+                <h2>Start with what you know</h2>
+                <p>
+                  Share an interest and choose what feels comfortable. A little
+                  information is enough; we don’t guess a person’s preferences
+                  from their age or background.
+                </p>
+                <h2>Explore with care</h2>
+                <p>
+                  When configured, Kinship searches Qloo for exact, unambiguous
+                  cultural references and explores related entities through its
+                  Insights API. A cultural relationship isn’t proof that someone
+                  likes or remembers an item.
+                </p>
+                <h2>Make it your own</h2>
+                <p>
+                  Gemini, when available, selects a validated activity template.
+                  Otherwise, Kinship uses a simple built-in template. The person
+                  can decline, change or stop at any time. Review all
+                  suggestions and references before sharing.
+                </p>
+                <p>
+                  Kinship is a supportive companion, not a medical device,
+                  memory test or substitute for professional care.
+                </p>
+              </div>
+              <button className="btn primary" onClick={() => go("profile")}>
+                Create a moment <ArrowRight size={17} />
+              </button>
+            </div>
+          )}
+          {page === "privacy" && (
+            <div className="content narrow">
+              <p className="eyebrow muted">YOUR SPACE, YOUR CHOICE</p>
+              <h1>
+                Privacy & settings<span className="period">.</span>
+              </h1>
+              <div className="info-card">
+                <h2>What stays on this device</h2>
+                <p>
+                  Saved moments are stored in this browser’s local storage, not
+                  in a Kinship account or database. If storage is unavailable,
+                  saves last only for this session.
+                </p>
+                <h2>What is sent to services</h2>
+                <p>
+                  Your form is sent to the Kinship server for processing. When
+                  configured, cultural references are sent to Qloo; preferences
+                  and verified cultural entities are sent to Gemini. Those
+                  providers process requests under their own policies. Kinship
+                  does not intentionally store them remotely.
+                </p>
+                <h2>Use fictional details only</h2>
+                <p>
+                  This prototype is not for real patients’ personal or medical
+                  information. Please don’t include names, diagnoses, recordings
+                  or location. No account or analytics is required.
+                </p>
+                <button className="btn secondary" onClick={clear}>
+                  <Trash2 size={17} /> Clear all local Kinship data
+                </button>
+                {storageMessage && <p role="status">{storageMessage}</p>}
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+      <nav className="mobile-nav" aria-label="Mobile navigation">
+        {nav.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => go(id)}
+            aria-current={page === id ? "page" : undefined}
+          >
+            <Icon size={20} />
+            <span>
+              {id === "profile"
+                ? "Create"
+                : id === "saved"
+                  ? "Saved"
+                  : id === "how"
+                    ? "How it works"
+                    : "Privacy"}
+            </span>
+            <span className="sr-only">{label}</span>
+          </button>
+        ))}
       </nav>
-
-      {/* The splash sits outside every Suspense boundary on purpose. Both
-          overlays are lazy, and a boundary around them would make the very
-          first thing a visitor sees wait on a chunk it has no use for — on a
-          mid-range phone over mobile data that is a visible delay before the
-          app can even introduce itself. */}
-      {splashOpen && (
-        <SplashScreen darkMode={darkMode} onDone={() => setSplashOpen(false)} />
-      )}
-
-      {/* Each overlay mounts only when it is opened, so neither chunk is
-          fetched on first load. Both stop their own sound on unmount. */}
-      {sundowningModalOpen && (
-        <Suspense fallback={null}>
-          <SundowningRescueModal
-            open
-            onClose={() => setSundowningModalOpen(false)}
-            data={prescription}
-            onToggleWarmEq={() =>
-              setGuardrails((prev) => ({ ...prev, hearingLossWarmEq: !prev.hearingLossWarmEq }))
-            }
-          />
-        </Suspense>
-      )}
-
-      {traceDrawerOpen && (
-        <Suspense fallback={null}>
-          <KinshipQlooDrawer
-            open
-            onClose={() => setTraceDrawerOpen(false)}
-            trace={prescription?.agentTrace || []}
-            reasoningLog={prescription?.agentReasoningLog || []}
-            currentGuardrails={guardrails}
-            primaryElderClue={elderClues[0]?.name || 'Miriam Makeba'}
-            primaryGrandchildSeed={grandchildSeeds[0]?.name || 'Laufey'}
-            qlooStatus={qlooStatus}
-          />
-        </Suspense>
-      )}
     </div>
   );
-};
-
-/**
- * Fallback while a screen chunk arrives. Plain text on purpose: no spinner, no
- * progress bar, nothing that implies a countdown.
- */
-const ScreenLoading: React.FC<{ label: string }> = ({ label }) => (
-  <div className="loam-card p-8 md:p-10 text-center" role="status">
-    <p className="text-lg md:text-xl font-serif text-loam-ink dark:text-parchment-50">{label}</p>
-  </div>
-);
+}

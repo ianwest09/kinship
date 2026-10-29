@@ -1,3 +1,5 @@
+> **Historical document:** This describes the previous, retired prototype, not the current Kinship application. Its claims, capabilities and test results do not apply to the current build. See README.md for current information.
+
 # Devpost Submission Copy — Kinship (`https://qloo.devpost.com/`)
 
 > Ready-to-paste submission write-up structured around the **4 official Stage-2 judging criteria (in exact tie-breaker priority order)** plus the **$25,000 Venture Investment thesis**.

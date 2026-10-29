@@ -1,3 +1,5 @@
+> **Historical document:** This describes the previous, retired prototype, not the current Kinship application. Its claims, capabilities and test results do not apply to the current build. See README.md for current information.
+
 # Kinship — AI Handoff Brief
 
 **Prepared:** 28 October 2026 (Africa/Johannesburg)  

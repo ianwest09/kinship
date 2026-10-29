@@ -1,3 +1,5 @@
+> **Historical document:** This describes the previous, retired prototype, not the current Kinship application. Its claims, capabilities and test results do not apply to the current build. See README.md for current information.
+
 # Kinship — Implementation Report
 
 **Date:** 2026-10-28
