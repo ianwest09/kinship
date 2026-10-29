@@ -23,7 +23,14 @@ export function createKinshipApiApp() {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Strict-Transport-Security', 'max-age=63072000');
-    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    // X-Frame-Options is deliberately NOT set, and was explicitly removed here
+    // before #10 reintroduced it. Kinship has no accounts, no cookies and no
+    // authenticated state-changing action, so there is no clickjacking surface
+    // for the header to protect — while the header itself stops the app
+    // rendering in any cross-origin frame, which is how the sandbox preview and
+    // an embedded hackathon demo are viewed. tests/securityHeaders.test.ts fails
+    // if it comes back. If framing ever needs restricting, do it with a CSP
+    // `frame-ancestors` allowlist naming the real hosts, not with SAMEORIGIN.
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     res.setHeader(
       'Content-Security-Policy-Report-Only',

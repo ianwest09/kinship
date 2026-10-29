@@ -15,12 +15,18 @@ async function startServer() {
   if (process.env.NODE_ENV === 'production' && fs.existsSync(path.join(distPath, 'index.html'))) {
     app.use(
       express.static(distPath, {
-        immutable: true,
-        maxAge: '1y',
+        // Caching is decided per path rather than by a blanket `immutable: true`.
+        // Only /assets is fingerprinted by Vite, so only /assets can be cached
+        // forever; index.html and the unhashed files copied from public/ (the
+        // logo, the splash mark, the icons) would otherwise be pinned for a year
+        // and a changed logo would never reach a returning visitor. This matches
+        // the /assets rule in vercel.json, which is what production actually uses.
         setHeaders: (res, filePath) => {
-          if (path.basename(filePath) === 'index.html') {
-            res.setHeader('Cache-Control', 'no-cache');
-          }
+          const rel = path.relative(distPath, filePath).split(path.sep).join('/');
+          res.setHeader(
+            'Cache-Control',
+            rel.startsWith('assets/') ? 'public, max-age=31536000, immutable' : 'no-cache'
+          );
         },
       })
     );

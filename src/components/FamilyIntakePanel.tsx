@@ -432,9 +432,10 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                   type="button"
                   disabled={elderClues.length <= 1}
                   onClick={() => onRemoveElderClue(c.name)}
+                  aria-label={`Remove ${c.name.split('(')[0].trim()} from their familiar things`}
                   className="disabled:opacity-40"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3 h-3" aria-hidden="true" />
                 </button>
               </span>
             ))}
@@ -480,8 +481,12 @@ export const FamilyIntakePanel: React.FC<Props> = ({
               placeholder="Or type any old song/film..."
               className="flex-1 px-3 py-1.5 rounded-xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 text-xs"
             />
-            <button type="submit" className="px-3 py-1.5 rounded-xl bg-plum-600 text-white text-xs font-medium">
-              <Plus className="w-3.5 h-3.5" />
+            <button
+              type="submit"
+              aria-label="Add this to their familiar things"
+              className="px-3 py-1.5 rounded-xl bg-plum-600 text-white text-xs font-medium"
+            >
+              <Plus className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
           </form>
         </section>
@@ -533,9 +538,10 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                   type="button"
                   disabled={grandchildSeeds.length <= 1}
                   onClick={() => onRemoveGrandchildSeed(g.name)}
+                  aria-label={`Remove ${g.name.split('(')[0].trim()} from what the younger ones love`}
                   className="disabled:opacity-40"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3 h-3" aria-hidden="true" />
                 </button>
               </span>
             ))}
@@ -581,8 +587,12 @@ export const FamilyIntakePanel: React.FC<Props> = ({
               placeholder="Or type any 2020s artist/film..."
               className="flex-1 px-3 py-1.5 rounded-xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 text-xs"
             />
-            <button type="submit" className="px-3 py-1.5 rounded-xl bg-pine-600 text-white text-xs font-medium">
-              <Plus className="w-3.5 h-3.5" />
+            <button
+              type="submit"
+              aria-label="Add this to what the younger ones love"
+              className="px-3 py-1.5 rounded-xl bg-pine-600 text-white text-xs font-medium"
+            >
+              <Plus className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
           </form>
         </section>
