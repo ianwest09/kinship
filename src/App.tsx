@@ -37,6 +37,7 @@ import { SplashScreen } from './components/SplashScreen';
 import { DiscoverView } from './components/DiscoverView';
 import { SharedMomentView } from './components/SharedMomentView';
 import { PreferencesView, TextSize } from './components/PreferencesView';
+import { Analytics } from '@vercel/analytics/react';
 // Home, Discover and Share a moment stay in the entry chunk: they are the first
 // journey. Everything below is one tap deeper, so it loads on demand. The entry
 // bundle previously carried every screen, both overlays and the offline engine,
@@ -1180,6 +1181,8 @@ export const App: React.FC = () => {
           />
         </Suspense>
       )}
+
+      <Analytics />
     </div>
   );
 };
