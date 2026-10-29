@@ -264,6 +264,14 @@ const BANNED_CLAIMS = [
   'prefrontal', 'hippocamp', 'entorhinal', 'parasympathetic', 'cortex',
   // invented statistics and borrowed authority
   'visit dread', 'clinicians worldwide', 'stage 5', 'stage 6',
+  // Compliance absolutes and liveness overclaims. These reached the Discover
+  // screen as a "Zero PII" badge and a "Live request-by-request diff" heading
+  // over a comparison whose left column is authored prose, not a model call.
+  // The earlier hyphenated zero-PII bans did not catch the unhyphenated form,
+  // and the file was in COPY_SURFACES but not CAREGIVER_SURFACES, so the
+  // narrower list never looked at it.
+  'zero pii', 'zero-pii', 'zero cloud pii', 'hipaa', 'popia', 'gdpr',
+  'blind llm', 'live request-by-request',
 ];
 
 test('no clinical, medication or guaranteed-effect claims reach user-visible copy', async () => {
@@ -309,4 +317,76 @@ test('invented parameters are labelled as local filters, not Qloo query params',
     engine.includes('local filter, not a Qloo param'),
     'locally applied filters must say they are not Qloo parameters'
   );
+});
+
+test('the comparison badge counts only entity types the code really queries', async () => {
+  // The badge used to claim "6 Cross-Domain Entity Types". The server queries
+  // five urn:entity:* types, so the number is derived from the source now and
+  // this test fails if the two ever drift apart again.
+  const view = await readFile('src/components/ReminiscenceAndBridgeView.tsx', 'utf8');
+  const badge = view.match(/(\d+)\s+entity types queried/);
+  assert.ok(badge, 'the badge no longer states how many entity types are queried');
+
+  const queried = new Set<string>();
+  const serverFiles = [
+    'server/kinshipQlooEngine.ts',
+    'server/reminiscenceGraph.ts',
+    'server/mcpTools.ts',
+  ];
+  for (const [, src] of await readAll(serverFiles)) {
+    for (const m of src.matchAll(/urn:entity:([a-z_]+)/g)) queried.add(m[1]);
+  }
+  assert.equal(
+    Number(badge![1]),
+    queried.size,
+    `badge says ${badge![1]} but the code queries ${queried.size}: ${[...queried].sort().join(', ')}`
+  );
+});
+
+/**
+ * The submission copy is read by judges before the app is, so it has to make
+ * the same claims the product makes and no others. It previously rendered 18 of
+ * the phrases banned above — statistics nobody could source, named brain
+ * regions offered as mechanism, drug-interaction safety, and an absolute
+ * no-personal-data claim — while the live app said the opposite in its own
+ * operator appendix. Both documents are scanned now, so the two cannot drift
+ * apart again.
+ *
+ * The public MCP tool names are stripped first for the same reason they are
+ * stripped in the source scan: they are a published API contract, and renaming
+ * them would break every existing integration.
+ */
+const PUBLISHED_DOCS = ['DEVPOST_SUBMISSION.md', 'README.md'];
+
+test('the published documents make no claim the product refuses', async () => {
+  const toolNames = new RegExp(PUBLIC_MCP_TOOL_NAMES.join('|'), 'g');
+  for (const [doc, src] of await readAll(PUBLISHED_DOCS)) {
+    const copy = src.replace(toolNames, ' ').toLowerCase();
+    for (const phrase of BANNED_CLAIMS) {
+      assert.ok(
+        !copy.includes(phrase),
+        `${doc} makes the claim "${phrase}" that the product refuses to make`
+      );
+    }
+  }
+});
+
+test('the published documents do not cite endpoints the code never calls', async () => {
+  // GET /v2/tags was listed in both documents and in an earlier MCP manifest
+  // while being called nowhere in the codebase.
+  const serverSource = (
+    await readAll(['server/kinshipQlooEngine.ts', 'server/reminiscenceGraph.ts', 'server/mcpTools.ts'])
+  )
+    .map(([, src]) => src)
+    .join('\n');
+  const claimed = new Set<string>();
+  for (const [doc, src] of await readAll(PUBLISHED_DOCS)) {
+    for (const m of src.matchAll(/GET \/(v2\/[a-z_]+|search)/g)) claimed.add(`/${m[1]}`);
+  }
+  for (const path of claimed) {
+    assert.ok(
+      serverSource.includes(path),
+      `a published document cites ${path}, which the server never calls`
+    );
+  }
 });
