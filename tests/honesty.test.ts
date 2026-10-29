@@ -342,3 +342,51 @@ test('the comparison badge counts only entity types the code really queries', as
     `badge says ${badge![1]} but the code queries ${queried.size}: ${[...queried].sort().join(', ')}`
   );
 });
+
+/**
+ * The submission copy is read by judges before the app is, so it has to make
+ * the same claims the product makes and no others. It previously rendered 18 of
+ * the phrases banned above — statistics nobody could source, named brain
+ * regions offered as mechanism, drug-interaction safety, and an absolute
+ * no-personal-data claim — while the live app said the opposite in its own
+ * operator appendix. Both documents are scanned now, so the two cannot drift
+ * apart again.
+ *
+ * The public MCP tool names are stripped first for the same reason they are
+ * stripped in the source scan: they are a published API contract, and renaming
+ * them would break every existing integration.
+ */
+const PUBLISHED_DOCS = ['DEVPOST_SUBMISSION.md', 'README.md'];
+
+test('the published documents make no claim the product refuses', async () => {
+  const toolNames = new RegExp(PUBLIC_MCP_TOOL_NAMES.join('|'), 'g');
+  for (const [doc, src] of await readAll(PUBLISHED_DOCS)) {
+    const copy = src.replace(toolNames, ' ').toLowerCase();
+    for (const phrase of BANNED_CLAIMS) {
+      assert.ok(
+        !copy.includes(phrase),
+        `${doc} makes the claim "${phrase}" that the product refuses to make`
+      );
+    }
+  }
+});
+
+test('the published documents do not cite endpoints the code never calls', async () => {
+  // GET /v2/tags was listed in both documents and in an earlier MCP manifest
+  // while being called nowhere in the codebase.
+  const serverSource = (
+    await readAll(['server/kinshipQlooEngine.ts', 'server/reminiscenceGraph.ts', 'server/mcpTools.ts'])
+  )
+    .map(([, src]) => src)
+    .join('\n');
+  const claimed = new Set<string>();
+  for (const [doc, src] of await readAll(PUBLISHED_DOCS)) {
+    for (const m of src.matchAll(/GET \/(v2\/[a-z_]+|search)/g)) claimed.add(`/${m[1]}`);
+  }
+  for (const path of claimed) {
+    assert.ok(
+      serverSource.includes(path),
+      `a published document cites ${path}, which the server never calls`
+    );
+  }
+});

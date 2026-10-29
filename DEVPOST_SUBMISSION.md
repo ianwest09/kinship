@@ -1,71 +1,489 @@
 # Devpost Submission Copy — Kinship (`https://qloo.devpost.com/`)
 
-> Ready-to-paste submission write-up structured around the **4 official Stage-2 judging criteria (in exact tie-breaker priority order)** plus the **$25,000 Venture Investment thesis**.
+> Ready-to-paste write-up, structured around the **4 official Stage-2 judging
+> criteria in tie-breaker priority order** and the **6 items the hackathon kit's
+> `docs/SUBMISSION.md` asks every submission to include**. The six required items
+> are numbered inline so nothing is missed when pasting into the form.
+>
+> Every figure in this document is either computed by a test in this repository,
+> read from a live response, or explicitly marked as an assumption. Claims the
+> product itself refuses to make are not made here either — see
+> *What changed in this rewrite* at the end.
 
 ---
 
 ## Project Title
-**Kinship — Dementia Reminiscence Bump, Sundowning & Intergenerational Bridge Agent**
 
-## Tagline (Elevator Pitch)
-An autonomous Qloo Taste AI™ care agent that reconstructs an Alzheimer’s elder’s ages 10–30 youth universe, calms 4:30 PM sundowning, curates dysphagia-safe nostalgic meals, and bridges Gen-Z grandkids with grandparents — with zero PII.
+**Kinship — a reminiscence-bump and intergenerational-bridge agent built on Qloo Taste AI™**
+
+## Tagline (elevator pitch)
+
+Kinship takes one or two surviving clues about someone's life and uses Qloo to
+rebuild the music, films and touchstones that were culturally salient in the
+place they grew up, between the ages of 10 and 30 — then turns that into things
+a family can actually sit down and do together: a late-afternoon settling
+option, a large-type screen for sitting side by side, and a printable passport
+for whoever is helping today. No person's name is ever sent to Qloo.
 
 ---
+
+## 1. Product problem statement *(required item 1)*
+
+Families caring for someone with dementia run out of things to talk about. The
+obvious questions — *do you remember me, what did you do today* — ask for recall
+that is exactly what has become unreliable, so the conversation collapses into
+silence and both people feel it. Visiting grandchildren avoid it, and the person
+they came to see loses contact with them.
+
+Meanwhile the late afternoon is often the hardest stretch of the day. Families
+and care teams reach for whatever is on television, and a generic "oldies"
+playlist or a film from the right decade can carry content — suspense, war,
+loud interruption — that lands badly without anyone intending it.
+
+What is missing is not another entertainment recommender. It is a way to answer
+a very specific question that no general model can answer reliably: **what was
+actually popular, in this specific place, during the specific years this
+specific person was young?** That is a cultural-salience question over a
+historical catalogue, and it is precisely what Qloo's taste graph is built for.
 
 ## Inspiration
-Over **57 million families** live with Alzheimer’s and dementia. Every afternoon around **4:30 PM (“sundowning”)**, fading light triggers acute confusion, pacing, and distress. Meanwhile, **over 60% of grandchildren and young relatives pull back from visiting** because conventional conversation (*“Do you remember me? What did you eat today?”*) accidentally quizzes broken short-term hippocampal memory.
 
-Neuroscience offers an extraordinary lifeline: cultural memories formed between **ages 10 and 30 — the “Reminiscence Bump”** — are encoded in the **medial prefrontal cortex (mPFC)**, one of the last brain regions touched by Alzheimer’s. Yet families rarely know the exact songs, B-sides, radio shows, scents, and comfort dishes from when their 81-year-old loved one was 18 in Cape Town, Tokyo, Kingston, Mumbai, or Chicago — and generic LLMs fail dangerously by guessing Western Top-40 clichés or perilous era classics like *Psycho* (1960).
+The idea sits on a well-established observation in memory research: the
+**reminiscence bump**. People tend to hold on to music and culture from roughly
+their teens and twenties far more strongly than to what came later, and those
+memories often remain reachable long after recent events have become difficult.
+Anyone who has watched a familiar song reach someone who had seemed absent knows
+the effect needs no embellishment.
 
-We built **Kinship** to prove what happens when an autonomous clinical care agent is given **Qloo Taste AI™**.
-
----
-
-## What It Does
-From just **1–2 surviving family clues** (or a messy natural-language family voice/text note), Kinship’s 5-stage Qloo agent generates:
-1. **Reconstructed Ages 10–30 Youth Universe**: Era-locked songs, musicals, and broadcasts from the elder’s youth hometown, complete with Qloo clue attribution (`feature.explainability=true`), presbycusis-friendly warm-EQ Web Audio chord previews (`150–800 Hz`, `<2.5 kHz` hearing-aid safe roll-off), and **Zero-Quiz sensory invitations**.
-2. **Intergenerational Grandchild-to-Grandparent Bridge (`/v2/analysis/compare`)**: Reveals the exact harmonic and narrative DNA shared between a visitor’s modern favorites (*Laufey*, *Olivia Dean*, *Studio Ghibli*, *Tems*, *Great British Bake Off*) and the elder’s youth touchstones — paired with a 15-minute side-by-side visit playbook and the large-type **Shared Moment** screen for sitting side by side.
-3. **4:30 PM Emergency Sundowning Rescue Modal**: One-tap amber-dusk protocol sequencing a 15-minute clinical **Iso-Principle BPM step-down (`96 → 76 → 62 BPM`)** alongside $5 olfactory/tea/tactile triggers (`urn:entity:brand`) that project directly to the amygdala via Cranial Nerve I.
-4. **Dysphagia-Safe Nostalgic Senior Dining & Calm Cafés (`urn:entity:place` + IDDSI Levels 4–6)**: Pairs regional youth culinary taste tags with fork-mashable/easy-to-chew textures, scald-safe `<52°C` serving temperatures, statin/donepezil medication safety, high-contrast plating (`+26%` caloric intake), and quiet-hour heritage cafés (`<55 dB`).
-5. **Printable 1-Page Bedside Care Passport & Zero-PII QR Code**: Encodes the entire room protocol into a self-contained `#kinship=...` URL fragment inside a scannable **ISO/IEC 18004 QR code** (`0 bytes` of cloud PHI stored).
+The honest limitation of that observation is also the design constraint for this
+product: a familiar song is an opportunity, not a promise. Kinship is built so
+that every suggestion is labelled as a suggestion, every screen offers a neutral
+way out, and nothing claims to work every time.
 
 ---
 
-## How We Built It (Aligned to Official Judging Criteria)
+## What it does
 
-### 1. Technological Implementation (Tie-Breaker Priority #1)
-- **6 Qloo Cross-Domain Surfaces in Parallel**: Orchestrates `GET /search`, `GET /v2/insights` (`urn:entity:artist`, `urn:entity:movie`, `urn:entity:tv_show` with `filter.release_year`, `signal.location.query`, `bias.trends="off"`, `filter.exclude.tags`, `feature.explainability=true`), `GET /v2/analysis/compare`, `GET /v2/insights?filter.type=urn:demographics`, `GET /v2/insights?filter.type=urn:heatmap` (`urn:geohash`), `urn:entity:brand`, and `urn:entity:place`.
-- **Autonomous ReAct Self-Correction Loop**: Screens candidate streams for distress/peril tags (`horror`, `thriller`, `war`) and presbycusis harshness; if a diaspora query returns `<2` results inside strict city/year bounds, the agent autonomously widens the Reminiscence window (`±5 yrs`) and relaxes hyper-local radius while keeping `bias.trends="off"`.
-- **Callable MCP Tool Server (`mcp/1.0`)**: Exposes `GET /api/mcp/tools` and `POST /api/mcp/call` for 5 Qloo clinical tools so external Claude, OpenAI, or LangGraph agents can invoke Kinship programmatically.
-- **Interactive “Blind LLM vs. Qloo Taste AI™” Diff**: Demonstrates side-by-side why generic LLMs fail without Qloo’s taste graph.
+From one or two surviving clues — or a free-text note written the way a family
+would speak it — Kinship produces five things:
 
-### 2. Design (Tie-Breaker Priority #2)
-- **Loam design system, built for older eyes first**: warm paper `#F4F0E8`, white card surfaces, soft charcoal `#353432`, muted sage `#64745D` and a soft blue focus indicator. Every pairing was contrast-checked rather than assumed — ink on paper 10.95:1, sage text on paper 5.63:1, focus ring 3.59:1 (above the WCAG 2.2 non-text 3:1 minimum) — and two supplied reference values were deliberately darkened because they failed (sage on paper measured 4.40:1, focus blue 2.95:1).
-- **Typography as an accessibility control**: the root font is 17px and all type is rem-based, so the built-in **Normal / Large / Largest** reading preference (persisted per device) scales type *and* spacing together without breaking layout. 93 absolute-px sizes between 9px and 11px were removed from the codebase.
-- **Five plain-language destinations** — Home, Discover, Together, Family, Preferences — with a four-item bottom navigation on phones (44px minimum touch targets under coarse pointers, safe-area padding for the gesture bar) and the full clinical detail preserved one tap away for care teams and judges.
-- **Dementia-inclusive interaction rules**: no quizzes, scores, countdowns or pressure anywhere; every screen offers a neutral way out ("Not for us today", "Try something else", "No need to finish anything"); recommendations are labelled "a suggestion, not a fact about anyone"; and the approved Kinship logo opens the app with a calm splash that is always skippable, honours `prefers-reduced-motion`, and never traps focus or scroll.
-- **Three cognitive modes, all first-class**: the calm family surfaces, the **large-type Shared Moment screen** for sitting side by side, and the **low-glare dusk Settling Sounds protocol** for late-afternoon distress.
-- **Built-In Presbycusis Web Audio Engine & Zero-Dep QR Codec**: Custom Web Audio synthesizer with toggleable `2.5 kHz` low-pass filter for senior hearing aids, plus a custom Galois-Field Reed-Solomon ISO/IEC 18004 QR generator for instant nurse/family handoffs.
-
-### 3. Potential Impact & Venture Thesis (Tie-Breaker Priority #3)
-- **Global & Diaspora Equity**: Supports **8 cultural regions** out of the box (Cape Town & Sophiatown, Chicago, London, Brooklyn, Tokyo, Kingston & Windrush, Mumbai, Buenos Aires) plus arbitrary live Qloo 250M+ entity queries.
-- **Zero-BAA Enterprise Wedge for 32,000+ Senior Living Communities**: Memory-care operators face 65% annual CNA turnover and costly sundowning escalations, yet traditional healthcare AI stalls for 9 months in HIPAA/BAA review. Because Qloo Taste AI™ requires **zero PII**, facilities deploy Kinship bedside QR Passports in **under 15 minutes** at **$14/resident/month** (`2.9×` net labor ROI) alongside CMS’s new **$2,500/yr Medicare GUIDE** dementia respite model.
-
-### 4. Quality of the Idea (Tie-Breaker Priority #4)
-- Reframes taste intelligence from passive entertainment discovery into **non-pharmacological neurological medicine and intergenerational human connection** — something impossible for an LLM alone and uniquely unlocked by Qloo.
+1. **A reconstructed ages 10–30 youth universe.** Era-locked songs, films and
+   broadcasts from the person's youth hometown, each carrying its Qloo clue
+   attribution (`feature.explainability=true`), with an optional warm-EQ Web
+   Audio preview (a 2.5 kHz low-pass toggle for hearing aids) and
+   zero-quiz sensory invitations — prompts phrased so nobody has to recall
+   anything to take part.
+2. **An intergenerational bridge** (`GET /v2/analysis/compare`). What a
+   visitor's modern favourite and the elder's youth universe genuinely share,
+   expressed as a 15-minute side-by-side visit playbook plus a large-type
+   **Shared Moment** screen designed for two people looking at one device.
+3. **A late-afternoon settling option.** A three-step tempo arc
+   (96 → 76 → 62 BPM across roughly 15 minutes), scent and texture suggestions
+   drawn from `urn:entity:brand`, and an optional warm-EQ setting. The app says
+   plainly that this is a suggestion and not a treatment, and that it will not
+   work every time.
+4. **Nostalgic dining and calm venues** (`urn:entity:place`). Regional
+   culinary taste tags paired with heritage cafés, easy-to-chew texture ideas,
+   warm-not-hot serving temperatures and high-contrast plating. Presented as
+   general comfort suggestions, with texture, swallowing and medication
+   questions explicitly handed back to the care team.
+5. **A printable one-page bedside passport with a QR code.** The passport
+   encodes into a `#kinship=…` URL fragment, which a browser never sends to a
+   server. The QR matrix is generated by a hand-written
+   **ISO/IEC 18004** encoder in `src/utils/qrAndPassport.ts` (byte mode, ECC
+   level L, versions 1–14, Reed-Solomon over GF(256) via its own `gfMul`,
+   `rsDivisor` and `rsRemainder`) — no external QR dependency. The screen also
+   states the trade-off out loud: anyone who scans the code can read what is in
+   it, and it can land in browser history, so it should be shared deliberately.
 
 ---
 
-## Submission Links
+## 2. The Qloo workflow, and why it fits this problem *(required item 2)*
+
+**Three endpoint paths are actually called**, with these parameters:
+
+| Path | Parameters used | Why it fits |
+| --- | --- | --- |
+| `GET /search` | entity name resolution | Turns one surviving clue ("Miriam Makeba", "Tems") into Qloo entity identifiers, so nothing downstream depends on a guessed string. |
+| `GET /v2/insights` | `filter.type` (`urn:entity:artist`, `urn:entity:movie`, `urn:entity:tv_show`, `urn:entity:brand`, `urn:entity:place`), `filter.release_year.min`/`.max`, `filter.location.query`, `signal.location.query`, `bias.trends="off"`, `filter.exclude.tags`, `filter.content_rating`, `feature.explainability=true`, `output.heatmap.boundary=urn:geohash` | This is the load-bearing call. Release-year bounds *and* a location signal *and* trend bias switched off is exactly the shape of "what was salient here, then" — a query a general model can only approximate by guessing. `bias.trends="off"` matters: a trending-weighted result would surface what is popular now, not what was popular in 1962. |
+| `GET /v2/analysis/compare` | `signal.interests.entities` on both sides | Compares a visitor's modern favourite against the elder's youth universe directly, so the bridge between two people is computed rather than asserted. |
+
+**Five `urn:entity:*` types** are queried — artist, movie, tv_show, brand,
+place — plus two insight surfaces: `urn:heatmap` (bounded by `urn:geohash`) for
+neighbourhood-level youth culture, and `urn:demographics` for the generational
+comparison.
+
+**Why this could not be built without Qloo.** The product's entire value is
+specificity along three axes at once: *which years*, *which place*, *which kind
+of thing*. A prompted model produces plausible-sounding decade stereotypes and
+cannot distinguish Cape Town in 1958 from a generic "50s oldies" playlist. The
+offline fallback in this repository exists only so a reviewer without a
+credential can explore the workflow — and when it is in use, the app says so on
+screen and labels every item as coming from Kinship's own collection rather
+than from Qloo.
+
+**Eight cultural regions** ship with curated support, including diaspora
+histories that a US/UK-centric catalogue would flatten: Cape Town (and the
+Sophiatown jazz era), Chicago, London, Brooklyn, Showa-era Tokyo, Kingston
+rocksteady, Mumbai's golden-age filmi music, and Buenos Aires.
+
+### The agent's behaviour, described accurately
+
+- **A real self-correction pass.** If a live query returns fewer than two
+  results for a diaspora cue, the engine drops peril tags and retries with the
+  reminiscence window widened by ±5 years and the city lock relaxed, keeping
+  `bias.trends="off"` — and records that it did so in a note the UI can show
+  (`server/kinshipQlooEngine.ts:449–475`).
+- **A recorded four-step reasoning trace.** Every run produces an
+  `agentReasoningLog` labelled `OBSERVE → TOOL_CALL → AUDIT_SELF_CORRECT →
+  SYNTHESIZE`, each entry naming the tools and the endpoint used
+  (`server/kinshipQlooEngine.ts:1318–1342`). This is an explanation structure
+  built from a deterministic pipeline — it is deliberately **not** described as
+  an autonomous model-driven loop, because no model is deciding the steps.
+- **Safety filtering as data, not prose.** Distress-heavy tags (`horror`,
+  `thriller`, `war`) are excluded at query time via `filter.exclude.tags`, and
+  what was blocked is reported in `blockedDistressTraps` so the filtering is
+  auditable rather than implied.
+- **An MCP tool server (`mcp/1.0`).** `GET /api/mcp/tools` publishes the
+  manifest and `POST /api/mcp/call` invokes it, so an external Claude, OpenAI
+  or LangGraph workflow can call Kinship programmatically. The five tools are
+  `reconstruct_reminiscence_bump`, `bridge_generations_compare`,
+  `prescribe_iso_sundowning_rescue`, `curate_dysphagia_nostalgic_dining` and
+  `parse_family_intake_story`. The last two names are inherited from an earlier
+  draft and read more medically than the product behaves; renaming them would
+  break existing integrations, so their **descriptions** now state the limits
+  explicitly instead.
+- **A comparison section that says what it is.** Discover carries a
+  "without Qloo vs. with Qloo" panel arguing why taste intelligence matters
+  here. Its left column is authored prose describing how a generic model tends
+  to answer — no model is called to produce it — and the panel now states that
+  plainly rather than implying an experiment was run.
+
+---
+
+## 3. Request to result, redacted *(required item 3)*
+
+The call the app makes for a first-time visitor, with the entity choices shown
+as the engine resolves them. No credential and no person's name appears at any
+point in the outbound request.
+
+```http
+GET /v2/insights
+  ?filter.type=urn:entity:artist
+  &filter.release_year.min=1954
+  &filter.release_year.max=1974
+  &signal.location.query=Cape Town
+  &bias.trends=off
+  &filter.exclude.tags=horror,thriller,war
+  &feature.explainability=true
+```
+
+**Entity and tag choices, and why:**
+
+- `filter.release_year.min/max = 1954/1974` — derived, never typed in. The
+  birth year is converted to `[birthYear+10, birthYear+30]`, so the window
+  follows the person rather than a decade label.
+- `signal.location.query = Cape Town` — a city name is the only
+  person-adjacent value that leaves the service. It is chosen from a fixed list
+  of eight, not free text, so it cannot carry an address or an identifier.
+- `bias.trends = off` — without this the result drifts toward what is currently
+  popular, which is the opposite of the question being asked.
+- `filter.exclude.tags = horror,thriller,war` — era-appropriate titles are not
+  automatically safe titles, and a 1960 suspense classic is a poor thing to put
+  in front of someone in a dim room at 4:30 in the afternoon.
+- `feature.explainability = true` — so each returned cue can show *why* it was
+  chosen. Provenance is rendered in the UI, not hidden behind a score.
+
+**What comes back**, and what the app does with it: entity identifiers, names,
+release years and affinity values, each kept attached to the clue that produced
+it. Kinship uses the release year to compute how old the person would have been
+when it came out, and renders that as the reason a suggestion is on screen.
+Nothing is cached between requests, and no names are stored server-side.
+
+**A note on the sample values.** The output shape above is what the engine
+produces in both modes. The example values shipped in this repository come from
+the deterministic offline twin (`mode: "verified_cultural_twin"`), captured in a
+sandbox that holds no credential — so they are reproducible by anyone running
+the code, and they are labelled as not-Qloo output wherever they appear.
+Production holds the credential and reports that the live path is reachable:
+
+```json
+GET https://kinship-app-phi.vercel.app/api/health   (2026-10-29T08:49:29.686Z)
+{"ok":true,"mcpToolsCount":5,
+ "qloo":{"connected":true,"baseUrl":"https://hackathon.api.qloo.com",
+         "maskedKey":"hack••••678b"}}
+```
+
+`qloo.connected: true` establishes that the deployed function reaches the Qloo
+API with valid credentials. It does not by itself prove that a full bridge call
+returned live entities; a redacted live capture of `POST /api/kinship-bridge`
+showing `"mode":"live_qloo_api"` is to be pasted here before submission.
+
+---
+
+## How it was built, against the judging criteria
+
+### 1. Technological implementation *(tie-breaker priority 1)*
+
+- **A Vite + React 18 front end on an Express server** (`server/index.ts`,
+  `server/apiRouter.ts`), deployed to Vercel as a serverless function. Four
+  runtime dependencies in total: `express`, `react`, `react-dom`,
+  `lucide-react`. No router library, no state library, no UI kit.
+- **Engine and catalogue separated** (`server/kinshipQlooEngine.ts`,
+  `server/reminiscenceGraph.ts`) so the Qloo path and the offline twin return
+  the same shape and the UI can label which one it got.
+- **Five MCP tools over `mcp/1.0`**, published at `GET /api/mcp/tools` and
+  callable at `POST /api/mcp/call`.
+- **A hand-written QR encoder** (ISO/IEC 18004, Reed-Solomon over GF(256)) and a
+  **hand-written Web Audio engine** with a toggleable 2.5 kHz low-pass for
+  hearing aids — both dependency-free, both in the repo.
+- **Code-split per screen**, so the entry chunk is 277.50 kB (85.26 kB gzipped)
+  and the heavy views load on demand.
+- **78 automated tests** across routing, design tokens, rendered accessibility
+  semantics, claim language, response headers and post-interaction behaviour.
+  Typecheck and build run in CI on every push.
+
+### 2. Design *(tie-breaker priority 2)*
+
+- **Contrast is computed, not assumed.** `tests/designTokens.test.ts` reads the
+  real values out of `tailwind.config.js` and asserts every pairing against its
+  WCAG 2.2 minimum, so a palette edit that drops a ratio below threshold fails
+  CI. It validates its own contrast function against known values first
+  (21:1 for black on white, 4.48:1 for `#777777` on white). Current figures:
+  ink `#353432` on warm paper `#F4F0E8` **10.94:1**; on parchment `#FDFCF9`
+  **12.12:1**; sage `#55634E` on warm paper **5.63:1**; sage `#64745D` on white
+  **5.00:1**; white on sage `#64745D` **5.00:1**; sage `#A9B5A2` on dark
+  **7.18:1**; focus ring `#6A7DAD` on paper **3.59:1** against the 3:1 non-text
+  minimum. The originally supplied focus blue `#788CBA` measured **2.95:1** and
+  was darkened to `#6A7DAD` rather than shipped.
+- **Type size is an accessibility control.** The root font is 17px and all type
+  is rem-based, so the built-in Normal / Large / Largest preference scales type
+  and spacing together without breaking layout. 93 absolute-px sizes between
+  9px and 11px were removed from the codebase to make that true.
+- **Journey order is data, not layout.** `ROUTE_IDS` in `src/utils/routing.ts`
+  defines the order the screens are meant to be used in, and both the phone
+  bottom nav and the desktop nav derive their order from it. Two tests pin it,
+  so the navigation cannot silently drift out of sequence.
+- **Interaction rules for dementia-inclusive use.** No quizzes, no scores, no
+  countdowns, no streaks, no notifications, no autoplay of distressing media.
+  Every screen offers a neutral way out ("Not for us today", "Try something
+  else", "No need to finish anything"), declining a suggestion is undoable, and
+  an immediate stop is always visible.
+- **The sample family is declared, not hidden.** Kinship starts with an example
+  family so a first-time visitor is not staring at an empty screen — and every
+  screen says so, naming the example, until the visitor supplies a detail of
+  their own, at which point the notice goes away. An interaction test asserts
+  that transition.
+- **A phone nav with four labelled destinations** (44px minimum touch targets
+  under coarse pointers, safe-area padding for the gesture bar), with the full
+  technical detail preserved one tap away for care teams and judges.
+
+### 3. Potential impact *(tie-breaker priority 3)*
+
+Kinship is aimed at the gap between what a family can do on their own and what
+a memory-care operator can commission. It needs no account, no database and no
+integration to be useful on day one: one person can open the URL, type a
+hometown and a birth year, and have something to sit down with in under a
+minute. The same output prints as a one-page passport that can be handed to
+whoever is on shift.
+
+The eight supported regions are deliberately weighted toward diaspora histories
+that a US/UK-centric catalogue flattens — Sophiatown jazz, Kingston rocksteady,
+Showa-era kayōkyoku, Mumbai's golden-age filmi music — because the people least
+served by generic "oldies" defaults are exactly the people whose youth culture
+was local.
+
+The operator appendix in the app contains a per-resident cost model. It is
+labelled on screen as an illustrative assumption built on simple arithmetic,
+not as a quote, a forecast or a result, and nothing in this submission repeats
+those figures as though they were findings. Kinship records no outcomes and
+cannot report any.
+
+### 4. Quality of the idea *(tie-breaker priority 4)*
+
+Taste intelligence is usually pointed at discovery — what to try next. Kinship
+points the same machinery at **familiarity**: what was already loved, in a
+specific place, during a specific window of one person's life. That inversion is
+what makes Qloo load-bearing rather than decorative. Release-year bounds
+combined with a location signal and `bias.trends="off"` is a question about
+historical cultural salience, and answering it well is the whole product.
+
+It also changes what a good result looks like. A recommender optimises for
+engagement; Kinship optimises for a fifteen-minute visit going well, which is
+why the output is a playbook and a printable sheet rather than a feed, and why
+every suggestion is labelled as a suggestion.
+
+---
+
+## 4. Demo and screenshots *(required item 4)*
+
+**Live demo (public, no login):** `https://kinship-app-phi.vercel.app`
+
+The demo is the submission: there is no video, and no credential is needed to
+use it. Suggested path for a reviewer, about four minutes:
+
+1. Land on Home. Note that it says the family on screen is an example, and
+   offers one obvious first action.
+2. **Explore what's familiar** — the reconstructed youth universe, each cue
+   carrying why it was chosen. Open the Qloo trace drawer to see the four-step
+   reasoning log and whether each item is labelled `LIVE` or `TWIN`.
+3. **Share a moment** — the large-type side-by-side screen.
+4. **Add what you know** — change the place or the birth year and watch the
+   suggestions and the example-family notice respond.
+5. **Care passport** — the printable page and its QR code.
+6. **If late afternoon feels unsettled** (Home) — the settling-sounds dialog.
+   It is a real modal: focus moves in, Escape closes it.
+
+Screenshots at 360px and 1280px, and a screen-reader pass, are to be added
+before submission. **No screenshot in this submission will contain a credential
+or a real person's information** — the demo data is an example family that the
+app itself labels as fictional.
+
+## 5. Setup from a clean environment *(required item 5)*
+
+Verified on Node **v22.22.3**. No global tooling required.
+
+```bash
+git clone https://github.com/ianwest09/kinship.git
+cd kinship
+npm ci                 # installs from the lockfile
+cp .env.example .env   # PORT, QLOO_BASE_URL, QLOO_API_KEY
+npm run build          # vite build -> dist/
+npm run start          # NODE_ENV=production, serves dist/ + the API; PORT honoured, default 3000
+```
+
+Then open `http://localhost:3000`.
+
+```bash
+npm test               # 78 tests: routing, tokens, rendered a11y, claims, headers, interaction
+npm run typecheck      # tsc --noEmit
+npm run dev            # tsx server/index.ts, no build step
+```
+
+**Running without a Qloo credential is a supported path, not a broken one.**
+With `QLOO_API_KEY` absent the app starts normally, `/api/health` reports
+`qloo.connected: false`, and the UI states that results are drawn from
+Kinship's own curated collection rather than from Qloo. Nothing is silently
+substituted.
+
+Environment variables, by name only:
+
+| Variable | Purpose |
+| --- | --- |
+| `PORT` | Optional. Listen port; defaults to 3000. |
+| `QLOO_BASE_URL` | Qloo API base. Set to `https://hackathon.api.qloo.com`. |
+| `QLOO_API_KEY` | Hackathon credential. Server-side only — never sent to the browser, never logged, and shown in responses only masked (`hack••••678b`). In production it exists solely as an encrypted Vercel environment variable. |
+| `KINSHIP_ADMIN_TOKEN` | Optional. `POST /api/qloo-config` is disabled entirely unless this is set, and even then requires it in an `x-kinship-admin` header. The in-app key-entry field was removed so no visitor can reach that path. |
+
+## 6. Known limitations, including what the result does not establish *(required item 6)*
+
+Stated plainly, because the honest version is the useful one:
+
+- **Nothing here is a medical device or a treatment.** Kinship makes no
+  regulatory or compliance certification claim of any kind, and no clinical
+  assessment of any person. Compliance for a real deployment depends on the
+  operator's own judgement.
+- **No outcome is measured or implied.** The app records no outcomes, so it
+  cannot report any. There is no evidence in this repository that any
+  suggestion reduced distress, lengthened a visit or changed eating. Every
+  figure in the operator appendix is a labelled planning assumption.
+- **The suggestion will not work every time**, and the product says so on the
+  screen where it matters. Familiarity is not a switch.
+- **The live Qloo path is confirmed reachable, not yet captured.**
+  `/api/health` in production reports `qloo.connected: true` with the key
+  masked, which proves the deployed function authenticates against the Qloo
+  API. A redacted `live_qloo_api` response from a full bridge call is still to
+  be added. Every automated test runs against the deterministic offline twin,
+  because the build environment holds no credential.
+- **No browser testing was possible in the build environment.** Interaction
+  behaviour is verified with jsdom — real events, real React, real DOM — but
+  jsdom has no layout engine, so **overflow, clipping, spacing, focus rings and
+  contrast in context are unverified by automation**. Contrast is verified
+  arithmetically from the palette instead. There are no screenshots yet and no
+  physical-device or screen-reader session has been recorded.
+- **Controlled inputs are not covered by automation.** jsdom cannot drive
+  React's controlled inputs: setting a value and dispatching `input`/`change`
+  moves the DOM value but React's value tracker never sees it, so `onChange`
+  does not fire. The free-text story parser and the birth-year slider are
+  therefore exercised by hand only. This is documented in
+  `tests/helpers/jsdomHarness.ts` so nobody mistakes it for coverage later.
+- **A city name does leave the service.** Outbound Qloo requests carry entity
+  identifiers, release years, a city chosen from a fixed list of eight, and
+  content filters. Person names and birth years are used to build the request
+  and then discarded; request bodies are not logged, only engine errors. A
+  fragment-based passport link is never sent to a server, but anyone who scans
+  it can read what is inside it.
+- **The offline twin is not Qloo output.** Where it is used, the app labels it.
+  A reviewer who sees suggestions without a credential is seeing Kinship's own
+  curated collection, and the interface says so.
+- **Third-party analytics may be present at the platform level.** Vercel Web
+  Analytics was enabled on the project during development and can only be
+  switched off from the dashboard. No analytics script exists anywhere in this
+  repository, and two automated installer pull requests were closed unmerged
+  for that reason. Whether the platform injects a script at the edge has not
+  been confirmed either way.
+
+---
+
+## Submission links
 
 | Field | Value |
 | --- | --- |
-| **Live demo (public, no login)** | https://kinship-app-phi.vercel.app |
-| **Source repository** | https://github.com/ianwest09/kinship |
-| **Open-source licence** | MIT — `LICENSE` at repository root, auto-detected and shown in the GitHub **About** sidebar |
-| **Health / connectivity check** | https://kinship-app-phi.vercel.app/api/health → `qloo.connected` reports whether the deployment is answering from live Qloo or from the labelled offline fallback |
-| **MCP tool manifest** | https://kinship-app-phi.vercel.app/api/mcp/tools → `protocol: mcp/1.0`, 5 tools |
+| **Live demo (public, no login)** | `https://kinship-app-phi.vercel.app` |
+| **Source repository** | `https://github.com/ianwest09/kinship` |
+| **Open-source licence** | MIT — `LICENSE` at repository root |
+| **Health / connectivity check** | `/api/health` → `qloo.connected` reports whether the deployment is answering from live Qloo or from the labelled offline fallback |
+| **MCP tool manifest** | `/api/mcp/tools` → `protocol: mcp/1.0`, five tools |
 
-Externally hosted on Vercel (`iad1`, Node 24, Vite build → serverless `api/index.ts`). Not local-only and not behind private access: Deployment Protection is disabled, so any judge can open the URL and run the full workflow end to end. `QLOO_API_KEY` is supplied only as an encrypted Vercel environment variable and is never sent to the browser — the in-app key-entry field was removed for that reason, and `POST /api/qloo-config` now requires a server-side `KINSHIP_ADMIN_TOKEN` plus a matching `x-kinship-admin` header.
+Externally hosted on Vercel (`iad1`, Node 24, Vite build → serverless
+function). Not local-only and not behind private access: any judge can open the
+URL and run the full workflow end to end.
 
-No demo video is submitted (Devpost does not require one); the live URL is the demo.
+### Current production state, verified
+
+| Check | Result |
+| --- | --- |
+| Deployment | `dpl_4MtHFranfiXjHgPvj1Jt2jwmCx57` — `READY` / `PROMOTED`, target production |
+| Commit | `03254c7` on `main`, commit signature verified |
+| Aliases | `kinship-app-phi.vercel.app` assigned, `aliasError: null` |
+| Build | 18.2s, both Vercel commit statuses `success` |
+| `/api/health` | `ok: true`, `mcpToolsCount: 5`, **`qloo.connected: true`**, `maskedKey: hack••••678b` — read at `2026-10-29T08:49:29.686Z`, after the alias was assigned |
+| `/api/mcp/tools` | `protocol: mcp/1.0`, five tools, descriptions free of treatment and medication claims |
+| Front page | Renders the example-family declaration and the single first action |
+| Operator appendix | Renders with "Illustrative model — not measured results" and "Demo cohort (fictional)" labelling |
+
+---
+
+## What changed in this rewrite, and why
+
+The previous version of this document made claims the shipped product
+deliberately refuses to make. Measured against this repository's own honesty
+suite, it rendered **18 of the 68 phrases that `tests/honesty.test.ts` bans from
+user-visible copy** — including named brain regions presented as mechanism,
+drug-interaction safety, a food-texture grading standard, and an absolute
+no-personal-data claim. A judge would have read those, then opened a demo whose own
+operator appendix states that Kinship makes no regulatory or compliance
+certification claim of any kind and is not a medical device, and whose settling
+tool says it is "a suggestion only — not a treatment, and it will not work every
+time". The
+submission would have looked like marketing the product had walked back.
+
+Specifically removed, and what replaced it:
+
+| Removed | Replaced with |
+| --- | --- |
+| Uncited statistics (a global family count, a percentage of grandchildren who avoid visiting, an intake improvement, a staff-turnover rate, a labour-return multiple, a reimbursement figure, a per-resident price) | The problem statement, which needs no number to be persuasive, plus a pointer to the appendix's cost model *as a labelled assumption* |
+| Named brain regions and neural pathways presented as mechanism | The reminiscence bump described as an observation in memory research, with its limits stated |
+| Drug-interaction and texture-level safety claims | The MCP descriptions' own wording: general comfort suggestions, with those questions handed to the care team |
+| Absolute no-personal-data claims | The specific, true claim: no person's name is sent to Qloo, and a city from a fixed list of eight is |
+| An endpoint listed in the architecture table | Removed — it is called nowhere in the codebase (verified: zero occurrences) |
+| An entity-domain count | Five `urn:entity:*` types plus two insight surfaces, which is what the code queries |
+| An "autonomous agent loop" framing | The four-step *recorded trace* it actually is, plus the genuine self-correction retry pass, cited by file and line |
+| A comparison panel framed as a live diff | A panel that states its left column is authored prose and that no model is called to produce it |
+
+Both this file and `README.md` are now scanned against the same ban list in CI,
+so the submission copy cannot drift away from the product again. The tool names
+`prescribe_iso_sundowning_rescue` and `curate_dysphagia_nostalgic_dining` are
+excluded from that scan deliberately: they are a published API contract, and
+renaming them would break integrations. Their descriptions carry the limits
+instead.

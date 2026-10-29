@@ -1,6 +1,6 @@
 # Kinship — The Dementia “Reminiscence Bump” & Intergenerational Bridge Agent
 
-> **Qloo Agentic Hackathon (“Agents, but with taste.”)** · Built on **Qloo Taste AI™ v2** (`artist`, `movie`, `tv_show`, `brand`, `place`, `demographics`, `heatmap`, `/v2/analysis/compare`) + **Model Context Protocol (`mcp/1.0`)** · **MIT Licensed** · **Zero Cloud PHI / Zero PII**
+> **Qloo Agentic Hackathon (“Agents, but with taste.”)** · Built on **Qloo Taste AI™ v2** (`artist`, `movie`, `tv_show`, `brand`, `place`, `demographics`, `heatmap`, `/v2/analysis/compare`) + **Model Context Protocol (`mcp/1.0`)** · **MIT Licensed** · **No person’s name is ever sent to Qloo**
 
 ## Live Demo
 
@@ -38,34 +38,34 @@ Five destinations — **Home, Discover, Together, Family, Preferences** — sit 
 
 Over **57 million families worldwide** navigate Alzheimer’s and related dementias. Two heartbreaks strike almost every household and memory-care community every single day:
 
-1. **4:30 PM “Sundowning” Agitation**: As daylight fades, circadian confusion triggers acute homesickness (*“I want to go home”*), pacing, and distress. Caregivers or smart-TV autoplay routinely put on generic “oldies” or 1960s films — accidentally playing suspense/war triggers (*Psycho*, *The Birds*, loud streaming ad breaks) that dementia brains perceive as real-room danger.
-2. **Intergenerational Visit Dread**: Over **60% of teens and Gen-Z grandchildren** dread visiting a grandparent with dementia because standard conversation (*“Do you remember my school? What did you have for lunch?”*) inadvertently quizzes damaged short-term hippocampal memory — causing shame and silence.
+1. **The late-afternoon hard stretch**: as daylight fades, the end of the day is often the hardest — restlessness, pacing, wanting to go home. Whatever is on the television gets left running, and a generic “oldies” playlist or a film from the right decade can carry suspense, war or loud interruption that lands badly without anyone intending it.
+2. **Intergenerational avoidance**: adult grandchildren often put off visiting, because the obvious conversation (*“Do you remember my school? What did you have for lunch?”*) asks for recall that has become unreliable — so the visit collapses into shame and silence on both sides.
 
 ### The Neurological Breakthrough + Why Only Qloo Taste AI™ Can Solve It
 
-Neuroscience proves that while Alzheimer’s erodes recent hippocampal memory, **autobiographical, musical, olfactory, and culinary memories formed between ages 10 and 30 — the “Reminiscence Bump” — survive into late-stage disease inside the medial prefrontal cortex (mPFC)** (Petr Janata, UC Davis).
+Memory research has long described the **reminiscence bump**: music and culture absorbed between roughly ages 10 and 30 tends to be held on to far more strongly than what came later, and often stays reachable long after recent events have become difficult. Kinship is built on that observation — and on its honest limit, which is that a familiar song is an opportunity, not a promise.
 
 A generic prompted LLM **cannot** solve this safely:
 - Generic LLMs guess US/UK Top-40 stereotypes, suffer recency bias, hallucinate release years, recommend peril-heavy era classics, and tell grandchildren to ask memory-testing questions.
-- **Kinship** uses **Qloo Taste AI™’s 250M+ entity cultural graph** with **zero patient PII** to reconstruct an elder’s exact ages 10–30 cultural universe in their youth hometown, filter out distress triggers, compose a 15-minute clinical **Iso-Principle BPM step-down (`96 → 76 → 62 BPM`)**, pair **IDDSI Levels 4–6 dysphagia-safe youth comfort meals & quiet cafés**, and run **`GET /v2/analysis/compare`** to reveal the hidden musical/story DNA connecting a 19-year-old grandchild’s favorites (*Laufey*, *Olivia Dean*, *Studio Ghibli*, *Tems*) with their grandparent’s 1950s–1970s youth touchstones.
+- **Kinship** uses **Qloo Taste AI™** to reconstruct the ages 10–30 cultural universe of the person’s youth hometown, exclude distress-heavy tags at query time, build a settling tempo arc (**96 → 76 → 62 BPM** across roughly 15 minutes), pair regional youth culinary tags with easy-to-chew texture ideas, warm-not-hot serving temperatures and quiet heritage cafés (`urn:entity:place`), and run **`GET /v2/analysis/compare`** to show what a 19-year-old grandchild’s favourites (*Laufey*, *Olivia Dean*, *Studio Ghibli*, *Tems*) genuinely share with their grandparent’s 1950s–1970s touchstones.
 
 ---
 
 ## Full-Surface Qloo v2 API Architecture
 
-Kinship orchestrates **6 entity/insight domains** and **all core Qloo v2 endpoints** inside a 4-iteration autonomous ReAct agent loop (`OBSERVE → TOOL_CALL → AUDIT_SELF_CORRECT → SYNTHESIZE`):
+Kinship queries **five `urn:entity:*` types** (`artist`, `movie`, `tv_show`, `brand`, `place`) plus the `urn:demographics` and `urn:heatmap` insight surfaces, and records a four-step reasoning trace (`OBSERVE → TOOL_CALL → AUDIT_SELF_CORRECT → SYNTHESIZE`) for every run. The trace is an explanation structure built from a deterministic pipeline — no model decides the steps.
 
-| Agent / Tool | Qloo v2 Endpoint & Parameters | Clinical Care Role |
+| Agent / Tool | Qloo v2 Endpoint & Parameters | What it does for the family |
 |---|---|---|
-| **01. Clue & Bump Resolver** | `GET /search` · `GET /v2/tags` | Resolves 1–2 surviving family clues + grandchild favorites into Qloo UUIDs and locks the `[birthYear+10, birthYear+30]` mPFC window. |
+| **01. Clue & Bump Resolver** | `GET /search` | Resolves one or two surviving family clues and a grandchild’s favourites into Qloo entity identifiers, and locks the window to `[birthYear+10, birthYear+30]`. |
 | **02. Youth-Universe Reconstructor** | `GET /v2/insights` (`urn:entity:artist`, `movie`, `tv_show`, `filter.release_year`, `signal.location.query`, `bias.trends="off"`, `feature.explainability=true`) | Reconstructs high-salience youth cues across **8 global & diaspora regions** (Cape Town, Chicago, London, Brooklyn, Tokyo, Kingston, Mumbai, Buenos Aires) with clue attribution. |
-| **03. Sundowning, Brand & Dining Shield** | `GET /v2/insights` (`filter.exclude.tags=horror,thriller,war`, `urn:entity:brand`, `urn:entity:place`) | Blocks era peril traps, sequences `96→76→62 BPM` Iso-Principle entrainment, prescribes $5 olfactory/tea anchors, and curates **IDDSI Levels 4–6 easy-to-chew (<52°C, medication-safe) nostalgic dining & quiet hours**. |
+| **03. Settling, Brand & Dining** | `GET /v2/insights` (`filter.exclude.tags=horror,thriller,war`, `filter.content_rating`, `urn:entity:brand`, `urn:entity:place`) | Excludes distress-heavy tags at query time and reports what was blocked, sequences the `96→76→62 BPM` tempo arc, suggests scent and texture anchors from `urn:entity:brand`, and pairs regional culinary tags with easy-to-chew textures, warm-not-hot serving temperatures and quiet-hour heritage cafés. |
 | **04. Intergenerational Soul Bridge** | `GET /v2/analysis/compare` (`a.signal.interests.entities` vs `b.signal.interests.entities`) | Computes shared harmonic & narrative tag co-occurrence across 60 years to generate a 3-step, zero-quiz 15-minute grandchild visit playbook. |
-| **05. Silo Breaker & Hometown Mapper** | `GET /v2/insights?filter.type=urn:demographics` + `filter.type=urn:heatmap` (`output.heatmap.boundary=urn:geohash`) | Proves generational recommender siloing across 6 age bands and maps neighborhood youth geohashes with sensory place prompts. |
+| **05. Generational & Hometown Mapper** | `GET /v2/insights?filter.type=urn:demographics` + `filter.type=urn:heatmap` (`output.heatmap.boundary=urn:geohash`) | Compares taste across age bands and maps neighbourhood-level youth geohashes with sensory place prompts. |
 
-### Autonomous Agent Self-Correction & Model Context Protocol (`mcp/1.0`)
-- **Sparsity & Safety Self-Correction**: If a live Qloo query returns distress-tagged entities or `<2` results for a diaspora cue, Kinship’s auditor drops peril tags and autonomously retries with a widened `±5 year` diaspora window while maintaining `bias.trends="off"`.
-- **Callable MCP Tool Server**: Exposes `GET /api/mcp/tools` and `POST /api/mcp/call` for 5 clinical tools (`reconstruct_reminiscence_bump`, `bridge_generations_compare`, `prescribe_iso_sundowning_rescue`, `curate_dysphagia_nostalgic_dining`, `parse_family_intake_story`) so any Claude, OpenAI, or LangGraph care workflow can call Kinship directly.
+### Self-Correction, Provenance & Model Context Protocol (`mcp/1.0`)
+- **Sparsity self-correction**: if a live Qloo query returns distress-tagged entities or fewer than two results for a diaspora cue, the engine drops peril tags and retries with the window widened by `±5 years` and the city lock relaxed, keeping `bias.trends="off"` — and records that it did so (`server/kinshipQlooEngine.ts:449–475`).
+- **Callable MCP Tool Server**: exposes `GET /api/mcp/tools` and `POST /api/mcp/call` for five tools (`reconstruct_reminiscence_bump`, `bridge_generations_compare`, `prescribe_iso_sundowning_rescue`, `curate_dysphagia_nostalgic_dining`, `parse_family_intake_story`) so any Claude, OpenAI or LangGraph workflow can call Kinship directly. Two of those names read more medically than the product behaves; they are a published API contract, so their descriptions carry the limits instead.
 
 ---
 
