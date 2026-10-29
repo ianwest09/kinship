@@ -26,9 +26,11 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      # Dependency-free suite: node:test + tsx, both already in the project.
-      # Covers contrast ratios, routing, rendered accessibility semantics and
-      # the honesty guards over claim language.
+      # node:test + tsx, plus jsdom (dev-only) so the interaction suite can mount
+      # the real App and drive it with events. Covers contrast ratios, routing,
+      # rendered accessibility semantics, the honesty guards over claim language,
+      # response headers, and post-interaction behaviour. No browser is involved:
+      # jsdom has no layout engine, so nothing here verifies appearance.
       - name: Test
         run: npm test
 
