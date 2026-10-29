@@ -1274,7 +1274,12 @@ export async function generateKinshipBridge(
   const topCue = reconstructedYouthUniverse[0];
   const topHotspot = hometownHotspots[0];
 
-  // Upgrade 3: Dynamic "Without Qloo (Blind LLM) vs. With Qloo Taste AI™" Side-by-Side Proof
+  // Upgrade 3: the side-by-side comparison rendered on the Discover screen.
+  // The "without Qloo" column below is authored prose describing how a generic
+  // prompted model tends to answer this kind of question. No model is called to
+  // produce it and nothing here is measured, so the UI says so plainly rather
+  // than calling the pair a live diff. The Qloo column interpolates values this
+  // run actually computed, which is what keeps the comparison honest.
   const blindLlmComparison: BlindLlmComparisonRow[] = [
     {
       dimension: '1. Era Precision (Ages 10–30 Reminiscence Window)',

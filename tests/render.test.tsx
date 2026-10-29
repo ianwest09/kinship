@@ -493,6 +493,23 @@ test('the detailed view describes screening, not clinical verification', () => {
   assert.ok(!/verified for dementia sensory comfort/.test(detailHtml));
 });
 
+test('the Qloo comparison says what it actually is', () => {
+  // Rendered from the real engine fixture above, so this is what a visitor sees.
+  // The section used to call itself a "Live request-by-request diff" and wear a
+  // "Zero PII" badge, while its left column is authored prose: no model is
+  // called to produce it. The operator appendix already refuses compliance
+  // claims, so this screen must not make one either.
+  const text = detailHtml.replace(/<!--\s*-->/g, '');
+
+  assert.match(text, /Without Qloo vs\. with Qloo/);
+  assert.match(text, /A generic model would probably guess/);
+  assert.match(text, /no model is called to produce it/);
+  assert.match(text, /No names sent to Qloo/);
+  assert.ok(!/zero\s*pii/i.test(text), 'a compliance claim the appendix refuses to make');
+  assert.ok(!text.includes('Live request-by-request'), 'calling an authored comparison live');
+  assert.ok(!/Generic Prompted LLM/.test(text), 'implies a model was prompted at request time');
+});
+
 /* --------------------------------------------------------------- overlays */
 
 test('the settling-sounds dialog is a real dialog with plain-language title', () => {

@@ -114,7 +114,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
             className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl border border-plum-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 text-plum-700 dark:text-brass-200 text-xs font-semibold shadow-sm"
           >
             <GitCompare className="w-4 h-4" />
-            <span>Blind LLM vs. Qloo Taste AI™</span>
+            <span>Without Qloo vs. with Qloo</span>
             {showBlindLlmCompare ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
 
@@ -134,7 +134,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
       </div>
 
       {/* ===================================================================== */}
-      {/* UPGRADE 3: WITHOUT QLOO (BLIND LLM) VS. WITH QLOO TASTE AI™ PROOF     */}
+      {/* UPGRADE 3: WITHOUT QLOO VS. WITH QLOO TASTE AI™ — LEFT COLUMN IS AUTHORED     */}
       {/* ===================================================================== */}
       {showBlindLlmCompare && data.blindLlmComparison?.length > 0 && (
         <section className="rounded-3xl border border-plum-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-900 p-5 md:p-6 shadow-sm space-y-4">
@@ -142,16 +142,24 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
             <div>
               <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider break-words text-plum-600 dark:text-brass-200">
                 <GitCompare className="w-4 h-4" />
-                <span>Why “Agents With Taste” matter here · Live request-by-request diff</span>
+                <span>Why “Agents With Taste” matter here · What changes when Qloo answers</span>
               </div>
               <h3 className="text-lg md:text-xl font-semibold text-loam-ink dark:text-parchment-50 mt-0.5">
-                Without Qloo (Generic Prompted LLM) vs. With Qloo Taste AI™ for {data.guardrailsApplied.elderName}
+                What a generic model tends to guess vs. what Kinship builds with Qloo Taste AI™ for {data.guardrailsApplied.elderName}
               </h3>
             </div>
             <span className="text-meta font-mono px-2.5 py-1 rounded-full bg-pine-50 dark:bg-vinyl-800 text-pine-700 dark:text-pine-300 self-start sm:self-auto">
-              Zero PII · 6 Cross-Domain Entity Types
+              No names sent to Qloo · 5 entity types queried
             </span>
           </div>
+
+          <p className="text-meta text-loam-body dark:text-loam-body-dark">
+            The “without Qloo” column is a written illustration of how a generic
+            prompted model tends to answer this kind of question — no model is
+            called to produce it, and nothing on this page is measured. The Qloo
+            column is built from this run’s own values, and the request trace
+            labels every step LIVE or TWIN so you can see where they came from.
+          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             {data.blindLlmComparison.map((row) => (
@@ -165,11 +173,11 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                 <div className="p-2.5 rounded-xl bg-clay-50/80 dark:bg-clay-950/30 border border-clay-200/80 dark:border-clay-900/50 space-y-1">
                   <div className="flex items-center gap-1.5 font-semibold text-clay-800 dark:text-clay-300">
                     <XCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>Blind LLM Guess:</span>
+                    <span>A generic model would probably guess:</span>
                   </div>
                   <p className="text-loam-body dark:text-loam-body-dark">{row.blindLlmGuess}</p>
                   <p className="text-meta text-clay-700 dark:text-clay-300 italic">
-                    Why it fails: {row.whyBlindLlmFails}
+                    Why that falls short: {row.whyBlindLlmFails}
                   </p>
                 </div>
                 <div className="p-2.5 rounded-xl bg-pine-50 dark:bg-vinyl-900 border border-pine-500/30 space-y-1">
