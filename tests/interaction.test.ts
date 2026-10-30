@@ -90,11 +90,34 @@ test('the phone back button returns to the previous screen, not out of the app',
   assert.match(q.text(), /Where to start/);
 });
 
-test('every bottom-nav destination is reachable and routed', async () => {
-  // A first load has a bare URL and Home comes from DEFAULT_ROUTE; once the
-  // person navigates, Home is written as #/home. Both resolve to the same screen.
+test('the floating menu expands, routes and closes without a bottom bar', async () => {
+  assert.equal(q.w.document.querySelector('#mobile-floating-menu'), null);
+  assert.equal(q.w.document.querySelector('.fixed.bottom-0'), null, 'the old bottom menu is still mounted');
+
+  const openMenu = () => q.w.document.querySelector('button[aria-label="Open main menu"]');
+  await q.click(openMenu());
+  const menu = q.w.document.querySelector('#mobile-floating-menu');
+  assert.ok(menu, 'the floating menu did not expand');
+  assert.equal(q.w.document.querySelector('button[aria-label="Close main menu"]')?.getAttribute('aria-expanded'), 'true');
+  assert.match(menu!.textContent ?? '', /Home/);
+  assert.match(menu!.textContent ?? '', /Discover/);
+  assert.match(menu!.textContent ?? '', /Together/);
+  assert.match(menu!.textContent ?? '', /Family/);
+  assert.match(menu!.textContent ?? '', /Passport/);
+  assert.match(menu!.textContent ?? '', /Preferences/);
+
+  const discover = [...menu!.querySelectorAll('button')].find((button) => button.textContent?.includes('Discover'));
+  await q.click(discover);
+  assert.equal(q.hash(), '#/discover');
+  assert.equal(q.w.document.querySelector('#mobile-floating-menu'), null, 'menu stayed open after navigation');
+
+  await q.click(openMenu());
+  await q.key('Escape');
+  assert.equal(q.w.document.querySelector('#mobile-floating-menu'), null, 'Escape did not close the menu');
+});
+
+test('every main-navigation destination is reachable and routed', async () => {
   const expected: Array<[string, string]> = [
-    ['Discover', '#/discover'],
     ['Together', '#/together'],
     ['Family', '#/family'],
     ['Home', '#/home'],

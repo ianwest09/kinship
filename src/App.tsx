@@ -6,11 +6,13 @@ import {
   FileHeart,
   Heart,
   Home as HomeIcon,
+  Menu,
   Moon,
   MoonStar,
   Settings,
   Sun,
   Users,
+  X,
 } from 'lucide-react';
 import {
   CareHomeCohortRecord,
@@ -203,15 +205,9 @@ const TAB_TITLES: Record<ActiveTab, string> = {
 };
 
 /**
- * Primary bottom navigation on phones: four roomy destinations.
- *
- * Five items would give each ~72px at 360px wide, which clips "Preferences".
- * Preferences, Passport and the detailed view stay one tap away from the header
- * and from the Home and Preferences screens, so nothing is orphaned.
- *
- * Both bars take their order from ROUTE_IDS rather than listing it themselves,
- * so the navigation follows the same sequence Home describes and cannot drift
- * from it when a screen is added.
+ * Navigation follows the same journey order as Home. Phones expose it from a
+ * floating menu rather than reserving the bottom edge, while wider screens keep
+ * the horizontal navigation visible.
  */
 const PHONE_DESTINATIONS: RouteId[] = ['home', 'discover', 'together', 'family'];
 const DESKTOP_DESTINATIONS: RouteId[] = [...PHONE_DESTINATIONS, 'passport', 'settings'];
@@ -237,10 +233,6 @@ const NAV_ICONS: Partial<Record<RouteId, React.ReactNode>> = {
 function inJourneyOrder(destinations: RouteId[]): RouteId[] {
   return ROUTE_IDS.filter((id) => destinations.includes(id));
 }
-
-const MOBILE_NAV: Array<{ id: ActiveTab; label: string; icon: React.ReactNode }> = inJourneyOrder(
-  PHONE_DESTINATIONS
-).map((id) => ({ id, label: NAV_LABELS[id] ?? TAB_TITLES[id], icon: NAV_ICONS[id] }));
 
 const DESKTOP_NAV: Array<{ id: ActiveTab; label: string }> = inJourneyOrder(
   DESKTOP_DESTINATIONS
@@ -271,6 +263,7 @@ export const App: React.FC = () => {
     () => readStored<TextSize>(TEXT_SIZE_KEY, ['normal', 'large', 'largest']) ?? 'normal'
   );
   const [splashOpen, setSplashOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sundowningModalOpen, setSundowningModalOpen] = useState(false);
   const [traceDrawerOpen, setTraceDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
@@ -289,6 +282,7 @@ export const App: React.FC = () => {
    */
   const routeRef = useRef<ActiveTab>(activeTab);
   const navigate = useCallback((next: ActiveTab, options?: { replace?: boolean }) => {
+    setMobileMenuOpen(false);
     if (routeRef.current === next) return;
     routeRef.current = next;
     setActiveTab(next);
@@ -314,6 +308,7 @@ export const App: React.FC = () => {
         fromHash ?? (hashHasPassportPayload(window.location.hash) ? 'detail' : DEFAULT_ROUTE);
       routeRef.current = next;
       setActiveTab(next);
+      setMobileMenuOpen(false);
       setSundowningModalOpen(false);
       setTraceDrawerOpen(false);
     };
@@ -324,6 +319,16 @@ export const App: React.FC = () => {
       window.removeEventListener('hashchange', syncFromUrl);
     };
   }, []);
+
+  useEffect(() => {
+    if (!mobileMenuOpen || typeof window === 'undefined') return undefined;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [mobileMenuOpen]);
+
   const [focusCue, setFocusCue] = useState<ReminiscenceCue | null>(null);
 
   const [presets] = useState<FamilyPreset[]>(FAMILY_PRESETS);
@@ -967,25 +972,19 @@ export const App: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => navigate('settings')}
-              className="md:hidden p-2.5 rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-loam-card dark:bg-vinyl-900 hover:border-plum-400 transition-colors"
-              aria-label="Preferences and accessibility"
-              aria-current={activeTab === 'settings' ? 'page' : undefined}
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              className="fixed right-4 top-3 z-[60] inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-parchment-300 bg-loam-card text-loam-ink shadow-card transition-colors hover:border-plum-400 dark:border-vinyl-700 dark:bg-vinyl-900 dark:text-parchment-50 md:hidden"
+              aria-label={mobileMenuOpen ? 'Close main menu' : 'Open main menu'}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-floating-menu"
             >
-              <Settings
-                className={`w-5 h-5 ${
-                  activeTab === 'settings'
-                    ? 'text-plum-600 dark:text-plum-300'
-                    : 'text-loam-body dark:text-loam-body-dark'
-                }`}
-                aria-hidden="true"
-              />
+              {mobileMenuOpen ? <X className="h-6 w-6" aria-hidden="true" /> : <Menu className="h-6 w-6" aria-hidden="true" />}
             </button>
 
             <button
               type="button"
               onClick={() => setDarkMode((d) => !d)}
-              className="p-2.5 rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-loam-card dark:bg-vinyl-900 hover:border-plum-400 transition-colors"
+              className="hidden md:inline-flex p-2.5 rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-loam-card dark:bg-vinyl-900 hover:border-plum-400 transition-colors"
               aria-label={darkMode ? 'Switch to day mode' : 'Switch to evening mode'}
               aria-pressed={darkMode}
             >
@@ -998,6 +997,81 @@ export const App: React.FC = () => {
           </div>
         </div>
       </header>
+
+      {mobileMenuOpen && (
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-40 bg-vinyl-950/25 backdrop-blur-[1px] md:hidden no-print"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Close main menu"
+          />
+          <nav
+            id="mobile-floating-menu"
+            aria-label="Main"
+            className="fixed right-4 top-[4.5rem] z-50 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-parchment-300 bg-parchment-50 p-3 shadow-card dark:border-vinyl-700 dark:bg-vinyl-900 md:hidden no-print"
+          >
+            <p className="px-3 pb-2 pt-1 text-xs font-semibold uppercase tracking-[0.14em] text-loam-muted dark:text-loam-muted-dark">
+              Go to
+            </p>
+            <ul className="space-y-1">
+              {DESKTOP_NAV.map((item) => {
+                const active = activeTab === item.id;
+                const icon =
+                  item.id === 'passport' ? (
+                    <FileHeart className="h-5 w-5" aria-hidden="true" />
+                  ) : item.id === 'settings' ? (
+                    <Settings className="h-5 w-5" aria-hidden="true" />
+                  ) : (
+                    NAV_ICONS[item.id]
+                  );
+                return (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      onClick={() => navigate(item.id)}
+                      aria-current={active ? 'page' : undefined}
+                      className={`flex min-h-12 w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm font-semibold transition-colors ${
+                        active
+                          ? 'bg-plum-100 text-plum-800 dark:bg-vinyl-700 dark:text-plum-300'
+                          : 'text-loam-body hover:bg-parchment-200 dark:text-loam-body-dark dark:hover:bg-vinyl-800'
+                      }`}
+                    >
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-plum-600 shadow-sm dark:bg-vinyl-800 dark:text-plum-300" aria-hidden="true">
+                        {icon}
+                      </span>
+                      <span>{item.label}</span>
+                      {active && <span className="ml-auto text-xs">Current</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-parchment-200 pt-3 dark:border-vinyl-700">
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setSundowningModalOpen(true);
+                }}
+                className="loam-btn-quiet justify-start text-xs"
+              >
+                <MoonStar className="h-4 w-4" aria-hidden="true" />
+                Settling sounds
+              </button>
+              <button
+                type="button"
+                onClick={() => setDarkMode((mode) => !mode)}
+                className="loam-btn-quiet justify-start text-xs"
+                aria-pressed={darkMode}
+              >
+                {darkMode ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
+                {darkMode ? 'Day mode' : 'Evening mode'}
+              </button>
+            </div>
+          </nav>
+        </>
+      )}
 
       {/* Main content */}
       <main
@@ -1264,9 +1338,8 @@ export const App: React.FC = () => {
       </main>
 
       {/* Footer. Visible at every width — the clinical and provenance
-          disclaimer must not be hidden on the phone people actually use. The
-          extra bottom padding clears the fixed mobile navigation. */}
-      <footer className="border-t border-parchment-300 dark:border-vinyl-700 py-6 pb-28 md:pb-6 px-4 sm:px-6 text-center text-sm text-loam-body dark:text-loam-muted-dark space-y-4 no-print">
+          disclaimer must not be hidden on the phone people actually use. */}
+      <footer className="border-t border-parchment-300 dark:border-vinyl-700 py-6 px-4 sm:px-6 text-center text-sm text-loam-body dark:text-loam-muted-dark space-y-4 no-print">
         <div className="flex items-center justify-center gap-2.5">
           <img
             src="/kinship-mark.png"
@@ -1295,42 +1368,6 @@ export const App: React.FC = () => {
           Kinship v3 · Qloo Taste AI™ Agentic Hackathon · MIT licensed
         </p>
       </footer>
-
-      {/* Mobile bottom navigation — thumb-reachable, above the gesture bar. */}
-      <nav
-        aria-label="Main"
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-parchment-300 dark:border-vinyl-700 bg-parchment-50/98 dark:bg-vinyl-900/98 backdrop-blur-md pb-safe no-print"
-      >
-        <ul className="grid grid-cols-4">
-          {MOBILE_NAV.map((item) => {
-            const active = activeTab === item.id;
-            return (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  onClick={() => navigate(item.id)}
-                  aria-current={active ? 'page' : undefined}
-                  className={`w-full flex flex-col items-center justify-center gap-1 pt-2.5 pb-2 text-xs leading-tight font-semibold transition-colors ${
-                    active
-                      ? 'text-plum-700 dark:text-plum-300'
-                      : 'text-loam-muted dark:text-loam-muted-dark'
-                  }`}
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`flex items-center justify-center w-9 h-7 rounded-full transition-colors ${
-                      active ? 'bg-plum-100 dark:bg-vinyl-700' : ''
-                    }`}
-                  >
-                    {item.icon}
-                  </span>
-                  <span>{item.label}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
 
       {/* The splash sits outside every Suspense boundary on purpose. Both
           overlays are lazy, and a boundary around them would make the very

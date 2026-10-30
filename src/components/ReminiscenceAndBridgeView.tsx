@@ -1,5 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import {
   AlertOctagon,
   BarChart3,
   BookOpen,
@@ -38,6 +47,27 @@ import {
   toggleHarmonicPreview,
 } from '../utils/harmonicPlayer';
 import { safeCopyText } from '../utils/qrAndPassport';
+
+const RESPONSE_VALUES: Record<SparkJournalEntry['reaction'], number> = {
+  restless_skip: 1,
+  calm_soothed: 2,
+  lit_up_sang: 3,
+};
+
+function responseLabel(value: number): string {
+  if (value === 3) return 'We liked this';
+  if (value === 2) return 'Felt settling';
+  return 'Set aside';
+}
+
+type SentimentPoint = {
+  sequence: number;
+  time: string;
+  response: number;
+  responseLabel: string;
+  cueName: string;
+  note: string;
+};
 
 interface Props {
   data: KinshipPrescriptionResponse;
@@ -120,6 +150,22 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
       sensory: top(sensoryMentions),
     };
   }, [data.reconstructedYouthUniverse, data.sundowningSafePlaylist, sparkLog]);
+
+  const sentimentTimeline = useMemo(
+    () =>
+      sparkLog
+        .slice(0, 12)
+        .reverse()
+        .map((entry, index) => ({
+          sequence: index + 1,
+          time: entry.timestamp,
+          response: RESPONSE_VALUES[entry.reaction],
+          responseLabel: responseLabel(RESPONSE_VALUES[entry.reaction]),
+          cueName: entry.cueName.split('—')[0].trim(),
+          note: entry.personalNotes || entry.lucidQuote || 'No note added',
+        })),
+    [sparkLog]
+  );
 
   const handleToggleAudio = (id: string, label: string) => {
     const started = toggleHarmonicPreview(
@@ -617,6 +663,69 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
               </p>
             </div>
           </div>
+
+          {sentimentTimeline.length > 0 && (
+            <div className="mt-5 rounded-2xl border border-parchment-300 bg-white p-3 dark:border-vinyl-700 dark:bg-vinyl-900 md:p-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h5 className="font-semibold text-loam-ink dark:text-parchment-50">Caregiver sentiment over time</h5>
+                  <p className="mt-1 text-xs leading-relaxed text-loam-muted dark:text-loam-muted-dark">
+                    Up to 12 recent activities, in the order they were recorded. These are caregiver labels, not a wellbeing score.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2 text-xs" aria-hidden="true">
+                  <span className="rounded-full bg-clay-50 px-2 py-1 text-clay-800 dark:bg-vinyl-800 dark:text-clay-300">1 · Set aside</span>
+                  <span className="rounded-full bg-brass-50 px-2 py-1 text-brass-900 dark:bg-vinyl-800 dark:text-brass-200">2 · Settling</span>
+                  <span className="rounded-full bg-plum-50 px-2 py-1 text-plum-800 dark:bg-vinyl-800 dark:text-plum-300">3 · Liked</span>
+                </div>
+              </div>
+              <div
+                className="mt-4 h-64 w-full text-loam-body dark:text-loam-body-dark"
+                role="img"
+                aria-label="Line chart of caregiver responses to saved activities over time, from set aside through settling to liked"
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={sentimentTimeline} margin={{ top: 10, right: 16, left: 0, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="4 4" stroke="#D8D0C2" vertical={false} />
+                    <XAxis
+                      dataKey="sequence"
+                      tickFormatter={(value) => `#${value}`}
+                      tick={{ fill: 'currentColor', fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={{ stroke: '#AFA69A' }}
+                    />
+                    <YAxis
+                      domain={[1, 3]}
+                      ticks={[1, 2, 3]}
+                      width={72}
+                      tickFormatter={(value) => (value === 3 ? 'Liked' : value === 2 ? 'Settling' : 'Set aside')}
+                      tick={{ fill: 'currentColor', fontSize: 11 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip content={<MomentChartTooltip />} />
+                    <Line
+                      type="monotone"
+                      dataKey="response"
+                      stroke="#765078"
+                      strokeWidth={3}
+                      dot={{ r: 5, fill: '#765078', stroke: '#FFFFFF', strokeWidth: 2 }}
+                      activeDot={{ r: 7 }}
+                      isAnimationActive={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <ol className="sr-only">
+                {sentimentTimeline.map((point) => (
+                  <li key={`${point.sequence}-${point.cueName}`}>
+                    Activity {point.sequence}, {point.time}: {point.cueName}. {point.responseLabel}. {point.note}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
           {reflectionInsights.total === 0 ? (
             <p className="mt-4 text-sm text-loam-muted dark:text-loam-muted-dark">Save a moment to begin noticing gentle patterns over time.</p>
           ) : (
@@ -917,6 +1026,21 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
           </div>
         </div>
       </section>
+    </div>
+  );
+};
+
+const MomentChartTooltip: React.FC<{
+  active?: boolean;
+  payload?: Array<{ payload: SentimentPoint }>;
+}> = ({ active, payload }) => {
+  const point = payload?.[0]?.payload;
+  if (!active || !point) return null;
+  return (
+    <div className="max-w-64 rounded-xl border border-parchment-300 bg-white p-3 text-xs shadow-card dark:border-vinyl-600 dark:bg-vinyl-800">
+      <p className="font-semibold text-loam-ink dark:text-parchment-50">{point.cueName}</p>
+      <p className="mt-1 text-plum-700 dark:text-plum-300">{point.responseLabel} · {point.time}</p>
+      <p className="mt-2 leading-relaxed text-loam-body dark:text-loam-body-dark">{point.note}</p>
     </div>
   );
 };

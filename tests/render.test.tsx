@@ -90,22 +90,20 @@ test('App renders the first screen without a browser and without throwing', () =
   assert.match(html, /id="kinship-main"/);
 });
 
-test('the phone navigation has four labelled destinations, not icons alone', () => {
+test('phones use an accessible floating menu trigger instead of bottom navigation', () => {
   const html = renderToString(<App />);
-  for (const label of ['Home', 'Discover', 'Together', 'Family']) {
-    assert.ok(html.includes(`>${label}</span>`), `bottom nav is missing a text label: ${label}`);
-  }
-  // Icons must stay decorative; the label carries the accessible name.
-  assert.ok(html.includes('aria-hidden="true"'), 'nav icons should be aria-hidden');
+  assert.match(html, /aria-label="Open main menu"/);
+  assert.match(html, /aria-expanded="false"/);
+  assert.match(html, /aria-controls="mobile-floating-menu"/);
+  assert.ok(!html.includes('fixed bottom-0'), 'the old bottom navigation is still rendered');
 });
 
 test('the clinical disclaimer is present at every width, not hidden on phones', () => {
   const html = renderToString(<App />);
   assert.match(html, /Educational prompts only — not medical advice\./);
   assert.match(html, /not individualised clinical guidance/);
-  // It used to be hidden below `md`; the padding that clears the bottom nav is
-  // what keeps it readable above it.
-  assert.match(html, /pb-28 md:pb-6/);
+  const footer = html.match(/<footer[^>]*>/)?.[0] ?? '';
+  assert.ok(footer && !footer.includes('hidden'), 'the disclaimer footer is hidden on phones');
 });
 
 test('no provenance claim is made before there is a result to describe', () => {
@@ -225,21 +223,21 @@ test('Home explains the recent-moments empty state', () => {
   assert.match(html, /No saved moments yet/);
 });
 
-test('the phone navigation follows the same journey order as Home', () => {
+test('the main navigation follows the same journey order as Home', () => {
   const html = renderToString(<App />);
   const navRoutes: RouteId[] = ['home', 'discover', 'together', 'family'];
   const labels = { home: 'Home', discover: 'Discover', together: 'Together', family: 'Family' };
-  const positions = navRoutes.map((r) => html.indexOf(`>${labels[r]}</span>`));
-  assert.ok(positions.every((at) => at > -1), 'a bottom-nav label was not rendered');
+  const positions = navRoutes.map((route) => html.indexOf(`>${labels[route]}</button>`));
+  assert.ok(positions.every((at) => at > -1), 'a main-navigation label was not rendered');
   assert.deepEqual(
     navRoutes,
     [...navRoutes].sort((a, b) => ROUTE_IDS.indexOf(a) - ROUTE_IDS.indexOf(b)),
-    'bottom nav is not in journey order'
+    'main navigation is not in journey order'
   );
   assert.deepEqual(
     positions,
     [...positions].sort((a, b) => a - b),
-    'bottom nav renders in a different order from the journey'
+    'main navigation renders in a different order from the journey'
   );
 });
 
@@ -649,6 +647,10 @@ test('personal notes render alongside their saved connection moment', () => {
   assert.match(html, /Saved moments and personal notes/);
   assert.match(html, /Personal note: The quieter version felt more comfortable\./);
   assert.match(html, /What resonated/);
+  assert.match(html, /Caregiver sentiment over time/);
+  assert.match(html, /caregiver labels, not a wellbeing score/);
+  assert.match(html, /Line chart of caregiver responses/);
+  assert.match(html, /Felt settling/);
   assert.match(html, /Moments saved/);
   assert.match(html, /Marked as settling/);
   assert.match(html, /not an assessment or prediction/);
