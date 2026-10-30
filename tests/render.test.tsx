@@ -24,6 +24,7 @@ const renderToString = (element: React.ReactElement): string =>
 
 import { App } from '../src/App';
 import { HomeView } from '../src/components/HomeView';
+import { ProfileManager } from '../src/components/ProfileManager';
 import { DiscoverView } from '../src/components/DiscoverView';
 import { SharedMomentView } from '../src/components/SharedMomentView';
 import { PreferencesView } from '../src/components/PreferencesView';
@@ -119,6 +120,8 @@ const homeProps = {
   bumpWindow: data.bumpWindow,
   ready: true,
   usingExampleFamily: false,
+  recentMoments: [],
+  onOpenRecentMoment: noop,
   onExplore: noop,
   onOpenTogether: noop,
   onOpenFamily: noop,
@@ -167,6 +170,59 @@ test('Home presents its destinations in the journey order', () => {
     [...positions].sort((a, b) => a - b),
     'Home renders its destinations out of the order it lists them'
   );
+});
+
+test('Home shows only the three most recent saved moments as quick-access cards', () => {
+  const recentMoments = [
+    {
+      id: 'recent-1',
+      timestamp: '15:45',
+      cueId: 'cue-1',
+      cueName: 'First recent moment',
+      eraYearPinned: 1961,
+      personalNotes: 'A gentle moment beside the window.',
+      reaction: 'calm_soothed' as const,
+      qlooUpdateNote: 'Saved connection moment',
+    },
+    {
+      id: 'recent-2',
+      timestamp: '14:20',
+      cueId: 'cue-2',
+      cueName: 'Second recent moment',
+      reaction: 'lit_up_sang' as const,
+      qlooUpdateNote: 'Saved connection moment',
+    },
+    {
+      id: 'recent-3',
+      timestamp: '12:10',
+      cueId: 'cue-3',
+      cueName: 'Third recent moment',
+      reaction: 'calm_soothed' as const,
+      qlooUpdateNote: 'Saved connection moment',
+    },
+    {
+      id: 'older-4',
+      timestamp: '10:00',
+      cueId: 'cue-4',
+      cueName: 'Older fourth moment',
+      reaction: 'calm_soothed' as const,
+      qlooUpdateNote: 'Saved connection moment',
+    },
+  ];
+  const html = renderToString(<HomeView {...homeProps} recentMoments={recentMoments} />);
+  assert.match(html, /Recent Moments/);
+  assert.match(html, /First recent moment/);
+  assert.match(html, /Second recent moment/);
+  assert.match(html, /Third recent moment/);
+  assert.match(html, /A gentle moment beside the window\./);
+  assert.ok(!html.includes('Older fourth moment'), 'Home rendered more than three recent moments');
+  assert.equal(count(html, 'Open moment'), 3);
+});
+
+test('Home explains the recent-moments empty state', () => {
+  const html = renderToString(<HomeView {...homeProps} recentMoments={[]} />);
+  assert.match(html, /Recent Moments/);
+  assert.match(html, /No saved moments yet/);
 });
 
 test('the phone navigation follows the same journey order as Home', () => {
@@ -290,8 +346,76 @@ test('no media autoplays and no commercial track is implied', () => {
   assert.match(togetherHtml, /Play gentle chords/);
 });
 
+test('a caregiver can add a quick note to the specific connection moment', () => {
+  assert.match(togetherHtml, /<textarea[^>]*id="moment-reflection"/);
+  assert.match(togetherHtml, /Quick personal note/);
+  assert.match(togetherHtml, /Save note with moment/);
+});
+
+test('the connection moment offers optional browser read-aloud controls', () => {
+  assert.match(togetherHtml, /Read instructions aloud/);
+  assert.match(togetherHtml, /Read-aloud is not available in this browser/);
+  assert.match(togetherHtml, /aria-pressed="false"/);
+});
+
+test('the connection moment includes a printable guide, cultural bridge and ambient mixer', () => {
+  assert.match(togetherHtml, /Print Activity Guide/);
+  assert.match(togetherHtml, /Care-Partner Activity Guide/);
+  assert.match(togetherHtml, /See the cultural bridge/);
+  assert.match(togetherHtml, /Starting interest/);
+  assert.match(togetherHtml, /Sensory pairing/);
+  assert.match(togetherHtml, /Courtyard rain/);
+  assert.match(togetherHtml, /Warm hearth/);
+  assert.match(togetherHtml, /Tea brewing/);
+  assert.match(togetherHtml, /Garden breeze/);
+  assert.match(togetherHtml, /Vinyl needle hum/);
+  assert.match(togetherHtml, /Background volume/);
+});
+
 test('the shared screen announces itself politely to assistive tech', () => {
   assert.match(togetherHtml, /aria-live="polite"/);
+});
+
+test('profile management is opt-in and offers saved-profile switching', () => {
+  const disabled = renderToString(
+    <ProfileManager
+      profiles={[]}
+      activeProfileId={null}
+      currentName="Vera"
+      storageEnabled={false}
+      onSave={noop}
+      onSelect={noop}
+      onDelete={noop}
+    />
+  );
+  assert.match(disabled, /Remember this family on this device/);
+
+  const profile = {
+    id: 'vera',
+    label: 'Vera — jazz and gardening',
+    guardrails: { ...data.guardrailsApplied, preferredLanguage: 'en' },
+    elderClues: [{ name: 'Ella Fitzgerald', subtype: 'urn:entity:artist' as const, weight: 10 }],
+    grandchildSeeds: [],
+    boostedCueIds: [],
+    excludedCueIds: [],
+    sparkLog: [],
+    momentReflections: [],
+    savedAt: new Date(0).toISOString(),
+  };
+  const enabled = renderToString(
+    <ProfileManager
+      profiles={[profile]}
+      activeProfileId={null}
+      currentName="Vera"
+      storageEnabled
+      onSave={noop}
+      onSelect={noop}
+      onDelete={noop}
+    />
+  );
+  assert.match(enabled, /Save current profile/);
+  assert.match(enabled, /Vera — jazz and gardening/);
+  assert.match(enabled, /Switch profile/);
 });
 
 /* ----------------------------------------------------------- preferences */
@@ -491,6 +615,35 @@ test('the detailed view names its numbers after what they really are', () => {
 test('the detailed view describes screening, not clinical verification', () => {
   assert.match(detailHtml, /Kinship’s own safety filters/);
   assert.ok(!/verified for dementia sensory comfort/.test(detailHtml));
+});
+
+test('personal notes render alongside their saved connection moment', () => {
+  const html = renderToString(
+    <ReminiscenceAndBridgeView
+      data={data}
+      sparkLog={[
+        {
+          id: 'saved-note',
+          timestamp: '14:30',
+          cueId: 'cue-1',
+          cueName: 'A familiar song',
+          personalNotes: 'The quieter version felt more comfortable.',
+          reaction: 'calm_soothed',
+          qlooUpdateNote: 'Saved connection moment',
+        },
+      ]}
+      excludedCount={0}
+      onResetExcludes={noop}
+      onCueReaction={noop}
+      onOpenSharedMoment={noop}
+    />
+  );
+  assert.match(html, /Saved moments and personal notes/);
+  assert.match(html, /Personal note: The quieter version felt more comfortable\./);
+  assert.match(html, /What resonated/);
+  assert.match(html, /Moments saved/);
+  assert.match(html, /Marked as settling/);
+  assert.match(html, /not an assessment or prediction/);
 });
 
 /* --------------------------------------------------------------- overlays */
