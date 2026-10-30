@@ -248,7 +248,7 @@ export const PreferencesView: React.FC<Props> = ({
 
         <ToggleRow
           label="Remember my details in this browser"
-          hint="Saves the name, year and the songs you have added on this device only, so a closed tab or a flat battery does not lose them. Nothing is uploaded, and it never reaches Qloo."
+          hint="Saves the name, year, cultural clues and private moment reflections in this browser only, so a closed tab or a flat battery does not lose them. Nothing is uploaded, and it never reaches Qloo."
           checked={rememberOnDevice}
           onChange={onToggleRemember}
         />

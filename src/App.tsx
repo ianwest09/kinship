@@ -35,7 +35,7 @@ import { HomeView } from './components/HomeView';
 import { ExampleFamilyNote } from './components/ExampleFamilyNote';
 import { SplashScreen } from './components/SplashScreen';
 import { DiscoverView } from './components/DiscoverView';
-import { SharedMomentView } from './components/SharedMomentView';
+import { SharedMomentView, type MomentReflection } from './components/SharedMomentView';
 import { PreferencesView, TextSize } from './components/PreferencesView';
 // Home, Discover and Share a moment stay in the entry chunk: they are the first
 // journey. Everything below is one tap deeper, so it loads on demand. The entry
@@ -126,6 +126,7 @@ type StoredFamily = {
   boostedCueIds: string[];
   excludedCueIds: string[];
   sparkLog: SparkJournalEntry[];
+  momentReflections: MomentReflection[];
   savedAt: string;
 };
 
@@ -147,6 +148,7 @@ function readStoredFamily(): StoredFamily | null {
       boostedCueIds: Array.isArray(parsed.boostedCueIds) ? parsed.boostedCueIds : [],
       excludedCueIds: Array.isArray(parsed.excludedCueIds) ? parsed.excludedCueIds : [],
       sparkLog: Array.isArray(parsed.sparkLog) ? parsed.sparkLog : [],
+      momentReflections: Array.isArray(parsed.momentReflections) ? parsed.momentReflections : [],
       savedAt: typeof parsed.savedAt === 'string' ? parsed.savedAt : '',
     };
   } catch {
@@ -338,6 +340,9 @@ export const App: React.FC = () => {
   const [boostedCueIds, setBoostedCueIds] = useState<string[]>(restored?.boostedCueIds ?? []);
   const [excludedCueIds, setExcludedCueIds] = useState<string[]>(restored?.excludedCueIds ?? []);
   const [sparkLog, setSparkLog] = useState<SparkJournalEntry[]>(restored?.sparkLog ?? []);
+  const [momentReflections, setMomentReflections] = useState<MomentReflection[]>(
+    restored?.momentReflections ?? []
+  );
 
   const [qlooStatus, setQlooStatus] = useState({
     connected: false,
@@ -497,6 +502,7 @@ export const App: React.FC = () => {
         boostedCueIds,
         excludedCueIds,
         sparkLog,
+        momentReflections,
         savedAt: new Date().toISOString(),
       };
       window.localStorage.setItem(FAMILY_KEY, JSON.stringify(record));
@@ -511,6 +517,7 @@ export const App: React.FC = () => {
     boostedCueIds,
     excludedCueIds,
     sparkLog,
+    momentReflections,
   ]);
 
   /** Delete everything Kinship has written on this device, and say so. */
@@ -529,6 +536,7 @@ export const App: React.FC = () => {
     setBoostedCueIds([]);
     setExcludedCueIds([]);
     setSparkLog([]);
+    setMomentReflections([]);
     setClearedNote('Cleared. Nothing is stored on this device now.');
   }, []);
 
@@ -548,6 +556,7 @@ export const App: React.FC = () => {
     setBoostedCueIds([]);
     setExcludedCueIds([]);
     setSparkLog([]);
+    setMomentReflections([]);
   };
 
   const handleUpdateGuardrails = (patch: Partial<ElderGuardrails>) => {
@@ -946,6 +955,17 @@ export const App: React.FC = () => {
             data={prescription}
             focusCue={focusCue}
             warmEq={Boolean(guardrails.hearingLossWarmEq)}
+            reflections={momentReflections}
+            rememberOnDevice={rememberOnDevice}
+            onSaveReflection={(reflection) =>
+              setMomentReflections((previous) => [
+                reflection,
+                ...previous.filter((item) => item.cueKey !== reflection.cueKey),
+              ])
+            }
+            onRemoveReflection={(cueKey) =>
+              setMomentReflections((previous) => previous.filter((item) => item.cueKey !== cueKey))
+            }
             onCueReaction={handleCueReaction}
             onOpenRescue={() => setSundowningModalOpen(true)}
             onBackToDiscover={() => navigate('discover')}
