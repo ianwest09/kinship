@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   AudioLines as SpeechIcon,
+  CalendarPlus,
   Heart,
   MoonStar,
   Music,
@@ -20,6 +21,7 @@ import {
   stopHarmonicPreview,
   toggleHarmonicPreview,
 } from '../utils/harmonicPlayer';
+import { buildConnectionMomentIcs, defaultCalendarStart } from '../utils/calendar';
 import { TogetherCompanionTools } from './TogetherCompanionTools';
 
 export interface MomentReflection {
@@ -104,6 +106,9 @@ export const SharedMomentView: React.FC<Props> = ({
   const [reflectionNote, setReflectionNote] = useState('');
   const [comfort, setComfort] = useState(3);
   const [reflectionSaved, setReflectionSaved] = useState(false);
+  const [calendarStart, setCalendarStart] = useState(() => defaultCalendarStart());
+  const [calendarDuration, setCalendarDuration] = useState(30);
+  const [calendarStatus, setCalendarStatus] = useState('');
 
   // Follow the cue the family chose in Discover.
   useEffect(() => {
@@ -134,6 +139,7 @@ export const SharedMomentView: React.FC<Props> = ({
     setReflectionNote(saved?.note ?? '');
     setComfort(saved?.comfort ?? 3);
     setReflectionSaved(Boolean(saved));
+    setCalendarStatus('');
   }, [currentKey, reflections]);
 
   const stopSound = () => {
@@ -201,6 +207,40 @@ export const SharedMomentView: React.FC<Props> = ({
     window.addEventListener('afterprint', cleanUp, { once: true });
     window.print();
     window.setTimeout(cleanUp, 1000);
+  };
+
+  const addToCalendar = () => {
+    if (!cue || typeof window === 'undefined') return;
+    try {
+      const description = [
+        cue.sensoryInvitationPrompt,
+        'Sit side by side. There is no need to quiz, finish, or continue if the moment feels unwelcome.',
+        reflectionNote.trim() ? `Caregiver note: ${reflectionNote.trim()}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n\n');
+      const calendar = buildConnectionMomentIcs({
+        title: `Shared time with ${data.guardrailsApplied.elderName}: ${cue.name}`,
+        startLocal: calendarStart,
+        durationMinutes: calendarDuration,
+        description,
+        location: data.geographyInfo.name,
+        uidSeed: cue.entity_id || cue.name,
+      });
+      const blob = new Blob([calendar], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const safeName = cue.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      link.href = url;
+      link.download = `kinship-${safeName || 'shared-moment'}.ics`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+      setCalendarStatus('Calendar file downloaded. Open it to add this shared time to your calendar.');
+    } catch (error) {
+      setCalendarStatus(error instanceof Error ? error.message : 'The calendar file could not be created.');
+    }
   };
 
   if (!cue) {
@@ -322,6 +362,63 @@ export const SharedMomentView: React.FC<Props> = ({
             Read-aloud is not available in this browser. The instructions remain visible above.
           </p>
         )}
+
+        <section
+          className="mt-6 rounded-2xl border border-parchment-300 bg-parchment-50 p-4 dark:border-vinyl-700 dark:bg-vinyl-900 md:p-5"
+          aria-labelledby="schedule-moment-heading"
+        >
+          <div className="flex items-start gap-3">
+            <CalendarPlus className="mt-0.5 h-5 w-5 shrink-0 text-plum-600 dark:text-plum-300" aria-hidden="true" />
+            <div>
+              <h4 id="schedule-moment-heading" className="font-semibold text-loam-ink dark:text-parchment-50">
+                Plan another shared moment
+              </h4>
+              <p className="mt-1 text-sm leading-relaxed text-loam-body dark:text-loam-body-dark">
+                Choose a local date and time. Kinship creates a private calendar file in this browser and does not contact a calendar service.
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_8rem_auto] sm:items-end">
+            <label htmlFor="calendar-start" className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
+              Date and time
+              <input
+                id="calendar-start"
+                type="datetime-local"
+                value={calendarStart}
+                onChange={(event) => {
+                  setCalendarStart(event.target.value);
+                  setCalendarStatus('');
+                }}
+                className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-800 dark:text-parchment-50"
+              />
+            </label>
+            <label htmlFor="calendar-duration" className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
+              Length
+              <select
+                id="calendar-duration"
+                value={calendarDuration}
+                onChange={(event) => {
+                  setCalendarDuration(Number(event.target.value));
+                  setCalendarStatus('');
+                }}
+                className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-800 dark:text-parchment-50"
+              >
+                {[15, 30, 45, 60].map((minutes) => (
+                  <option key={minutes} value={minutes}>{minutes} min</option>
+                ))}
+              </select>
+            </label>
+            <button type="button" onClick={addToCalendar} className="loam-btn-secondary whitespace-nowrap text-sm">
+              <CalendarPlus className="h-4 w-4" aria-hidden="true" />
+              Add to Calendar
+            </button>
+          </div>
+          {calendarStatus && (
+            <p className="mt-3 text-sm text-loam-body dark:text-loam-body-dark" role="status">
+              {calendarStatus}
+            </p>
+          )}
+        </section>
 
         {/* Leaving is always available and always neutral. */}
         <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">

@@ -358,6 +358,14 @@ test('the connection moment offers optional browser read-aloud controls', () => 
   assert.match(togetherHtml, /aria-pressed="false"/);
 });
 
+test('the connection moment can generate a private calendar file for a chosen time', () => {
+  assert.match(togetherHtml, /Plan another shared moment/);
+  assert.match(togetherHtml, /type="datetime-local"/);
+  assert.match(togetherHtml, /id="calendar-duration"/);
+  assert.match(togetherHtml, /Add to Calendar/);
+  assert.match(togetherHtml, /does not contact a calendar service/);
+});
+
 test('the connection moment includes a printable guide, cultural bridge and ambient mixer', () => {
   assert.match(togetherHtml, /Print Activity Guide/);
   assert.match(togetherHtml, /Care-Partner Activity Guide/);
