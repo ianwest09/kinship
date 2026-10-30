@@ -119,6 +119,8 @@ const homeProps = {
   bumpWindow: data.bumpWindow,
   ready: true,
   usingExampleFamily: false,
+  recentMoments: [],
+  onOpenRecentMoment: noop,
   onExplore: noop,
   onOpenTogether: noop,
   onOpenFamily: noop,
@@ -167,6 +169,59 @@ test('Home presents its destinations in the journey order', () => {
     [...positions].sort((a, b) => a - b),
     'Home renders its destinations out of the order it lists them'
   );
+});
+
+test('Home shows only the three most recent saved moments as quick-access cards', () => {
+  const recentMoments = [
+    {
+      id: 'recent-1',
+      timestamp: '15:45',
+      cueId: 'cue-1',
+      cueName: 'First recent moment',
+      eraYearPinned: 1961,
+      personalNotes: 'A gentle moment beside the window.',
+      reaction: 'calm_soothed' as const,
+      qlooUpdateNote: 'Saved connection moment',
+    },
+    {
+      id: 'recent-2',
+      timestamp: '14:20',
+      cueId: 'cue-2',
+      cueName: 'Second recent moment',
+      reaction: 'lit_up_sang' as const,
+      qlooUpdateNote: 'Saved connection moment',
+    },
+    {
+      id: 'recent-3',
+      timestamp: '12:10',
+      cueId: 'cue-3',
+      cueName: 'Third recent moment',
+      reaction: 'calm_soothed' as const,
+      qlooUpdateNote: 'Saved connection moment',
+    },
+    {
+      id: 'older-4',
+      timestamp: '10:00',
+      cueId: 'cue-4',
+      cueName: 'Older fourth moment',
+      reaction: 'calm_soothed' as const,
+      qlooUpdateNote: 'Saved connection moment',
+    },
+  ];
+  const html = renderToString(<HomeView {...homeProps} recentMoments={recentMoments} />);
+  assert.match(html, /Recent Moments/);
+  assert.match(html, /First recent moment/);
+  assert.match(html, /Second recent moment/);
+  assert.match(html, /Third recent moment/);
+  assert.match(html, /A gentle moment beside the window\./);
+  assert.ok(!html.includes('Older fourth moment'), 'Home rendered more than three recent moments');
+  assert.equal(count(html, 'Open moment'), 3);
+});
+
+test('Home explains the recent-moments empty state', () => {
+  const html = renderToString(<HomeView {...homeProps} recentMoments={[]} />);
+  assert.match(html, /Recent Moments/);
+  assert.match(html, /No saved moments yet/);
 });
 
 test('the phone navigation follows the same journey order as Home', () => {

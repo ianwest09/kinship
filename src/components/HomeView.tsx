@@ -1,6 +1,16 @@
 import React from 'react';
-import { ArrowRight, Compass, FileHeart, Heart, Music, MoonStar, Users } from 'lucide-react';
-import { ElderGuardrails, ReminiscenceBumpWindow } from '../../shared/types';
+import {
+  ArrowRight,
+  Clock3,
+  Compass,
+  FileHeart,
+  Heart,
+  MessageSquareText,
+  Music,
+  MoonStar,
+  Users,
+} from 'lucide-react';
+import { ElderGuardrails, ReminiscenceBumpWindow, SparkJournalEntry } from '../../shared/types';
 
 interface Props {
   guardrails: ElderGuardrails;
@@ -8,6 +18,8 @@ interface Props {
   ready: boolean;
   /** True while the loaded family is still one of the bundled samples. */
   usingExampleFamily: boolean;
+  recentMoments: SparkJournalEntry[];
+  onOpenRecentMoment: (moment: SparkJournalEntry) => void;
   onExplore: () => void;
   onOpenTogether: () => void;
   onOpenFamily: () => void;
@@ -32,6 +44,8 @@ export const HomeView: React.FC<Props> = ({
   bumpWindow,
   ready,
   usingExampleFamily,
+  recentMoments,
+  onOpenRecentMoment,
   onExplore,
   onOpenTogether,
   onOpenFamily,
@@ -144,6 +158,81 @@ export const HomeView: React.FC<Props> = ({
             onClick={onOpenPassport}
           />
         </div>
+      </section>
+
+      {/* Recent saved moments --------------------------------------------- */}
+      <section aria-labelledby="recent-moments-heading" className="space-y-4">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-plum-600 dark:text-plum-300">
+              Saved moments
+            </p>
+            <h3
+              id="recent-moments-heading"
+              className="mt-1 font-serif text-2xl md:text-3xl font-semibold text-loam-ink dark:text-parchment-50"
+            >
+              Recent Moments
+            </h3>
+          </div>
+          {recentMoments.length > 0 && (
+            <p className="text-sm text-loam-muted dark:text-loam-muted-dark">
+              Your three most recent saved moments
+            </p>
+          )}
+        </div>
+
+        {recentMoments.length === 0 ? (
+          <div className="loam-card p-5 md:p-6 flex items-start gap-3.5 bg-parchment-50 dark:bg-vinyl-900">
+            <Heart className="w-5 h-5 mt-0.5 shrink-0 text-plum-500 dark:text-plum-300" aria-hidden="true" />
+            <div>
+              <p className="font-semibold text-loam-ink dark:text-parchment-50">No saved moments yet</p>
+              <p className="mt-1 text-sm leading-relaxed text-loam-body dark:text-loam-body-dark">
+                When something feels worth returning to, save it and it will appear here for quick access.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {recentMoments.slice(0, 3).map((moment) => (
+              <button
+                key={moment.id}
+                type="button"
+                onClick={() => onOpenRecentMoment(moment)}
+                className="loam-card group p-5 text-left transition-colors hover:border-plum-400 hover:bg-plum-50/60 dark:hover:bg-vinyl-800"
+                aria-label={`Open saved moment: ${moment.cueName}`}
+              >
+                <span className="flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-plum-600 dark:text-plum-300">
+                    <Clock3 className="w-3.5 h-3.5" aria-hidden="true" />
+                    {moment.timestamp}
+                  </span>
+                  {moment.eraYearPinned && (
+                    <span className="text-xs text-loam-muted dark:text-loam-muted-dark">
+                      {moment.eraYearPinned}
+                    </span>
+                  )}
+                </span>
+                <span className="mt-3 block font-serif text-xl font-semibold leading-snug text-loam-ink dark:text-parchment-50">
+                  {moment.cueName}
+                </span>
+                {moment.personalNotes ? (
+                  <span className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-loam-body dark:text-loam-body-dark">
+                    <MessageSquareText className="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true" />
+                    <span className="line-clamp-2">{moment.personalNotes}</span>
+                  </span>
+                ) : (
+                  <span className="mt-3 block text-sm text-loam-muted dark:text-loam-muted-dark">
+                    Saved to enjoy together again.
+                  </span>
+                )}
+                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-plum-700 dark:text-plum-300">
+                  Open moment
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Gentle, non-alarming evening support ----------------------------- */}

@@ -770,6 +770,19 @@ export const App: React.FC = () => {
     navigate('together');
   };
 
+  const openRecentMoment = (moment: SparkJournalEntry) => {
+    const availableCues = [
+      ...(prescription?.reconstructedYouthUniverse ?? []),
+      ...(prescription?.sundowningSafePlaylist ?? []),
+    ];
+    const cue =
+      availableCues.find(
+        (candidate) =>
+          candidate.entity_id === moment.cueId || candidate.name === moment.cueName
+      ) ?? null;
+    openTogetherWith(cue);
+  };
+
   /**
    * Is the family on screen still one of the bundled samples?
    *
@@ -988,6 +1001,10 @@ export const App: React.FC = () => {
             bumpWindow={prescription?.bumpWindow ?? null}
             ready={Boolean(prescription)}
             usingExampleFamily={usingExampleFamily}
+            recentMoments={sparkLog
+              .filter((moment) => moment.reaction !== 'restless_skip')
+              .slice(0, 3)}
+            onOpenRecentMoment={openRecentMoment}
             onExplore={() => navigate('discover')}
             onOpenTogether={() => navigate('together')}
             onOpenFamily={() => navigate('family')}
