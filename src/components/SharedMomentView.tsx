@@ -692,7 +692,7 @@ export const SharedMomentView: React.FC<Props> = ({
             <Users className="w-6 h-6 shrink-0 text-plum-600 dark:text-plum-300 mt-0.5" aria-hidden="true" />
             <div className="min-w-0">
               <h3 className="text-base md:text-lg font-semibold text-loam-ink dark:text-parchment-50">
-                If a grandchild or younger relative is visiting
+                If {data.guardrailsApplied.caregiverName?.trim() || 'a caregiver or family member'} is joining
               </h3>
               <p className="mt-2 text-base md:text-lg font-serif italic leading-relaxed text-plum-700 dark:text-plum-300">
                 {bridge.zeroQuizBridgeQuestion}

@@ -275,6 +275,151 @@ export const FamilyIntakePanel: React.FC<Props> = ({
         </div>
       </section>
 
+      <section className="rounded-3xl border border-parchment-300 bg-white p-6 shadow-sm dark:border-vinyl-700 dark:bg-vinyl-900 md:p-7" aria-labelledby="people-details-heading">
+        <div className="max-w-3xl">
+          <span className="font-mono text-meta uppercase tracking-wider text-plum-600 dark:text-brass-200">
+            Optional relationship context
+          </span>
+          <h3 id="people-details-heading" className="mt-1 font-serif text-2xl font-semibold text-loam-ink dark:text-parchment-50">
+            About the two of you
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-loam-body dark:text-loam-body-dark">
+            Names, relationship, age and cultural background help Kinship word shared activities more naturally. Gender is optional and never used to assume an interest. Names and identity details are not sent to Qloo.
+          </p>
+        </div>
+
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          <fieldset className="rounded-2xl border border-parchment-200 bg-parchment-50 p-4 dark:border-vinyl-700 dark:bg-vinyl-800 md:p-5">
+            <legend className="px-1 font-semibold text-loam-ink dark:text-parchment-50">Person receiving care</legend>
+            <div className="mt-2 grid gap-4 sm:grid-cols-2">
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50 sm:col-span-2">
+                Preferred name
+                <input
+                  type="text"
+                  value={guardrails.elderName}
+                  onChange={(event) => onUpdateGuardrails({ elderName: event.target.value })}
+                  autoComplete="off"
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                />
+              </label>
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
+                Age
+                <input
+                  type="number"
+                  min={18}
+                  max={120}
+                  value={thisYear - guardrails.birthYear}
+                  onChange={(event) => {
+                    const age = Number(event.target.value);
+                    if (age >= 18 && age <= 120) onUpdateGuardrails({ birthYear: thisYear - age });
+                  }}
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                />
+              </label>
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
+                Gender
+                <select
+                  value={guardrails.elderGenderIdentity ?? ''}
+                  onChange={(event) => onUpdateGuardrails({ elderGenderIdentity: event.target.value })}
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                >
+                  <option value="">Not specified</option>
+                  <option value="woman">Woman</option>
+                  <option value="man">Man</option>
+                  <option value="non-binary">Non-binary</option>
+                  <option value="prefer-not-to-say">Prefer not to say</option>
+                </select>
+              </label>
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50 sm:col-span-2">
+                Nationality or cultural background
+                <input
+                  type="text"
+                  value={guardrails.elderNationality ?? ''}
+                  onChange={(event) => onUpdateGuardrails({ elderNationality: event.target.value })}
+                  placeholder="For example: South African, Jamaican-British, Japanese"
+                  autoComplete="off"
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink placeholder:text-loam-muted dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                />
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset className="rounded-2xl border border-parchment-200 bg-parchment-50 p-4 dark:border-vinyl-700 dark:bg-vinyl-800 md:p-5">
+            <legend className="px-1 font-semibold text-loam-ink dark:text-parchment-50">Caregiver or visiting family member</legend>
+            <div className="mt-2 grid gap-4 sm:grid-cols-2">
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50 sm:col-span-2">
+                Preferred name
+                <input
+                  type="text"
+                  value={guardrails.caregiverName ?? ''}
+                  onChange={(event) =>
+                    onUpdateGuardrails({ caregiverName: event.target.value, grandchildName: event.target.value || guardrails.grandchildName })
+                  }
+                  placeholder="Who will share this time?"
+                  autoComplete="off"
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink placeholder:text-loam-muted dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                />
+              </label>
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
+                Age
+                <input
+                  type="number"
+                  min={12}
+                  max={120}
+                  value={guardrails.caregiverAge ?? ''}
+                  onChange={(event) => onUpdateGuardrails({ caregiverAge: event.target.value ? Number(event.target.value) : undefined })}
+                  placeholder="Optional"
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink placeholder:text-loam-muted dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                />
+              </label>
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
+                Gender
+                <select
+                  value={guardrails.caregiverGenderIdentity ?? ''}
+                  onChange={(event) => onUpdateGuardrails({ caregiverGenderIdentity: event.target.value })}
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                >
+                  <option value="">Not specified</option>
+                  <option value="woman">Woman</option>
+                  <option value="man">Man</option>
+                  <option value="non-binary">Non-binary</option>
+                  <option value="prefer-not-to-say">Prefer not to say</option>
+                </select>
+              </label>
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
+                Relationship
+                <select
+                  value={guardrails.caregiverRelationship ?? ''}
+                  onChange={(event) => onUpdateGuardrails({ caregiverRelationship: event.target.value })}
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                >
+                  <option value="">Not specified</option>
+                  <option value="spouse or partner">Spouse or partner</option>
+                  <option value="daughter">Daughter</option>
+                  <option value="son">Son</option>
+                  <option value="grandchild">Grandchild</option>
+                  <option value="sibling">Sibling</option>
+                  <option value="friend">Friend</option>
+                  <option value="professional caregiver">Professional caregiver</option>
+                  <option value="other family member">Other family member</option>
+                </select>
+              </label>
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
+                Nationality or cultural background
+                <input
+                  type="text"
+                  value={guardrails.caregiverNationality ?? ''}
+                  onChange={(event) => onUpdateGuardrails({ caregiverNationality: event.target.value })}
+                  placeholder="Optional"
+                  autoComplete="off"
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink placeholder:text-loam-muted dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                />
+              </label>
+            </div>
+          </fieldset>
+        </div>
+      </section>
+
       {/* Interactive Neurological Reminiscence Bump Curve & Birth Year Scrubber */}
       <section className="rounded-3xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-900 p-6 md:p-7 shadow-sm space-y-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">

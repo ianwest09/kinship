@@ -41,6 +41,14 @@ export interface ElderGuardrails {
   plotFreeMusicalFocus: boolean; // shifts moderate/late stage away from complex dialogue plots toward song, visual rhythm & craft
   hearingLossWarmEq?: boolean; // Presbycusis filter: favors warm contralto/baritone/cello & rolls off >3.2 kHz harshness
   preferredLanguage?: string; // BCP-47 language used by browser-local spoken instructions
+  /** Optional identity context used only to make invitations and handovers more personal. */
+  elderGenderIdentity?: string;
+  elderNationality?: string;
+  caregiverName?: string;
+  caregiverAge?: number;
+  caregiverGenderIdentity?: string;
+  caregiverRelationship?: string;
+  caregiverNationality?: string;
   grandchildName: string;
 }
 

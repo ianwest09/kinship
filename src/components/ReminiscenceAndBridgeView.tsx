@@ -102,6 +102,8 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
   }, []);
 
   const warmEq = Boolean(data.guardrailsApplied.hearingLossWarmEq);
+  const caregiverName = data.guardrailsApplied.caregiverName?.trim() || data.guardrailsApplied.grandchildName;
+  const caregiverRelationship = data.guardrailsApplied.caregiverRelationship?.trim();
   const reflectionInsights = useMemo(() => {
     const saved = sparkLog.filter((entry) => entry.reaction !== 'restless_skip');
     const liked = saved.filter((entry) => entry.reaction === 'lit_up_sang').length;
@@ -293,7 +295,8 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
               <span>Agent 04 · GET /v2/analysis/compare · Intergenerational Bridge</span>
             </div>
             <h3 className="text-xl md:text-2xl font-semibold text-loam-ink dark:text-parchment-50 mt-1">
-              {data.guardrailsApplied.grandchildName} ↔ {data.guardrailsApplied.elderName}: Shared Cultural DNA Across 60 Years
+              {caregiverName} ↔ {data.guardrailsApplied.elderName}: A shared cultural bridge
+              {caregiverRelationship ? ` for their time together as ${caregiverRelationship} and care partner` : ''}
             </h3>
             <p className="text-xs md:text-sm text-loam-body dark:text-loam-muted-dark">
               Translates modern favorites into the exact youth-era recordings that share their harmonic, rhythmic, or domestic soul — turning awkward visits into 15 minutes of magic.
@@ -312,7 +315,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                 <div className="flex items-center justify-between gap-2 p-3.5 rounded-2xl bg-gradient-to-r from-pine-50 via-parchment-100 to-plum-50 dark:from-vinyl-900 dark:via-vinyl-900 dark:to-plum-900/40 border border-parchment-200 dark:border-vinyl-700">
                   <div className="min-w-0">
                     <div className="text-xs font-mono uppercase text-pine-700 dark:text-pine-300 font-semibold">
-                      {data.guardrailsApplied.grandchildName} ({br.grandchildSeedYear})
+                      {caregiverName} ({br.grandchildSeedYear})
                     </div>
                     <div className="font-semibold text-sm text-loam-ink dark:text-parchment-50 truncate">
                       {br.grandchildSeedName.split('(')[0].trim()}

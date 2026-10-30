@@ -1246,7 +1246,12 @@ export const App: React.FC = () => {
             }
             onSelectCareCircleRole={(role) => {
               setActivePresetId(null);
-              setGuardrails((prev) => ({ ...prev, grandchildName: role.visitorLabel }));
+              setGuardrails((prev) => ({
+                ...prev,
+                grandchildName: role.visitorLabel,
+                caregiverName: role.visitorLabel.split('(')[0].trim(),
+                caregiverRelationship: role.relationshipBadge.toLowerCase(),
+              }));
               const mapped = role.seedIds
                 .map((id) => grandchildCatalog.find((g) => g.entity_id === id))
                 .filter((g): g is CulturalClueSeed => Boolean(g))

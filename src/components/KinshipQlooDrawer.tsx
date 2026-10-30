@@ -54,10 +54,10 @@ export const KinshipQlooDrawer: React.FC<Props> = ({
       birthYear: currentGuardrails.birthYear,
       youthGeography: currentGuardrails.youthGeography,
       elderClueName: primaryElderClue,
-      grandchildName: currentGuardrails.grandchildName,
+      grandchildName: currentGuardrails.caregiverName || currentGuardrails.grandchildName,
       grandchildSeedName: primaryGrandchildSeed,
       hearingLossWarmEq: currentGuardrails.hearingLossWarmEq,
-      storyText: `My ${2026 - currentGuardrails.birthYear}-year-old loved one ${currentGuardrails.elderName} grew up in ${currentGuardrails.youthGeography.replace('_', ' ')} loving ${primaryElderClue} and gets sundowning anxiety at 4:30 PM; ${currentGuardrails.grandchildName} loves ${primaryGrandchildSeed}.`,
+      storyText: `My ${2026 - currentGuardrails.birthYear}-year-old loved one ${currentGuardrails.elderName} grew up in ${currentGuardrails.youthGeography.replace('_', ' ')} loving ${primaryElderClue}; ${currentGuardrails.caregiverName || currentGuardrails.grandchildName} (${currentGuardrails.caregiverRelationship || 'family visitor'}) loves ${primaryGrandchildSeed}.`,
     };
     try {
       const res = await fetch('/api/mcp/call', {

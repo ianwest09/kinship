@@ -754,6 +754,18 @@ export async function generateKinshipBridge(
     vector: u.vector,
   }))];
 
+  const caregiverName = guardrails.caregiverName?.trim() || guardrails.grandchildName;
+  const caregiverRelationship = guardrails.caregiverRelationship?.trim() || 'family visitor';
+  const caregiverDescription = `${guardrails.caregiverAge ? `${guardrails.caregiverAge}-year-old ` : ''}${caregiverRelationship}`;
+  const sharedCulturalContext = [
+    guardrails.elderNationality?.trim(),
+    guardrails.caregiverNationality?.trim(),
+  ].filter((value): value is string => Boolean(value));
+  const culturalBridgeNote =
+    sharedCulturalContext.length > 0
+      ? ` Their stated cultural backgrounds (${sharedCulturalContext.join(' and ')}) are context for the invitation, while the actual match comes from the places and cultural favourites they selected.`
+      : '';
+
   const intergenerationalBridges: IntergenerationalBridge[] = resolvedGrandchildSeeds.map((gc, idx) => {
     // Score every elder youth anchor against this grandchild seed via vector co-occurrence
     const ranked = allElderAnchors
@@ -814,10 +826,10 @@ export async function generateKinshipBridge(
       overlapPct,
       sharedTags,
       sharedDnaHeadline: `${sharedTags[0].label} + ${sharedTags[1].label}`,
-      harmonicExplanation: `Qloo’s /v2/analysis/compare rates ${gc.name} (${gc.year}), which ${guardrails.grandchildName} loves, ${overlapPct}% alike in mood, tempo and style with ${best.ea.name} (${best.ea.year}) from ${guardrails.elderName}’s youth. A way in to listening together — not a prediction of any reaction.`,
+      harmonicExplanation: `Qloo’s /v2/analysis/compare rates ${gc.name} (${gc.year}), which ${caregiverName} loves, ${overlapPct}% alike in mood, tempo and style with ${best.ea.name} (${best.ea.year}) from ${guardrails.elderName}’s youth. This gives ${caregiverName}, ${guardrails.elderName}’s ${caregiverDescription}, a personal way into listening together — not a prediction of any reaction.${culturalBridgeNote}`,
       threeStepPlaybook: [
-        `Minute 0–4 (Settle in): Play ${best.ea.name} (${best.ea.year}) first, and simply watch — shoulders, hands, eyes. Say nothing yet.`,
-        `Minute 5–10 (Share Your World): Say “I love this sound too — listen to a singer from my generation who sounds just like this,” and play 90 seconds of ${gc.name}.`,
+        `Minute 0–4 (Settle in): ${caregiverName} can play ${best.ea.name} (${best.ea.year}) first and simply notice whether it feels welcome. Say nothing yet.`,
+        `Minute 5–10 (Share Your World): ${caregiverName} can say “I love this sound too — here is something from my generation with a similar warmth,” and play 90 seconds of ${gc.name}.`,
         `Minute 11–15 (Sensory Togetherness): Keep volume warm and gentle; hold hands, look at a photo, or share tea with zero memory quizzing.`,
       ],
       zeroQuizBridgeQuestion: `“${guardrails.elderName}, listen to how warm ${gc.name.split('(')[0].trim()} sounds right after ${best.ea.name.split('(')[0].trim()} — which one makes you want to tap your feet more?”`,
@@ -1298,8 +1310,8 @@ export async function generateKinshipBridge(
       qlooApiMechanism: `filter.exclude.tags=horror,thriller,war + urn:entity:brand + urn:entity:place`,
     },
     {
-      dimension: `4. Zero-Quiz Bridge for ${guardrails.grandchildName} (Visitor)`,
-      blindLlmGuess: `Advises ${guardrails.grandchildName}: “Ask ${guardrails.elderName} what she had for lunch or if she remembers your school!”`,
+      dimension: `4. Zero-Quiz Bridge for ${caregiverName} (${caregiverDescription})`,
+      blindLlmGuess: `Advises ${caregiverName}: “Ask ${guardrails.elderName} what they had for lunch or if they remember your school!”`,
       whyBlindLlmFails: 'Direct short-term memory quizzing puts the spotlight on what someone can no longer recall, which can lead to embarrassment and withdrawal.',
       qlooTasteAiResult: `Reports ${topBridge?.overlapPct || 93}% shared taste affinity between ${topBridge?.grandchildSeedName || 'modern favourite'} and ${topBridge?.elderAnchorName || 'youth classic'} as a starting point for side-by-side listening.`,
       qlooApiMechanism: `GET /v2/analysis/compare (a.signal vs b.signal) + filter.type=urn:demographics`,
@@ -1335,7 +1347,7 @@ export async function generateKinshipBridge(
     {
       iteration: 4,
       phase: 'SYNTHESIZE',
-      thought: `Sequencing the 15-minute three-step tempo arc (96→76→62 BPM) + ${guardrails.grandchildName}’s 3-step zero-quiz visit playbook + a familiar-meal dining card.`,
+      thought: `Sequencing the 15-minute three-step tempo arc (96→76→62 BPM) + ${caregiverName}’s 3-step zero-quiz visit playbook + a familiar-meal dining card.`,
       toolName: 'prescribe_iso_sundowning_rescue & curate_dysphagia_nostalgic_dining',
       observation: `Plan ready (${topBridge?.overlapPct || 93}% cross-generational bridge overlap; calm venue: ${seniorDiningPlan.calmVenue.name}).`,
     },

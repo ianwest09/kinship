@@ -582,6 +582,41 @@ test('every input on the family form has an accessible name', () => {
   assert.match(familyHtml, /aria-valuetext=/);
 });
 
+test('the family form collects optional details for both people without stereotyping interests', () => {
+  assert.match(familyHtml, /About the two of you/);
+  assert.match(familyHtml, /Person receiving care/);
+  assert.match(familyHtml, /Caregiver or visiting family member/);
+  assert.match(familyHtml, /Preferred name/);
+  assert.match(familyHtml, /Nationality or cultural background/);
+  assert.match(familyHtml, /Relationship/);
+  assert.match(familyHtml, /Gender is optional and never used to assume an interest/);
+  assert.match(familyHtml, /Names and identity details are not sent to Qloo/);
+});
+
+test('relationship details make bridge suggestions personal without changing their claim boundary', async () => {
+  const personalized = await generateKinshipBridge({
+    guardrails: {
+      ...preset.guardrails,
+      elderName: 'Vera',
+      elderNationality: 'South African',
+      caregiverName: 'Amina',
+      caregiverAge: 42,
+      caregiverRelationship: 'daughter',
+      caregiverNationality: 'Kenyan-British',
+    },
+    elderClues,
+    grandchildSeeds,
+    boostedCueIds: [],
+    excludedCueIds: [],
+  });
+  const explanation = personalized.intergenerationalBridges[0].harmonicExplanation;
+  assert.match(explanation, /Amina/);
+  assert.match(explanation, /42-year-old daughter/);
+  assert.match(explanation, /South African and Kenyan-British/);
+  assert.match(explanation, /actual match comes from the places and cultural favourites they selected/);
+  assert.match(explanation, /not a prediction of any reaction/);
+});
+
 test('the family form uses plain language and no invented percentages', () => {
   assert.match(familyHtml, /Find suggestions/);
   assert.ok(!familyHtml.includes('Reconstruct Era &amp; Bridge'), 'jargon button label');
