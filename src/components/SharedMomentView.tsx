@@ -6,6 +6,7 @@ import {
   MoonStar,
   Music,
   Play,
+  Printer,
   Save,
   Sparkles,
   Square,
@@ -28,6 +29,7 @@ export interface MomentReflection {
   comfort: number;
   note: string;
   savedAt: string;
+  cueSnapshot?: ReminiscenceCue;
 }
 
 interface Props {
@@ -172,7 +174,7 @@ export const SharedMomentView: React.FC<Props> = ({
       'There is no need to finish anything.',
     ].join(' ');
     const utterance = new SpeechSynthesisUtterance(instructions);
-    utterance.lang = document.documentElement.lang || 'en';
+    utterance.lang = data.guardrailsApplied.preferredLanguage || document.documentElement.lang || 'en';
     utterance.rate = 0.84;
     utterance.pitch = 0.95;
     utterance.onend = () => setSpeakingInstructions(false);
@@ -190,6 +192,16 @@ export const SharedMomentView: React.FC<Props> = ({
   };
 
   const bridge = data.intergenerationalBridges?.[0];
+  const sensoryPairing = data.sensoryTactileKit?.[0];
+
+  const printActivityGuide = () => {
+    if (typeof window === 'undefined') return;
+    document.body.classList.add('printing-activity-guide');
+    const cleanUp = () => document.body.classList.remove('printing-activity-guide');
+    window.addEventListener('afterprint', cleanUp, { once: true });
+    window.print();
+    window.setTimeout(cleanUp, 1000);
+  };
 
   if (!cue) {
     return (
@@ -283,6 +295,15 @@ export const SharedMomentView: React.FC<Props> = ({
 
           <button
             type="button"
+            onClick={printActivityGuide}
+            className="loam-btn-secondary text-base no-print"
+          >
+            <Printer className="w-5 h-5" aria-hidden="true" />
+            <span>Print Activity Guide</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => {
               onCueReaction(cue, 'lit_up_sang');
               setAcknowledged((prev) => ({ ...prev, [cueKey(cue)]: 'loved' }));
@@ -338,6 +359,36 @@ export const SharedMomentView: React.FC<Props> = ({
 
         <details className="mt-6 border-t border-parchment-200 pt-5 dark:border-vinyl-700">
           <summary className="cursor-pointer text-sm font-semibold text-plum-700 marker:text-plum-500 dark:text-plum-300">
+            See the cultural bridge
+          </summary>
+          <div className="mt-4" aria-label="Cultural bridge from a family clue to this moment and a sensory pairing">
+            <div className="grid items-stretch gap-2 sm:grid-cols-[1fr_auto_1fr_auto_1fr] sm:gap-3">
+              <BridgeNode
+                eyebrow="Starting interest"
+                title={cue.explainability?.[0]?.seed_name ?? 'A family clue'}
+                detail="Something the family shared"
+              />
+              <BridgeArrow />
+              <BridgeNode
+                eyebrow="Taste connection"
+                title={cue.name}
+                detail="A related cultural suggestion"
+              />
+              <BridgeArrow />
+              <BridgeNode
+                eyebrow="Sensory pairing"
+                title={sensoryPairing?.name ?? 'A familiar room texture'}
+                detail={sensoryPairing?.fiveDollarAction ?? cue.sensoryInvitationPrompt}
+              />
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-loam-muted dark:text-loam-muted-dark">
+              This path explains how the invitation was assembled. It is a possibility to try, not proof of a memory or preference.
+            </p>
+          </div>
+        </details>
+
+        <details className="mt-5 border-t border-parchment-200 pt-5 dark:border-vinyl-700">
+          <summary className="cursor-pointer text-sm font-semibold text-plum-700 marker:text-plum-500 dark:text-plum-300">
             Why this suggestion?
           </summary>
           <div className="mt-4 grid gap-3 text-sm leading-relaxed text-loam-body dark:text-loam-body-dark sm:grid-cols-2">
@@ -366,6 +417,40 @@ export const SharedMomentView: React.FC<Props> = ({
           </div>
         </details>
       </section>
+
+      <article className="print-activity-guide" aria-hidden="true">
+        <header>
+          <p className="print-kicker">Kinship · Care-Partner Activity Guide</p>
+          <h1>{cue.name}</h1>
+          <p>{cue.releaseYear} · {data.geographyInfo.name}</p>
+        </header>
+        <section>
+          <h2>Opening words</h2>
+          <blockquote>“{cue.sensoryInvitationPrompt}”</blockquote>
+        </section>
+        <section>
+          <h2>Try this together</h2>
+          <ol>
+            <li>Sit side by side and read the opening words slowly.</li>
+            <li>If it feels welcome, play the gentle chords or add a quiet room sound.</li>
+            <li>{sensoryPairing?.fiveDollarAction ?? 'Offer one familiar object, scent, or warm drink without asking for a name or date.'}</li>
+            <li>Leave space for quiet. A smile, a pause, or no response at all is okay.</li>
+          </ol>
+        </section>
+        <section>
+          <h2>Comfort boundaries</h2>
+          <ul>
+            <li>Do not quiz, correct, or ask them to prove a memory.</li>
+            <li>Stop or switch activities if anything feels unwelcome.</li>
+            <li>There is no need to finish. Sitting quietly together is enough.</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Caregiver note</h2>
+          <p>{reflectionNote.trim() || 'No note has been added for this moment yet.'}</p>
+        </section>
+        <footer>Prepared in Kinship · Keep this guide somewhere easy for the next care partner to find.</footer>
+      </article>
 
       <TogetherCompanionTools key={currentKey} durationMinutes={5} />
 
@@ -435,6 +520,7 @@ export const SharedMomentView: React.FC<Props> = ({
                 comfort,
                 note: reflectionNote.trim(),
                 savedAt: new Date().toISOString(),
+                cueSnapshot: cue,
               });
               setReflectionSaved(true);
             }}
@@ -539,3 +625,15 @@ export const SharedMomentView: React.FC<Props> = ({
     </div>
   );
 };
+
+const BridgeNode: React.FC<{ eyebrow: string; title: string; detail: string }> = ({ eyebrow, title, detail }) => (
+  <div className="rounded-2xl border border-parchment-300 bg-parchment-50 p-4 dark:border-vinyl-700 dark:bg-vinyl-900">
+    <p className="text-xs font-semibold uppercase tracking-wider text-plum-600 dark:text-plum-300">{eyebrow}</p>
+    <p className="mt-1.5 font-semibold text-loam-ink dark:text-parchment-50">{title}</p>
+    <p className="mt-1 text-xs leading-relaxed text-loam-body dark:text-loam-body-dark">{detail}</p>
+  </div>
+);
+
+const BridgeArrow: React.FC = () => (
+  <span className="self-center text-center text-xl text-plum-500" aria-hidden="true">→</span>
+);

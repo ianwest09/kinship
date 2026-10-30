@@ -21,6 +21,7 @@ import {
   KinshipPrescriptionResponse,
   QlooEntitySubtype,
   ReminiscenceCue,
+  SavedCareProfile,
   SparkJournalEntry,
   YouthGeographyId,
 } from '../shared/types';
@@ -37,6 +38,7 @@ import { SplashScreen } from './components/SplashScreen';
 import { DiscoverView } from './components/DiscoverView';
 import { SharedMomentView, type MomentReflection } from './components/SharedMomentView';
 import { PreferencesView, TextSize } from './components/PreferencesView';
+import { ProfileManager } from './components/ProfileManager';
 // Home, Discover and Share a moment stay in the entry chunk: they are the first
 // journey. Everything below is one tap deeper, so it loads on demand. The entry
 // bundle previously carried every screen, both overlays and the offline engine,
@@ -109,6 +111,7 @@ const TEXT_SIZE_KEY = 'kinship.textSize';
 const EVENING_KEY = 'kinship.eveningMode';
 const REMEMBER_KEY = 'kinship.remember';
 const FAMILY_KEY = 'kinship.family.v1';
+const PROFILES_KEY = 'kinship.profiles.v1';
 
 /**
  * What a family has typed, kept on their own device.
@@ -162,6 +165,29 @@ function dropStoredFamily() {
     window.localStorage.removeItem(FAMILY_KEY);
   } catch {
     /* private mode or a full quota — nothing to delete */
+  }
+}
+
+function readStoredProfiles(): SavedCareProfile[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    if (window.localStorage.getItem(REMEMBER_KEY) !== 'on') return [];
+    const raw = window.localStorage.getItem(PROFILES_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((profile) => profile && typeof profile.id === 'string' && profile.guardrails)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeStoredProfiles(profiles: SavedCareProfile[]) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+  } catch {
+    /* storage can be unavailable; current session remains usable */
   }
 }
 
@@ -321,6 +347,8 @@ export const App: React.FC = () => {
   const [rememberOnDevice, setRememberOnDevice] = useState<boolean>(
     () => restored !== null
   );
+  const [savedProfiles, setSavedProfiles] = useState<SavedCareProfile[]>(() => readStoredProfiles());
+  const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
   const [clearedNote, setClearedNote] = useState<string | null>(null);
 
   const [activePresetId, setActivePresetId] = useState<string | null>(
@@ -525,6 +553,7 @@ export const App: React.FC = () => {
     dropStoredFamily();
     try {
       window.localStorage.removeItem(REMEMBER_KEY);
+      window.localStorage.removeItem(PROFILES_KEY);
     } catch {
       /* ignore */
     }
@@ -537,16 +566,73 @@ export const App: React.FC = () => {
     setExcludedCueIds([]);
     setSparkLog([]);
     setMomentReflections([]);
+    setSavedProfiles([]);
+    setActiveProfileId(null);
     setClearedNote('Cleared. Nothing is stored on this device now.');
   }, []);
 
   const handleToggleRemember = useCallback(() => {
     setRememberOnDevice((on) => {
-      if (on) dropStoredFamily();
+      if (on) {
+        dropStoredFamily();
+        try {
+          window.localStorage.removeItem(PROFILES_KEY);
+        } catch {
+          /* ignore */
+        }
+        setSavedProfiles([]);
+        setActiveProfileId(null);
+      }
       setClearedNote(null);
       return !on;
     });
   }, []);
+
+  const handleSaveProfile = (label: string) => {
+    if (!rememberOnDevice) return;
+    const id = activeProfileId ?? `profile-${Date.now()}`;
+    const profile: SavedCareProfile = {
+      id,
+      label,
+      guardrails,
+      elderClues,
+      grandchildSeeds,
+      boostedCueIds,
+      excludedCueIds,
+      sparkLog,
+      momentReflections,
+      savedAt: new Date().toISOString(),
+    };
+    setSavedProfiles((current) => {
+      const next = [profile, ...current.filter((item) => item.id !== id)];
+      writeStoredProfiles(next);
+      return next;
+    });
+    setActiveProfileId(id);
+    setActivePresetId(null);
+  };
+
+  const handleSelectProfile = (profile: SavedCareProfile) => {
+    setActiveProfileId(profile.id);
+    setActivePresetId(null);
+    setGuardrails(profile.guardrails);
+    setElderClues(profile.elderClues);
+    setGrandchildSeeds(profile.grandchildSeeds);
+    setBoostedCueIds(profile.boostedCueIds);
+    setExcludedCueIds(profile.excludedCueIds);
+    setSparkLog(profile.sparkLog);
+    setMomentReflections(profile.momentReflections ?? []);
+    navigate('family');
+  };
+
+  const handleDeleteProfile = (id: string) => {
+    setSavedProfiles((current) => {
+      const next = current.filter((profile) => profile.id !== id);
+      writeStoredProfiles(next);
+      return next;
+    });
+    if (activeProfileId === id) setActiveProfileId(null);
+  };
 
   const handleSelectPreset = (p: FamilyPreset) => {
     setActivePresetId(p.id);
@@ -644,6 +730,7 @@ export const App: React.FC = () => {
         copy[existingIndex] = {
           ...copy[existingIndex],
           personalNotes: reflection.note,
+          cueSnapshot: reflection.cueSnapshot ?? copy[existingIndex].cueSnapshot,
         };
         return copy;
       }
@@ -659,6 +746,7 @@ export const App: React.FC = () => {
           cueName: reflection.cueName,
           eraYearPinned: reflection.releaseYear,
           personalNotes: reflection.note,
+          cueSnapshot: reflection.cueSnapshot,
           reaction: 'calm_soothed',
           qlooUpdateNote: 'Saved connection moment',
         },
@@ -694,6 +782,7 @@ export const App: React.FC = () => {
           cueId: cue.entity_id,
           cueName: cue.name,
           eraYearPinned: cue.releaseYear,
+          cueSnapshot: cue,
           reaction,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           qlooUpdateNote: 'Added to filter.exclude.entities to prevent restlessness',
@@ -719,6 +808,7 @@ export const App: React.FC = () => {
             cueName: cue.name,
             eraYearPinned: cue.releaseYear,
             lucidQuote,
+            cueSnapshot: cue,
             reaction: 'lit_up_sang',
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             qlooUpdateNote: 'Saved lucid family memory spark + boosted weight=25',
@@ -744,6 +834,7 @@ export const App: React.FC = () => {
         cueId: cue.entity_id,
         cueName: cue.name,
         eraYearPinned: cue.releaseYear,
+        cueSnapshot: cue,
         reaction,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         qlooUpdateNote:
@@ -776,10 +867,12 @@ export const App: React.FC = () => {
       ...(prescription?.sundowningSafePlaylist ?? []),
     ];
     const cue =
+      moment.cueSnapshot ??
       availableCues.find(
         (candidate) =>
           candidate.entity_id === moment.cueId || candidate.name === moment.cueName
-      ) ?? null;
+      ) ??
+      null;
     openTogetherWith(cue);
   };
 
@@ -1039,7 +1132,17 @@ export const App: React.FC = () => {
         )}
 
         {prescription && activeTab === 'family' && (
-          <FamilyIntakePanel
+          <div className="space-y-8">
+            <ProfileManager
+              profiles={savedProfiles}
+              activeProfileId={activeProfileId}
+              currentName={guardrails.elderName}
+              storageEnabled={rememberOnDevice}
+              onSave={handleSaveProfile}
+              onSelect={handleSelectProfile}
+              onDelete={handleDeleteProfile}
+            />
+            <FamilyIntakePanel
             presets={presets}
             activePresetId={activePresetId}
             elderCatalog={elderCatalog}
@@ -1078,7 +1181,8 @@ export const App: React.FC = () => {
             }}
             onApplyNarrative={handleApplyNarrative}
             onOpenBridgeView={() => navigate('discover')}
-          />
+            />
+          </div>
         )}
 
         {prescription && activeTab === 'detail' && (

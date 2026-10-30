@@ -321,6 +321,21 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                 </span>
               ))}
             </div>
+            <label htmlFor="preferred-language" className="mt-4 block text-sm font-semibold text-loam-ink dark:text-parchment-50">
+              Read-aloud language
+            </label>
+            <select
+              id="preferred-language"
+              value={guardrails.preferredLanguage ?? 'en'}
+              onChange={(event) => onUpdateGuardrails({ preferredLanguage: event.target.value })}
+              className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2 text-sm text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+            >
+              <option value="en">English</option>
+              <option value="af-ZA">Afrikaans</option>
+              <option value="xh-ZA">isiXhosa</option>
+              <option value="es">Spanish</option>
+              <option value="fr">French</option>
+            </select>
           </div>
         </div>
 

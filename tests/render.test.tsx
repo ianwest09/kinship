@@ -24,6 +24,7 @@ const renderToString = (element: React.ReactElement): string =>
 
 import { App } from '../src/App';
 import { HomeView } from '../src/components/HomeView';
+import { ProfileManager } from '../src/components/ProfileManager';
 import { DiscoverView } from '../src/components/DiscoverView';
 import { SharedMomentView } from '../src/components/SharedMomentView';
 import { PreferencesView } from '../src/components/PreferencesView';
@@ -357,8 +358,64 @@ test('the connection moment offers optional browser read-aloud controls', () => 
   assert.match(togetherHtml, /aria-pressed="false"/);
 });
 
+test('the connection moment includes a printable guide, cultural bridge and ambient mixer', () => {
+  assert.match(togetherHtml, /Print Activity Guide/);
+  assert.match(togetherHtml, /Care-Partner Activity Guide/);
+  assert.match(togetherHtml, /See the cultural bridge/);
+  assert.match(togetherHtml, /Starting interest/);
+  assert.match(togetherHtml, /Sensory pairing/);
+  assert.match(togetherHtml, /Courtyard rain/);
+  assert.match(togetherHtml, /Warm hearth/);
+  assert.match(togetherHtml, /Tea brewing/);
+  assert.match(togetherHtml, /Garden breeze/);
+  assert.match(togetherHtml, /Vinyl needle hum/);
+  assert.match(togetherHtml, /Background volume/);
+});
+
 test('the shared screen announces itself politely to assistive tech', () => {
   assert.match(togetherHtml, /aria-live="polite"/);
+});
+
+test('profile management is opt-in and offers saved-profile switching', () => {
+  const disabled = renderToString(
+    <ProfileManager
+      profiles={[]}
+      activeProfileId={null}
+      currentName="Vera"
+      storageEnabled={false}
+      onSave={noop}
+      onSelect={noop}
+      onDelete={noop}
+    />
+  );
+  assert.match(disabled, /Remember this family on this device/);
+
+  const profile = {
+    id: 'vera',
+    label: 'Vera — jazz and gardening',
+    guardrails: { ...data.guardrailsApplied, preferredLanguage: 'en' },
+    elderClues: [{ name: 'Ella Fitzgerald', subtype: 'urn:entity:artist' as const, weight: 10 }],
+    grandchildSeeds: [],
+    boostedCueIds: [],
+    excludedCueIds: [],
+    sparkLog: [],
+    momentReflections: [],
+    savedAt: new Date(0).toISOString(),
+  };
+  const enabled = renderToString(
+    <ProfileManager
+      profiles={[profile]}
+      activeProfileId={null}
+      currentName="Vera"
+      storageEnabled
+      onSave={noop}
+      onSelect={noop}
+      onDelete={noop}
+    />
+  );
+  assert.match(enabled, /Save current profile/);
+  assert.match(enabled, /Vera — jazz and gardening/);
+  assert.match(enabled, /Switch profile/);
 });
 
 /* ----------------------------------------------------------- preferences */
@@ -583,6 +640,10 @@ test('personal notes render alongside their saved connection moment', () => {
   );
   assert.match(html, /Saved moments and personal notes/);
   assert.match(html, /Personal note: The quieter version felt more comfortable\./);
+  assert.match(html, /What resonated/);
+  assert.match(html, /Moments saved/);
+  assert.match(html, /Marked as settling/);
+  assert.match(html, /not an assessment or prediction/);
 });
 
 /* --------------------------------------------------------------- overlays */

@@ -15,26 +15,35 @@ interface Props {
   durationMinutes?: number;
 }
 
-type AmbientSound = 'rain' | 'breeze' | 'hearth';
+type AmbientSound = 'rain' | 'breeze' | 'hearth' | 'tea' | 'vinyl';
 
 type AmbientSession = {
   context: AudioContext;
+  master: GainNode;
   nodes: AudioNode[];
 };
+
+const AMBIENT_CHOICES: Array<{ id: AmbientSound; label: string }> = [
+  { id: 'rain', label: 'Courtyard rain' },
+  { id: 'hearth', label: 'Warm hearth' },
+  { id: 'tea', label: 'Tea brewing' },
+  { id: 'breeze', label: 'Garden breeze' },
+  { id: 'vinyl', label: 'Vinyl needle hum' },
+];
 
 function formatTime(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
   return `${minutes}:${String(seconds % 60).padStart(2, '0')}`;
 }
 
-function startAmbient(kind: AmbientSound): AmbientSession | null {
+function startAmbient(kind: AmbientSound, volume: number): AmbientSession | null {
   const AudioContextClass = window.AudioContext ||
     (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AudioContextClass) return null;
 
   const context = new AudioContextClass();
   const master = context.createGain();
-  master.gain.value = 0.045;
+  master.gain.value = 0.008 + volume * 0.00055;
   master.connect(context.destination);
 
   const buffer = context.createBuffer(1, context.sampleRate * 2, context.sampleRate);
@@ -43,16 +52,24 @@ function startAmbient(kind: AmbientSound): AmbientSession | null {
   for (let i = 0; i < samples.length; i += 1) {
     const white = Math.random() * 2 - 1;
     previous = previous * 0.97 + white * 0.03;
-    samples[i] = kind === 'rain' ? white * 0.35 + previous * 0.65 : previous;
+    samples[i] =
+      kind === 'rain'
+        ? white * 0.35 + previous * 0.65
+        : kind === 'vinyl'
+          ? white * 0.12 + previous * 0.25
+          : kind === 'tea'
+            ? white * 0.08 + previous * 0.8
+            : previous;
   }
 
   const noise = context.createBufferSource();
   const filter = context.createBiquadFilter();
   noise.buffer = buffer;
   noise.loop = true;
-  filter.type = kind === 'rain' ? 'lowpass' : 'bandpass';
-  filter.frequency.value = kind === 'rain' ? 2200 : kind === 'breeze' ? 520 : 180;
-  filter.Q.value = kind === 'breeze' ? 0.5 : 0.8;
+  filter.type = kind === 'rain' || kind === 'tea' ? 'lowpass' : 'bandpass';
+  filter.frequency.value =
+    kind === 'rain' ? 2200 : kind === 'breeze' ? 520 : kind === 'vinyl' ? 900 : kind === 'tea' ? 1250 : 180;
+  filter.Q.value = kind === 'breeze' || kind === 'tea' ? 0.5 : 0.8;
   noise.connect(filter);
   filter.connect(master);
   noise.start();
@@ -70,7 +87,7 @@ function startAmbient(kind: AmbientSound): AmbientSession | null {
     nodes.push(oscillator, glow);
   }
 
-  return { context, nodes };
+  return { context, master, nodes };
 }
 
 function stopAmbient(session: AmbientSession | null) {
@@ -101,9 +118,9 @@ export const TogetherCompanionTools: React.FC<Props> = ({ durationMinutes = 5 })
   const [timerMinutes, setTimerMinutes] = useState(durationMinutes);
   const [secondsLeft, setSecondsLeft] = useState(durationMinutes * 60);
   const [timerRunning, setTimerRunning] = useState(false);
-  const [ambient, setAmbient] = useState<AmbientSound>('breeze');
-  const [ambientPlaying, setAmbientPlaying] = useState(false);
-  const ambientSession = useRef<AmbientSession | null>(null);
+  const [activeAmbients, setActiveAmbients] = useState<AmbientSound[]>([]);
+  const [ambientVolume, setAmbientVolume] = useState(35);
+  const ambientSessions = useRef<Map<AmbientSound, AmbientSession>>(new Map());
 
   useEffect(() => {
     if (!timerRunning) return undefined;
@@ -119,7 +136,23 @@ export const TogetherCompanionTools: React.FC<Props> = ({ durationMinutes = 5 })
     return () => window.clearInterval(id);
   }, [timerRunning]);
 
-  useEffect(() => () => stopAmbient(ambientSession.current), []);
+  useEffect(
+    () => () => {
+      ambientSessions.current.forEach(stopAmbient);
+      ambientSessions.current.clear();
+    },
+    []
+  );
+
+  useEffect(() => {
+    ambientSessions.current.forEach((session) => {
+      session.master.gain.setTargetAtTime(
+        0.008 + ambientVolume * 0.00055,
+        session.context.currentTime,
+        0.04
+      );
+    });
+  }, [ambientVolume]);
 
   const changeTimer = (delta: number) => {
     const next = Math.min(15, Math.max(1, timerMinutes + delta));
@@ -133,27 +166,24 @@ export const TogetherCompanionTools: React.FC<Props> = ({ durationMinutes = 5 })
     setSecondsLeft(timerMinutes * 60);
   };
 
-  const toggleAmbient = () => {
-    if (ambientPlaying) {
-      stopAmbient(ambientSession.current);
-      ambientSession.current = null;
-      setAmbientPlaying(false);
+  const toggleAmbient = (kind: AmbientSound) => {
+    const existing = ambientSessions.current.get(kind);
+    if (existing) {
+      stopAmbient(existing);
+      ambientSessions.current.delete(kind);
+      setActiveAmbients((current) => current.filter((item) => item !== kind));
       return;
     }
-    ambientSession.current = startAmbient(ambient);
-    setAmbientPlaying(Boolean(ambientSession.current));
+    const session = startAmbient(kind, ambientVolume);
+    if (!session) return;
+    ambientSessions.current.set(kind, session);
+    setActiveAmbients((current) => [...current, kind]);
   };
 
-  const chooseAmbient = (next: AmbientSound) => {
-    const wasPlaying = ambientPlaying;
-    stopAmbient(ambientSession.current);
-    ambientSession.current = null;
-    setAmbient(next);
-    setAmbientPlaying(false);
-    if (wasPlaying) {
-      ambientSession.current = startAmbient(next);
-      setAmbientPlaying(Boolean(ambientSession.current));
-    }
+  const stopAllAmbients = () => {
+    ambientSessions.current.forEach(stopAmbient);
+    ambientSessions.current.clear();
+    setActiveAmbients([]);
   };
 
   return (
@@ -214,23 +244,48 @@ export const TogetherCompanionTools: React.FC<Props> = ({ durationMinutes = 5 })
             <Volume2 className="h-5 w-5" aria-hidden="true" />
             <h4 className="font-semibold">Room sound</h4>
           </div>
-          <label htmlFor="ambient-sound" className="mt-3 block text-sm font-medium text-loam-body dark:text-loam-body-dark">
-            Choose a quiet texture
+          <p className="mt-3 text-sm text-loam-body dark:text-loam-body-dark">
+            Layer one or two quiet textures. Each sound is made locally and starts only when selected.
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {AMBIENT_CHOICES.map((choice) => {
+              const playing = activeAmbients.includes(choice.id);
+              return (
+                <button
+                  key={choice.id}
+                  type="button"
+                  onClick={() => toggleAmbient(choice.id)}
+                  aria-pressed={playing}
+                  className={`min-h-11 rounded-xl border px-3 py-2 text-left text-sm font-semibold ${
+                    playing
+                      ? 'border-plum-700 bg-plum-600 text-white'
+                      : 'border-parchment-300 bg-white text-loam-body dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-loam-body-dark'
+                  }`}
+                >
+                  {choice.label}
+                </button>
+              );
+            })}
+          </div>
+          <label htmlFor="ambient-volume" className="mt-4 block text-sm font-medium text-loam-body dark:text-loam-body-dark">
+            Background volume · {ambientVolume}%
           </label>
-          <select
-            id="ambient-sound"
-            value={ambient}
-            onChange={(event) => chooseAmbient(event.target.value as AmbientSound)}
-            className="mt-2 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-sm text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
-          >
-            <option value="breeze">Soft breeze</option>
-            <option value="rain">Distant rain</option>
-            <option value="hearth">Low hearth hum</option>
-          </select>
-          <button type="button" onClick={toggleAmbient} className="loam-btn-secondary mt-4 w-full text-sm" aria-pressed={ambientPlaying}>
-            {ambientPlaying ? <VolumeX className="h-4 w-4" aria-hidden="true" /> : <Volume2 className="h-4 w-4" aria-hidden="true" />}
-            {ambientPlaying ? 'Stop room sound' : 'Play room sound'}
-          </button>
+          <input
+            id="ambient-volume"
+            type="range"
+            min="10"
+            max="70"
+            step="5"
+            value={ambientVolume}
+            onChange={(event) => setAmbientVolume(Number(event.target.value))}
+            className="kinship-slider mt-2 w-full"
+          />
+          {activeAmbients.length > 0 && (
+            <button type="button" onClick={stopAllAmbients} className="loam-btn-secondary mt-4 w-full text-sm">
+              <VolumeX className="h-4 w-4" aria-hidden="true" />
+              Stop all room sounds
+            </button>
+          )}
         </div>
 
       </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   AlertOctagon,
   BarChart3,
@@ -72,6 +72,54 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
   }, []);
 
   const warmEq = Boolean(data.guardrailsApplied.hearingLossWarmEq);
+  const reflectionInsights = useMemo(() => {
+    const saved = sparkLog.filter((entry) => entry.reaction !== 'restless_skip');
+    const liked = saved.filter((entry) => entry.reaction === 'lit_up_sang').length;
+    const settling = saved.filter((entry) => entry.reaction === 'calm_soothed').length;
+    const momentsByName = new Map<string, number>();
+    const categories = new Map<string, number>();
+    const timesOfDay = new Map<string, number>();
+    const sensoryMentions = new Map<string, number>();
+    const allCues = [...data.reconstructedYouthUniverse, ...data.sundowningSafePlaylist];
+    const sensoryWords: Array<[string, RegExp]> = [
+      ['Music or sound', /music|song|sound|chord|sing/i],
+      ['Tea or a warm drink', /tea|coffee|warm drink/i],
+      ['Garden or flowers', /garden|flower|blossom|breeze/i],
+      ['Scent', /scent|smell|fragrance/i],
+      ['Something to hold', /touch|hold|fabric|object|wood/i],
+    ];
+    saved.forEach((entry) => {
+      momentsByName.set(entry.cueName, (momentsByName.get(entry.cueName) ?? 0) + 1);
+      const cue = allCues.find((candidate) => candidate.entity_id === entry.cueId || candidate.name === entry.cueName);
+      if (cue?.categoryBadge) categories.set(cue.categoryBadge, (categories.get(cue.categoryBadge) ?? 0) + 1);
+
+      const timeMatch = entry.timestamp.match(/(\d{1,2})(?::\d{2})?\s*(am|pm)?/i);
+      if (timeMatch) {
+        let hour = Number(timeMatch[1]);
+        const suffix = timeMatch[2]?.toLowerCase();
+        if (suffix === 'pm' && hour < 12) hour += 12;
+        if (suffix === 'am' && hour === 12) hour = 0;
+        const period = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening';
+        timesOfDay.set(period, (timesOfDay.get(period) ?? 0) + 1);
+      }
+
+      const words = `${entry.cueName} ${entry.personalNotes ?? ''} ${entry.lucidQuote ?? ''}`;
+      sensoryWords.forEach(([label, pattern]) => {
+        if (pattern.test(words)) sensoryMentions.set(label, (sensoryMentions.get(label) ?? 0) + 1);
+      });
+    });
+    const top = (values: Map<string, number>) =>
+      [...values.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+    return {
+      total: saved.length,
+      liked,
+      settling,
+      repeated: top(momentsByName),
+      category: top(categories),
+      timeOfDay: top(timesOfDay),
+      sensory: top(sensoryMentions),
+    };
+  }, [data.reconstructedYouthUniverse, data.sundowningSafePlaylist, sparkLog]);
 
   const handleToggleAudio = (id: string, label: string) => {
     const started = toggleHarmonicPreview(
@@ -558,6 +606,34 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
         </div>
         )}
 
+        {/* Caregiver observations are summarized descriptively, never scored or treated as health outcomes. */}
+        <section className="rounded-2xl border border-plum-200 bg-plum-50/50 p-4 dark:border-vinyl-700 dark:bg-vinyl-800" aria-labelledby="reflection-insights-heading">
+          <div className="flex items-start gap-2.5">
+            <BarChart3 className="mt-0.5 h-5 w-5 shrink-0 text-plum-600 dark:text-plum-300" aria-hidden="true" />
+            <div>
+              <h4 id="reflection-insights-heading" className="font-semibold text-loam-ink dark:text-parchment-50">What resonated</h4>
+              <p className="mt-1 text-xs leading-relaxed text-loam-body dark:text-loam-body-dark">
+                A simple summary of your saved observations. It describes what you recorded; it is not an assessment or prediction.
+              </p>
+            </div>
+          </div>
+          {reflectionInsights.total === 0 ? (
+            <p className="mt-4 text-sm text-loam-muted dark:text-loam-muted-dark">Save a moment to begin noticing gentle patterns over time.</p>
+          ) : (
+            <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <InsightItem label="Moments saved" value={String(reflectionInsights.total)} />
+              <InsightItem label="Marked ‘we liked this’" value={String(reflectionInsights.liked)} />
+              <InsightItem label="Marked as settling" value={String(reflectionInsights.settling)} />
+              <InsightItem label="Most-saved atmosphere" value={reflectionInsights.category ?? 'Keep observing'} />
+              <InsightItem label="Most-saved time of day" value={reflectionInsights.timeOfDay ?? 'Not enough times yet'} />
+              <InsightItem
+                label="Most-mentioned sensory cue"
+                value={reflectionInsights.sensory ?? reflectionInsights.repeated ?? 'Keep observing'}
+              />
+            </dl>
+          )}
+        </section>
+
         {/* Spark Log + Blocked Sundowning Traps */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
           <div className="lg:col-span-7 rounded-2xl border border-clay-200 dark:border-clay-900/60 bg-clay-50/50 dark:bg-clay-950/20 p-4 space-y-2.5">
@@ -844,3 +920,10 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
     </div>
   );
 };
+
+const InsightItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+  <div className="rounded-xl border border-parchment-200 bg-white p-3 dark:border-vinyl-700 dark:bg-vinyl-900">
+    <dt className="text-xs text-loam-muted dark:text-loam-muted-dark">{label}</dt>
+    <dd className="mt-1 font-semibold text-loam-ink dark:text-parchment-50">{value}</dd>
+  </div>
+);

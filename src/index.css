@@ -276,6 +276,10 @@
   }
 }
 
+.print-activity-guide {
+  display: none;
+}
+
 @media print {
   .no-print {
     display: none !important;
@@ -284,5 +288,73 @@
   body {
     background: #FFFFFF !important;
     color: #000000 !important;
+  }
+
+  body.printing-activity-guide * {
+    visibility: hidden !important;
+  }
+
+  body.printing-activity-guide .print-activity-guide,
+  body.printing-activity-guide .print-activity-guide * {
+    visibility: visible !important;
+  }
+
+  body.printing-activity-guide .print-activity-guide {
+    display: block !important;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0.35in 0.45in;
+    color: #111111 !important;
+    background: #FFFFFF !important;
+    font: 12pt/1.45 Georgia, serif;
+  }
+
+  .print-activity-guide header {
+    border-bottom: 3px solid #3f4c39;
+    padding-bottom: 0.18in;
+  }
+
+  .print-activity-guide h1 {
+    margin: 0.05in 0;
+    font-size: 25pt;
+    line-height: 1.1;
+  }
+
+  .print-activity-guide h2 {
+    margin: 0.18in 0 0.06in;
+    font-size: 15pt;
+  }
+
+  .print-activity-guide blockquote {
+    margin: 0;
+    padding: 0.12in 0.16in;
+    border-left: 4px solid #765078;
+    background: #f5f2ec;
+    font-size: 14pt;
+  }
+
+  .print-activity-guide ol,
+  .print-activity-guide ul {
+    margin: 0.05in 0 0;
+    padding-left: 0.27in;
+  }
+
+  .print-activity-guide li {
+    margin: 0.035in 0;
+  }
+
+  .print-activity-guide footer {
+    margin-top: 0.2in;
+    border-top: 1px solid #777777;
+    padding-top: 0.08in;
+    font-size: 9pt;
+  }
+
+  .print-kicker {
+    margin: 0;
+    font: 700 9pt/1.2 Arial, sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 }

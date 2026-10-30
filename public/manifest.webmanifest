@@ -1,0 +1,17 @@
+{
+  "name": "Kinship — Familiar moments together",
+  "short_name": "Kinship",
+  "description": "Caregiver activity guides, saved moments, reflections and browser-local companion tools.",
+  "start_url": "/#home",
+  "display": "standalone",
+  "background_color": "#F4F0E8",
+  "theme_color": "#64745D",
+  "icons": [
+    {
+      "src": "/kinship-mark.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

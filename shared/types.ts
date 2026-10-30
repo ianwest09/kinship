@@ -40,6 +40,7 @@ export interface ElderGuardrails {
   sundowningSafeShield: boolean; // maps to filter.content_rating=G,PG,TV-G & filter.exclude.tags=horror,war,peril
   plotFreeMusicalFocus: boolean; // shifts moderate/late stage away from complex dialogue plots toward song, visual rhythm & craft
   hearingLossWarmEq?: boolean; // Presbycusis filter: favors warm contralto/baritone/cello & rolls off >3.2 kHz harshness
+  preferredLanguage?: string; // BCP-47 language used by browser-local spoken instructions
   grandchildName: string;
 }
 
@@ -286,8 +287,30 @@ export interface SparkJournalEntry {
   lucidQuote?: string;
   /** Caregiver-authored note saved with this specific connection moment. */
   personalNotes?: string;
+  /** A local snapshot keeps this exact activity available when recommendations change or the device is offline. */
+  cueSnapshot?: ReminiscenceCue;
   reaction: 'lit_up_sang' | 'calm_soothed' | 'restless_skip';
   qlooUpdateNote: string;
+}
+
+export interface SavedCareProfile {
+  id: string;
+  label: string;
+  guardrails: ElderGuardrails;
+  elderClues: Array<{ entity_id?: string; name: string; subtype: QlooEntitySubtype; weight: number }>;
+  grandchildSeeds: Array<{ entity_id?: string; name: string; subtype: QlooEntitySubtype }>;
+  boostedCueIds: string[];
+  excludedCueIds: string[];
+  sparkLog: SparkJournalEntry[];
+  momentReflections: Array<{
+    cueKey: string;
+    cueName: string;
+    releaseYear?: number;
+    comfort: number;
+    note: string;
+    savedAt: string;
+  }>;
+  savedAt: string;
 }
 
 export interface FamilyNarrativeParseResult {
