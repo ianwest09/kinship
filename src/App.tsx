@@ -625,6 +625,62 @@ export const App: React.FC = () => {
     return parsed;
   };
 
+  const handleSaveMomentReflection = (reflection: MomentReflection) => {
+    setMomentReflections((previous) => [
+      reflection,
+      ...previous.filter((item) => item.cueKey !== reflection.cueKey),
+    ]);
+
+    // Keep the caregiver's words on the same saved entry as the moment itself,
+    // rather than in a separate notes silo. If the cue was already saved from
+    // a reaction, enrich that record; otherwise create a lightweight saved
+    // moment that can be revisited in the collection.
+    setSparkLog((previous) => {
+      const existingIndex = previous.findIndex(
+        (entry) => entry.cueId === reflection.cueKey || entry.cueName === reflection.cueName
+      );
+      if (existingIndex >= 0) {
+        const copy = [...previous];
+        copy[existingIndex] = {
+          ...copy[existingIndex],
+          personalNotes: reflection.note,
+        };
+        return copy;
+      }
+
+      return [
+        {
+          id: `reflection-${Date.now()}`,
+          timestamp: new Date(reflection.savedAt).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          cueId: reflection.cueKey,
+          cueName: reflection.cueName,
+          eraYearPinned: reflection.releaseYear,
+          personalNotes: reflection.note,
+          reaction: 'calm_soothed',
+          qlooUpdateNote: 'Saved connection moment',
+        },
+        ...previous,
+      ];
+    });
+  };
+
+  const handleRemoveMomentReflection = (cueKey: string) => {
+    const cueName = momentReflections.find((item) => item.cueKey === cueKey)?.cueName;
+    setMomentReflections((previous) => previous.filter((item) => item.cueKey !== cueKey));
+    setSparkLog((previous) =>
+      previous.flatMap((entry) => {
+        if (entry.cueId !== cueKey && entry.cueName !== cueName) return [entry];
+        if (entry.qlooUpdateNote === 'Saved connection moment') return [];
+        const updated = { ...entry };
+        delete updated.personalNotes;
+        return [updated];
+      })
+    );
+  };
+
   const handleCueReaction = (
     cue: ReminiscenceCue,
     reaction: 'lit_up_sang' | 'calm_soothed' | 'restless_skip',
@@ -957,15 +1013,8 @@ export const App: React.FC = () => {
             warmEq={Boolean(guardrails.hearingLossWarmEq)}
             reflections={momentReflections}
             rememberOnDevice={rememberOnDevice}
-            onSaveReflection={(reflection) =>
-              setMomentReflections((previous) => [
-                reflection,
-                ...previous.filter((item) => item.cueKey !== reflection.cueKey),
-              ])
-            }
-            onRemoveReflection={(cueKey) =>
-              setMomentReflections((previous) => previous.filter((item) => item.cueKey !== cueKey))
-            }
+            onSaveReflection={handleSaveMomentReflection}
+            onRemoveReflection={handleRemoveMomentReflection}
             onCueReaction={handleCueReaction}
             onOpenRescue={() => setSundowningModalOpen(true)}
             onBackToDiscover={() => navigate('discover')}

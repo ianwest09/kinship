@@ -284,6 +284,8 @@ export interface SparkJournalEntry {
   cueName: string;
   eraYearPinned?: number;
   lucidQuote?: string;
+  /** Caregiver-authored note saved with this specific connection moment. */
+  personalNotes?: string;
   reaction: 'lit_up_sang' | 'calm_soothed' | 'restless_skip';
   qlooUpdateNote: string;
 }

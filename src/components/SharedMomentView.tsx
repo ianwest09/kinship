@@ -11,6 +11,7 @@ import { TogetherCompanionTools } from './TogetherCompanionTools';
 export interface MomentReflection {
   cueKey: string;
   cueName: string;
+  releaseYear?: number;
   comfort: number;
   note: string;
   savedAt: string;
@@ -293,7 +294,7 @@ export const SharedMomentView: React.FC<Props> = ({
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h3 id="moment-reflection-heading" className="text-lg font-semibold text-loam-ink dark:text-parchment-50">
-              A private note for next time
+              Quick personal note
             </h3>
             <p className="mt-1 text-sm text-loam-body dark:text-loam-body-dark">
               What felt comfortable? What would you change? This is your private reflection, not a health measure or assessment.
@@ -351,6 +352,7 @@ export const SharedMomentView: React.FC<Props> = ({
               onSaveReflection({
                 cueKey: currentKey ?? cue.name,
                 cueName: cue.name,
+                releaseYear: cue.releaseYear,
                 comfort,
                 note: reflectionNote.trim(),
                 savedAt: new Date().toISOString(),
@@ -360,7 +362,7 @@ export const SharedMomentView: React.FC<Props> = ({
             className="loam-btn-primary text-sm"
           >
             <Save className="h-4 w-4" aria-hidden="true" />
-            {reflectionSaved ? 'Note saved' : 'Save private note'}
+            {reflectionSaved ? 'Saved with this moment' : 'Save note with moment'}
           </button>
           {reflectionSaved && (
             <button

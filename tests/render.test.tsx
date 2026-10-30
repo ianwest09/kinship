@@ -290,6 +290,12 @@ test('no media autoplays and no commercial track is implied', () => {
   assert.match(togetherHtml, /Play gentle chords/);
 });
 
+test('a caregiver can add a quick note to the specific connection moment', () => {
+  assert.match(togetherHtml, /<textarea[^>]*id="moment-reflection"/);
+  assert.match(togetherHtml, /Quick personal note/);
+  assert.match(togetherHtml, /Save note with moment/);
+});
+
 test('the shared screen announces itself politely to assistive tech', () => {
   assert.match(togetherHtml, /aria-live="polite"/);
 });
@@ -491,6 +497,31 @@ test('the detailed view names its numbers after what they really are', () => {
 test('the detailed view describes screening, not clinical verification', () => {
   assert.match(detailHtml, /Kinship’s own safety filters/);
   assert.ok(!/verified for dementia sensory comfort/.test(detailHtml));
+});
+
+test('personal notes render alongside their saved connection moment', () => {
+  const html = renderToString(
+    <ReminiscenceAndBridgeView
+      data={data}
+      sparkLog={[
+        {
+          id: 'saved-note',
+          timestamp: '14:30',
+          cueId: 'cue-1',
+          cueName: 'A familiar song',
+          personalNotes: 'The quieter version felt more comfortable.',
+          reaction: 'calm_soothed',
+          qlooUpdateNote: 'Saved connection moment',
+        },
+      ]}
+      excludedCount={0}
+      onResetExcludes={noop}
+      onCueReaction={noop}
+      onOpenSharedMoment={noop}
+    />
+  );
+  assert.match(html, /Saved moments and personal notes/);
+  assert.match(html, /Personal note: The quieter version felt more comfortable\./);
 });
 
 /* --------------------------------------------------------------- overlays */

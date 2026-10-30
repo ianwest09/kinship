@@ -587,7 +587,7 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
 
           <div className="lg:col-span-5 rounded-2xl border border-parchment-300 dark:border-vinyl-700 bg-white dark:bg-vinyl-800 p-4 space-y-2">
             <div className="text-xs font-semibold text-loam-ink dark:text-parchment-50">
-              What you have noted (shapes the next suggestions):
+              Saved moments and personal notes:
             </div>
             {sparkLog.length === 0 ? (
               <p className="text-xs text-loam-muted dark:text-loam-muted-dark">
@@ -606,6 +606,11 @@ export const ReminiscenceAndBridgeView: React.FC<Props> = ({
                     {s.lucidQuote && (
                       <div className="pl-3 italic text-loam-body dark:text-parchment-100">
                         “{s.lucidQuote}”
+                      </div>
+                    )}
+                    {s.personalNotes && (
+                      <div className="pl-3 text-loam-body dark:text-parchment-100">
+                        Personal note: {s.personalNotes}
                       </div>
                     )}
                   </div>
