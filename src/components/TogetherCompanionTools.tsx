@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  AudioLines,
   Minus,
   Pause,
   Play,
@@ -13,8 +12,6 @@ import {
 } from 'lucide-react';
 
 interface Props {
-  title: string;
-  invitation: string;
   durationMinutes?: number;
 }
 
@@ -97,27 +94,16 @@ function stopAmbient(session: AmbientSession | null) {
 
 /**
  * Optional, browser-only session helpers adapted from the Drive prototype.
- * Nothing starts automatically, and neither audio nor narration makes a
- * network request. These are comforts, not part of the recommendation score.
+ * Nothing starts automatically, and generated room audio makes no network
+ * request. These are comforts, not part of the recommendation score.
  */
-export const TogetherCompanionTools: React.FC<Props> = ({
-  title,
-  invitation,
-  durationMinutes = 5,
-}) => {
+export const TogetherCompanionTools: React.FC<Props> = ({ durationMinutes = 5 }) => {
   const [timerMinutes, setTimerMinutes] = useState(durationMinutes);
   const [secondsLeft, setSecondsLeft] = useState(durationMinutes * 60);
   const [timerRunning, setTimerRunning] = useState(false);
   const [ambient, setAmbient] = useState<AmbientSound>('breeze');
   const [ambientPlaying, setAmbientPlaying] = useState(false);
-  const [speaking, setSpeaking] = useState(false);
   const ambientSession = useRef<AmbientSession | null>(null);
-
-  const narration = useMemo(
-    () => `${title}. ${invitation} There is no need to remember anything. We can stop whenever you like.`,
-    [title, invitation]
-  );
-  const speechAvailable = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
   useEffect(() => {
     if (!timerRunning) return undefined;
@@ -133,13 +119,7 @@ export const TogetherCompanionTools: React.FC<Props> = ({
     return () => window.clearInterval(id);
   }, [timerRunning]);
 
-  useEffect(
-    () => () => {
-      stopAmbient(ambientSession.current);
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
-    },
-    []
-  );
+  useEffect(() => () => stopAmbient(ambientSession.current), []);
 
   const changeTimer = (delta: number) => {
     const next = Math.min(15, Math.max(1, timerMinutes + delta));
@@ -176,23 +156,6 @@ export const TogetherCompanionTools: React.FC<Props> = ({
     }
   };
 
-  const toggleNarration = () => {
-    if (!speechAvailable) return;
-    if (speaking) {
-      window.speechSynthesis.cancel();
-      setSpeaking(false);
-      return;
-    }
-    const utterance = new SpeechSynthesisUtterance(narration);
-    utterance.rate = 0.82;
-    utterance.pitch = 0.92;
-    utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
-    setSpeaking(true);
-  };
-
   return (
     <section className="loam-card overflow-hidden" aria-labelledby="together-tools-heading">
       <div className="border-b border-parchment-200 bg-parchment-50 px-5 py-4 dark:border-vinyl-700 dark:bg-vinyl-900 md:px-7">
@@ -203,13 +166,13 @@ export const TogetherCompanionTools: React.FC<Props> = ({
               Optional things to make the room gentler
             </h3>
             <p className="mt-1 text-sm text-loam-body dark:text-loam-body-dark">
-              Nothing starts by itself. Sound and speech stay in this browser.
+              Nothing starts by itself. Room sounds are generated in this browser.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-px bg-parchment-200 dark:bg-vinyl-700 md:grid-cols-3">
+      <div className="grid gap-px bg-parchment-200 dark:bg-vinyl-700 md:grid-cols-2">
         <div className="bg-loam-card p-5 dark:bg-vinyl-800 md:p-6">
           <div className="flex items-center gap-2 text-loam-ink dark:text-parchment-50">
             <Timer className="h-5 w-5" aria-hidden="true" />
@@ -270,28 +233,6 @@ export const TogetherCompanionTools: React.FC<Props> = ({
           </button>
         </div>
 
-        <div className="bg-loam-card p-5 dark:bg-vinyl-800 md:p-6">
-          <div className="flex items-center gap-2 text-loam-ink dark:text-parchment-50">
-            <AudioLines className="h-5 w-5" aria-hidden="true" />
-            <h4 className="font-semibold">Read it aloud</h4>
-          </div>
-          <p className="mt-3 text-sm leading-relaxed text-loam-body dark:text-loam-body-dark">
-            Your browser can read the invitation slowly. It is generated on this device.
-          </p>
-          <button
-            type="button"
-            onClick={toggleNarration}
-            disabled={!speechAvailable}
-            className="loam-btn-secondary mt-4 w-full text-sm disabled:cursor-not-allowed disabled:opacity-50"
-            aria-pressed={speaking}
-          >
-            {speaking ? <VolumeX className="h-4 w-4" aria-hidden="true" /> : <AudioLines className="h-4 w-4" aria-hidden="true" />}
-            {speaking ? 'Stop reading' : 'Read invitation'}
-          </button>
-          {!speechAvailable && (
-            <p className="mt-2 text-xs text-loam-muted dark:text-loam-muted-dark">Read-aloud is not available in this browser.</p>
-          )}
-        </div>
       </div>
     </section>
   );

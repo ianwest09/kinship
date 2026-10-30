@@ -296,6 +296,12 @@ test('a caregiver can add a quick note to the specific connection moment', () =>
   assert.match(togetherHtml, /Save note with moment/);
 });
 
+test('the connection moment offers optional browser read-aloud controls', () => {
+  assert.match(togetherHtml, /Read instructions aloud/);
+  assert.match(togetherHtml, /Read-aloud is not available in this browser/);
+  assert.match(togetherHtml, /aria-pressed="false"/);
+});
+
 test('the shared screen announces itself politely to assistive tech', () => {
   assert.match(togetherHtml, /aria-live="polite"/);
 });

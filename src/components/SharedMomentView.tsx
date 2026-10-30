@@ -1,5 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Heart, MoonStar, Music, Play, Save, Sparkles, Square, Trash2, Users } from 'lucide-react';
+import {
+  ArrowLeft,
+  AudioLines as SpeechIcon,
+  Heart,
+  MoonStar,
+  Music,
+  Play,
+  Save,
+  Sparkles,
+  Square,
+  Trash2,
+  Users,
+  VolumeX,
+} from 'lucide-react';
 import { KinshipPrescriptionResponse, ReminiscenceCue } from '../../shared/types';
 import {
   inferHarmonicPreset,
@@ -85,6 +98,7 @@ export const SharedMomentView: React.FC<Props> = ({
   const [index, setIndex] = useState(0);
   const [playingKey, setPlayingKey] = useState<string | null>(null);
   const [acknowledged, setAcknowledged] = useState<Record<string, string>>({});
+  const [speakingInstructions, setSpeakingInstructions] = useState(false);
   const [reflectionNote, setReflectionNote] = useState('');
   const [comfort, setComfort] = useState(3);
   const [reflectionSaved, setReflectionSaved] = useState(false);
@@ -96,12 +110,21 @@ export const SharedMomentView: React.FC<Props> = ({
     if (at >= 0) setIndex(at);
   }, [focusCue, queue]);
 
-  // Always stop sound when leaving the screen.
-  useEffect(() => () => stopHarmonicPreview(), []);
+  // Always stop generated sound and browser narration when leaving the screen.
+  useEffect(
+    () => () => {
+      stopHarmonicPreview();
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    },
+    []
+  );
 
   const cue = queue[Math.min(index, Math.max(queue.length - 1, 0))];
   const currentKey = cue ? cueKey(cue) : null;
   const isPlaying = Boolean(cue && playingKey === `together-${currentKey}`);
+  const speechAvailable = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
   useEffect(() => {
     if (!currentKey) return;
@@ -116,8 +139,14 @@ export const SharedMomentView: React.FC<Props> = ({
     setPlayingKey(null);
   };
 
+  const stopSpeaking = () => {
+    if (speechAvailable) window.speechSynthesis.cancel();
+    setSpeakingInstructions(false);
+  };
+
   const toggleSound = () => {
     if (!cue) return;
+    if (speakingInstructions) stopSpeaking();
     const started = toggleHarmonicPreview(
       `together-${currentKey}`,
       inferHarmonicPreset(cue.name),
@@ -127,9 +156,36 @@ export const SharedMomentView: React.FC<Props> = ({
     setPlayingKey(started ? `together-${currentKey}` : null);
   };
 
+  const toggleInstructions = () => {
+    if (!cue || !speechAvailable) return;
+    if (speakingInstructions) {
+      stopSpeaking();
+      return;
+    }
+
+    stopSound();
+    const instructions = [
+      `Connection moment: ${cue.name}.`,
+      cue.sensoryInvitationPrompt,
+      'If it feels right, play the gentle chords and listen together.',
+      'You can try something else or stop and sit quietly at any time.',
+      'There is no need to finish anything.',
+    ].join(' ');
+    const utterance = new SpeechSynthesisUtterance(instructions);
+    utterance.lang = document.documentElement.lang || 'en';
+    utterance.rate = 0.84;
+    utterance.pitch = 0.95;
+    utterance.onend = () => setSpeakingInstructions(false);
+    utterance.onerror = () => setSpeakingInstructions(false);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+    setSpeakingInstructions(true);
+  };
+
   const moveBy = (delta: number) => {
     if (queue.length === 0) return;
     stopSound();
+    stopSpeaking();
     setIndex((prev) => (prev + delta + queue.length) % queue.length);
   };
 
@@ -212,6 +268,21 @@ export const SharedMomentView: React.FC<Props> = ({
 
           <button
             type="button"
+            onClick={toggleInstructions}
+            disabled={!speechAvailable}
+            aria-pressed={speakingInstructions}
+            className="loam-btn-secondary text-base disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {speakingInstructions ? (
+              <VolumeX className="w-5 h-5" aria-hidden="true" />
+            ) : (
+              <SpeechIcon className="w-5 h-5" aria-hidden="true" />
+            )}
+            <span>{speakingInstructions ? 'Stop reading' : 'Read instructions aloud'}</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => {
               onCueReaction(cue, 'lit_up_sang');
               setAcknowledged((prev) => ({ ...prev, [cueKey(cue)]: 'loved' }));
@@ -225,6 +296,12 @@ export const SharedMomentView: React.FC<Props> = ({
           </button>
         </div>
 
+        {!speechAvailable && (
+          <p className="mt-3 text-sm text-loam-muted dark:text-loam-muted-dark">
+            Read-aloud is not available in this browser. The instructions remain visible above.
+          </p>
+        )}
+
         {/* Leaving is always available and always neutral. */}
         <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
           <button
@@ -237,7 +314,14 @@ export const SharedMomentView: React.FC<Props> = ({
           >
             Try something else
           </button>
-          <button type="button" onClick={stopSound} className="loam-btn-quiet text-sm md:text-base">
+          <button
+            type="button"
+            onClick={() => {
+              stopSound();
+              stopSpeaking();
+            }}
+            className="loam-btn-quiet text-sm md:text-base"
+          >
             Stop and sit quietly
           </button>
           <span className="text-sm md:text-base text-loam-muted dark:text-loam-muted-dark">
@@ -283,12 +367,7 @@ export const SharedMomentView: React.FC<Props> = ({
         </details>
       </section>
 
-      <TogetherCompanionTools
-        key={currentKey}
-        title={cue.name}
-        invitation={cue.sensoryInvitationPrompt}
-        durationMinutes={5}
-      />
+      <TogetherCompanionTools key={currentKey} durationMinutes={5} />
 
       <section className="loam-card p-5 md:p-7" aria-labelledby="moment-reflection-heading">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -400,6 +479,7 @@ export const SharedMomentView: React.FC<Props> = ({
                   type="button"
                   onClick={() => {
                     stopSound();
+                    stopSpeaking();
                     setIndex(i);
                   }}
                   aria-current={active}
