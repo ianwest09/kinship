@@ -1,16 +1,29 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Heart, MoonStar, Music, Play, Sparkles, Square, Users } from 'lucide-react';
+import { ArrowLeft, Heart, MoonStar, Music, Play, Save, Sparkles, Square, Trash2, Users } from 'lucide-react';
 import { KinshipPrescriptionResponse, ReminiscenceCue } from '../../shared/types';
 import {
   inferHarmonicPreset,
   stopHarmonicPreview,
   toggleHarmonicPreview,
 } from '../utils/harmonicPlayer';
+import { TogetherCompanionTools } from './TogetherCompanionTools';
+
+export interface MomentReflection {
+  cueKey: string;
+  cueName: string;
+  comfort: number;
+  note: string;
+  savedAt: string;
+}
 
 interface Props {
   data: KinshipPrescriptionResponse;
   focusCue: ReminiscenceCue | null;
   warmEq: boolean;
+  reflections?: MomentReflection[];
+  rememberOnDevice?: boolean;
+  onSaveReflection?: (reflection: MomentReflection) => void;
+  onRemoveReflection?: (cueKey: string) => void;
   onCueReaction: (
     cue: ReminiscenceCue,
     reaction: 'lit_up_sang' | 'calm_soothed' | 'restless_skip',
@@ -19,6 +32,9 @@ interface Props {
   onOpenRescue: () => void;
   onBackToDiscover: () => void;
 }
+
+const EMPTY_REFLECTIONS: MomentReflection[] = [];
+const ignoreReflection = () => undefined;
 
 function cueKey(cue: ReminiscenceCue): string {
   return cue.entity_id || cue.name;
@@ -38,6 +54,10 @@ export const SharedMomentView: React.FC<Props> = ({
   data,
   focusCue,
   warmEq,
+  reflections = EMPTY_REFLECTIONS,
+  rememberOnDevice = false,
+  onSaveReflection = ignoreReflection,
+  onRemoveReflection = ignoreReflection,
   onCueReaction,
   onOpenRescue,
   onBackToDiscover,
@@ -64,6 +84,9 @@ export const SharedMomentView: React.FC<Props> = ({
   const [index, setIndex] = useState(0);
   const [playingKey, setPlayingKey] = useState<string | null>(null);
   const [acknowledged, setAcknowledged] = useState<Record<string, string>>({});
+  const [reflectionNote, setReflectionNote] = useState('');
+  const [comfort, setComfort] = useState(3);
+  const [reflectionSaved, setReflectionSaved] = useState(false);
 
   // Follow the cue the family chose in Discover.
   useEffect(() => {
@@ -78,6 +101,14 @@ export const SharedMomentView: React.FC<Props> = ({
   const cue = queue[Math.min(index, Math.max(queue.length - 1, 0))];
   const currentKey = cue ? cueKey(cue) : null;
   const isPlaying = Boolean(cue && playingKey === `together-${currentKey}`);
+
+  useEffect(() => {
+    if (!currentKey) return;
+    const saved = reflections.find((reflection) => reflection.cueKey === currentKey);
+    setReflectionNote(saved?.note ?? '');
+    setComfort(saved?.comfort ?? 3);
+    setReflectionSaved(Boolean(saved));
+  }, [currentKey, reflections]);
 
   const stopSound = () => {
     stopHarmonicPreview();
@@ -219,6 +250,134 @@ export const SharedMomentView: React.FC<Props> = ({
             any time in Preferences.
           </p>
         )}
+
+        <details className="mt-6 border-t border-parchment-200 pt-5 dark:border-vinyl-700">
+          <summary className="cursor-pointer text-sm font-semibold text-plum-700 marker:text-plum-500 dark:text-plum-300">
+            Why this suggestion?
+          </summary>
+          <div className="mt-4 grid gap-3 text-sm leading-relaxed text-loam-body dark:text-loam-body-dark sm:grid-cols-2">
+            <div className="rounded-xl bg-parchment-50 p-4 dark:bg-vinyl-900">
+              <p className="font-semibold text-loam-ink dark:text-parchment-50">Where it came from</p>
+              <p className="mt-1">
+                {cue.source === 'live_qloo_api'
+                  ? 'Live Qloo Taste AI returned this cultural entity.'
+                  : 'This comes from Kinship’s labelled offline collection, not a live Qloo result.'}
+              </p>
+            </div>
+            <div className="rounded-xl bg-parchment-50 p-4 dark:bg-vinyl-900">
+              <p className="font-semibold text-loam-ink dark:text-parchment-50">What the match means</p>
+              <p className="mt-1">
+                A taste relationship is a place to start. It does not prove a memory, preference, identity, or likely response.
+              </p>
+            </div>
+            {cue.explainability?.[0] && (
+              <div className="rounded-xl bg-parchment-50 p-4 dark:bg-vinyl-900 sm:col-span-2">
+                <p className="font-semibold text-loam-ink dark:text-parchment-50">Approved starting clue</p>
+                <p className="mt-1">
+                  Suggested from {cue.explainability[0].seed_name}. Kinship wrote the invitation and screened it against the family’s exclusions.
+                </p>
+              </div>
+            )}
+          </div>
+        </details>
+      </section>
+
+      <TogetherCompanionTools
+        key={currentKey}
+        title={cue.name}
+        invitation={cue.sensoryInvitationPrompt}
+        durationMinutes={5}
+      />
+
+      <section className="loam-card p-5 md:p-7" aria-labelledby="moment-reflection-heading">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h3 id="moment-reflection-heading" className="text-lg font-semibold text-loam-ink dark:text-parchment-50">
+              A private note for next time
+            </h3>
+            <p className="mt-1 text-sm text-loam-body dark:text-loam-body-dark">
+              What felt comfortable? What would you change? This is your private reflection, not a health measure or assessment.
+            </p>
+          </div>
+          <span className="shrink-0 rounded-full bg-parchment-100 px-3 py-1 text-xs font-semibold text-loam-body dark:bg-vinyl-800 dark:text-loam-body-dark">
+            {rememberOnDevice ? 'Saved on this device' : 'This tab only'}
+          </span>
+        </div>
+
+        <label htmlFor="moment-reflection" className="mt-5 block text-sm font-semibold text-loam-ink dark:text-parchment-50">
+          Your note
+        </label>
+        <textarea
+          id="moment-reflection"
+          rows={3}
+          value={reflectionNote}
+          onChange={(event) => {
+            setReflectionNote(event.target.value);
+            setReflectionSaved(false);
+          }}
+          placeholder="For example: the quieter sound felt better, or we preferred looking at the cover."
+          className="mt-2 w-full rounded-2xl border border-parchment-300 bg-white px-4 py-3 text-base text-loam-ink placeholder:text-loam-muted focus:border-plum-500 focus:outline-none focus:ring-2 focus:ring-loam-focus/40 dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+        />
+
+        <fieldset className="mt-4">
+          <legend className="text-sm font-semibold text-loam-ink dark:text-parchment-50">How comfortable did the moment feel?</legend>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {[1, 2, 3, 4, 5].map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  setComfort(value);
+                  setReflectionSaved(false);
+                }}
+                aria-pressed={comfort === value}
+                className={`min-h-11 min-w-11 rounded-xl border px-3 text-sm font-semibold ${
+                  comfort === value
+                    ? 'border-plum-700 bg-plum-600 text-white'
+                    : 'border-parchment-300 bg-white text-loam-body dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-loam-body-dark'
+                }`}
+              >
+                {value}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-loam-muted dark:text-loam-muted-dark">1 = not comfortable today · 3 = neutral · 5 = felt comfortable</p>
+        </fieldset>
+
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              onSaveReflection({
+                cueKey: currentKey ?? cue.name,
+                cueName: cue.name,
+                comfort,
+                note: reflectionNote.trim(),
+                savedAt: new Date().toISOString(),
+              });
+              setReflectionSaved(true);
+            }}
+            className="loam-btn-primary text-sm"
+          >
+            <Save className="h-4 w-4" aria-hidden="true" />
+            {reflectionSaved ? 'Note saved' : 'Save private note'}
+          </button>
+          {reflectionSaved && (
+            <button
+              type="button"
+              onClick={() => {
+                onRemoveReflection(currentKey ?? cue.name);
+                setReflectionNote('');
+                setComfort(3);
+                setReflectionSaved(false);
+              }}
+              className="loam-btn-quiet text-sm"
+            >
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
+              Remove note
+            </button>
+          )}
+        </div>
       </section>
 
       {/* Other things to try — quiet, optional, no pressure. */}
