@@ -126,6 +126,8 @@ const PROFILES_KEY = 'kinship.profiles.v1';
  */
 type StoredFamily = {
   guardrails: ElderGuardrails;
+  careRecipientAvatar?: string;
+  caregiverAvatar?: string;
   elderClues: ElderClueState[];
   grandchildSeeds: GrandchildSeedState[];
   boostedCueIds: string[];
@@ -148,6 +150,9 @@ function readStoredFamily(): StoredFamily | null {
     if (typeof parsed.guardrails.elderName !== 'string') return null;
     return {
       guardrails: { ...INITIAL_PRESET.guardrails, ...parsed.guardrails },
+      careRecipientAvatar:
+        typeof parsed.careRecipientAvatar === 'string' ? parsed.careRecipientAvatar : undefined,
+      caregiverAvatar: typeof parsed.caregiverAvatar === 'string' ? parsed.caregiverAvatar : undefined,
       elderClues: Array.isArray(parsed.elderClues) ? parsed.elderClues : [],
       grandchildSeeds: Array.isArray(parsed.grandchildSeeds) ? parsed.grandchildSeeds : [],
       boostedCueIds: Array.isArray(parsed.boostedCueIds) ? parsed.boostedCueIds : [],
@@ -362,6 +367,8 @@ export const App: React.FC = () => {
   const [guardrails, setGuardrails] = useState<ElderGuardrails>(
     restored?.guardrails ?? INITIAL_PRESET.guardrails
   );
+  const [careRecipientAvatar, setCareRecipientAvatar] = useState(restored?.careRecipientAvatar ?? '');
+  const [caregiverAvatar, setCaregiverAvatar] = useState(restored?.caregiverAvatar ?? '');
   const [elderClues, setElderClues] = useState<ElderClueState[]>(() =>
     restored?.elderClues?.length ? restored.elderClues : resolvePresetElderClues(INITIAL_PRESET)
   );
@@ -530,6 +537,8 @@ export const App: React.FC = () => {
     try {
       const record: StoredFamily = {
         guardrails,
+        careRecipientAvatar: careRecipientAvatar || undefined,
+        caregiverAvatar: caregiverAvatar || undefined,
         elderClues,
         grandchildSeeds,
         boostedCueIds,
@@ -545,6 +554,8 @@ export const App: React.FC = () => {
   }, [
     rememberOnDevice,
     guardrails,
+    careRecipientAvatar,
+    caregiverAvatar,
     elderClues,
     grandchildSeeds,
     boostedCueIds,
@@ -565,6 +576,8 @@ export const App: React.FC = () => {
     setRememberOnDevice(false);
     setActivePresetId(INITIAL_PRESET.id);
     setGuardrails(INITIAL_PRESET.guardrails);
+    setCareRecipientAvatar('');
+    setCaregiverAvatar('');
     setElderClues(resolvePresetElderClues(INITIAL_PRESET));
     setGrandchildSeeds(resolvePresetGrandchildSeeds(INITIAL_PRESET));
     setBoostedCueIds([]);
@@ -599,6 +612,8 @@ export const App: React.FC = () => {
     const profile: SavedCareProfile = {
       id,
       label,
+      careRecipientAvatar: careRecipientAvatar || undefined,
+      caregiverAvatar: caregiverAvatar || undefined,
       guardrails,
       elderClues,
       grandchildSeeds,
@@ -621,6 +636,8 @@ export const App: React.FC = () => {
     setActiveProfileId(profile.id);
     setActivePresetId(null);
     setGuardrails(profile.guardrails);
+    setCareRecipientAvatar(profile.careRecipientAvatar ?? '');
+    setCaregiverAvatar(profile.caregiverAvatar ?? '');
     setElderClues(profile.elderClues);
     setGrandchildSeeds(profile.grandchildSeeds);
     setBoostedCueIds(profile.boostedCueIds);
@@ -642,6 +659,8 @@ export const App: React.FC = () => {
   const handleSelectPreset = (p: FamilyPreset) => {
     setActivePresetId(p.id);
     setGuardrails(p.guardrails);
+    setCareRecipientAvatar('');
+    setCaregiverAvatar('');
     setElderClues(resolvePresetElderClues(p));
     setGrandchildSeeds(resolvePresetGrandchildSeeds(p));
     setBoostedCueIds([]);
@@ -1224,6 +1243,10 @@ export const App: React.FC = () => {
             geographies={geographies}
             guardrails={guardrails}
             bumpWindow={prescription.bumpWindow}
+            careRecipientAvatar={careRecipientAvatar}
+            caregiverAvatar={caregiverAvatar}
+            onCareRecipientAvatarChange={setCareRecipientAvatar}
+            onCaregiverAvatarChange={setCaregiverAvatar}
             elderClues={elderClues}
             grandchildSeeds={grandchildSeeds}
             onSelectPreset={handleSelectPreset}

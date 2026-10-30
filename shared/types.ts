@@ -42,13 +42,18 @@ export interface ElderGuardrails {
   hearingLossWarmEq?: boolean; // Presbycusis filter: favors warm contralto/baritone/cello & rolls off >3.2 kHz harshness
   preferredLanguage?: string; // BCP-47 language used by browser-local spoken instructions
   /** Optional identity context used only to make invitations and handovers more personal. */
-  elderGenderIdentity?: string;
-  elderNationality?: string;
+  careRecipientAge?: number; // current age; deliberately separate from the youth-era birth-year filter
+  careRecipientSex?: 'female' | 'male' | 'intersex' | 'prefer-not-to-say';
+  careRecipientPronouns?: 'she-her' | 'he-him' | 'they-them' | 'name-only';
+  careRecipientNationality?: string;
+  careRecipientCulturalBackground?: string;
   caregiverName?: string;
   caregiverAge?: number;
-  caregiverGenderIdentity?: string;
+  caregiverSex?: 'female' | 'male' | 'intersex' | 'prefer-not-to-say';
+  caregiverPronouns?: 'she-her' | 'he-him' | 'they-them' | 'name-only';
   caregiverRelationship?: string;
   caregiverNationality?: string;
+  caregiverCulturalBackground?: string;
   grandchildName: string;
 }
 
@@ -304,6 +309,9 @@ export interface SparkJournalEntry {
 export interface SavedCareProfile {
   id: string;
   label: string;
+  /** Optional, device-local thumbnails. Never included in recommendation requests. */
+  careRecipientAvatar?: string;
+  caregiverAvatar?: string;
   guardrails: ElderGuardrails;
   elderClues: Array<{ entity_id?: string; name: string; subtype: QlooEntitySubtype; weight: number }>;
   grandchildSeeds: Array<{ entity_id?: string; name: string; subtype: QlooEntitySubtype }>;

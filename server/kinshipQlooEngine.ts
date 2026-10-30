@@ -757,13 +757,39 @@ export async function generateKinshipBridge(
   const caregiverName = guardrails.caregiverName?.trim() || guardrails.grandchildName;
   const caregiverRelationship = guardrails.caregiverRelationship?.trim() || 'family visitor';
   const caregiverDescription = `${guardrails.caregiverAge ? `${guardrails.caregiverAge}-year-old ` : ''}${caregiverRelationship}`;
-  const sharedCulturalContext = [
-    guardrails.elderNationality?.trim(),
-    guardrails.caregiverNationality?.trim(),
+  const ageDifference =
+    guardrails.careRecipientAge && guardrails.caregiverAge
+      ? Math.abs(guardrails.careRecipientAge - guardrails.caregiverAge)
+      : null;
+  const pairFraming =
+    ageDifference !== null && ageDifference <= 15
+      ? 'a similar-generation exchange'
+      : ageDifference !== null
+        ? `a cross-generational bridge across their ${ageDifference}-year age difference`
+        : 'a shared cultural bridge';
+  const shareYourWorldWords =
+    ageDifference !== null && ageDifference <= 15
+      ? '“I love this sound too — here is another favourite with a similar warmth.”'
+      : '“I love this sound too — here is something from my generation with a similar warmth.”';
+  const careRecipientCulturalContext = [
+    guardrails.careRecipientNationality?.trim(),
+    guardrails.careRecipientCulturalBackground?.trim(),
   ].filter((value): value is string => Boolean(value));
+  const caregiverCulturalContext = [
+    guardrails.caregiverNationality?.trim(),
+    guardrails.caregiverCulturalBackground?.trim(),
+  ].filter((value): value is string => Boolean(value));
+  const statedContext = [
+    careRecipientCulturalContext.length > 0
+      ? `${guardrails.elderName}: ${careRecipientCulturalContext.join(', ')}`
+      : '',
+    caregiverCulturalContext.length > 0
+      ? `${caregiverName}: ${caregiverCulturalContext.join(', ')}`
+      : '',
+  ].filter(Boolean);
   const culturalBridgeNote =
-    sharedCulturalContext.length > 0
-      ? ` Their stated cultural backgrounds (${sharedCulturalContext.join(' and ')}) are context for the invitation, while the actual match comes from the places and cultural favourites they selected.`
+    statedContext.length > 0
+      ? ` Their stated cultural context (${statedContext.join('; ')}) helps frame the invitation, while the actual match comes from the places and cultural favourites they selected.`
       : '';
 
   const intergenerationalBridges: IntergenerationalBridge[] = resolvedGrandchildSeeds.map((gc, idx) => {
@@ -826,10 +852,10 @@ export async function generateKinshipBridge(
       overlapPct,
       sharedTags,
       sharedDnaHeadline: `${sharedTags[0].label} + ${sharedTags[1].label}`,
-      harmonicExplanation: `Qloo’s /v2/analysis/compare rates ${gc.name} (${gc.year}), which ${caregiverName} loves, ${overlapPct}% alike in mood, tempo and style with ${best.ea.name} (${best.ea.year}) from ${guardrails.elderName}’s youth. This gives ${caregiverName}, ${guardrails.elderName}’s ${caregiverDescription}, a personal way into listening together — not a prediction of any reaction.${culturalBridgeNote}`,
+      harmonicExplanation: `Qloo’s /v2/analysis/compare rates ${gc.name} (${gc.year}), which ${caregiverName} loves, ${overlapPct}% alike in mood, tempo and style with ${best.ea.name} (${best.ea.year}) from ${guardrails.elderName}’s youth. This gives ${caregiverName}, ${guardrails.elderName}’s ${caregiverDescription}, ${pairFraming} and a personal way into listening together — not a prediction of any reaction.${culturalBridgeNote}`,
       threeStepPlaybook: [
         `Minute 0–4 (Settle in): ${caregiverName} can play ${best.ea.name} (${best.ea.year}) first and simply notice whether it feels welcome. Say nothing yet.`,
-        `Minute 5–10 (Share Your World): ${caregiverName} can say “I love this sound too — here is something from my generation with a similar warmth,” and play 90 seconds of ${gc.name}.`,
+        `Minute 5–10 (Share Your World): ${caregiverName} can say ${shareYourWorldWords} Then play 90 seconds of ${gc.name}.`,
         `Minute 11–15 (Sensory Togetherness): Keep volume warm and gentle; hold hands, look at a photo, or share tea with zero memory quizzing.`,
       ],
       zeroQuizBridgeQuestion: `“${guardrails.elderName}, listen to how warm ${gc.name.split('(')[0].trim()} sounds right after ${best.ea.name.split('(')[0].trim()} — which one makes you want to tap your feet more?”`,
@@ -1387,20 +1413,24 @@ export function parseFamilyStoryToKinship(
   const patch: Partial<ElderGuardrails> = {};
   const receipts: Array<{ parameter: string; value: string; reason: string }> = [];
 
-  // Age or Birth Year extraction
+  // Current age and cultural era are intentionally independent. Only an explicit
+  // birth year changes the reminiscence window; an age updates present-day context.
   const birthYearMatch = text.match(/\bborn\s+(?:in\s+)?(19[2-6]\d)\b/i);
-  const ageMatch = text.match(/\b([6-9]\d)\s*(?:-|\s)?(?:year[- ]old|yo|yrs|years old|is\s+[6-9]\d)\b/i) || text.match(/\bis\s+([7-9]\d)\b/i);
+  const ageMatch = text.match(/\b([6-9]\d)\s*(?:-|\s)?(?:year[- ]old|yo|yrs|years old)\b/i) || text.match(/\bis\s+([7-9]\d)\b/i);
   if (birthYearMatch) {
     patch.birthYear = Number(birthYearMatch[1]);
-  } else if (ageMatch) {
-    const age = Number(ageMatch[1]);
-    patch.birthYear = CURRENT_YEAR - age;
-  }
-  if (patch.birthYear) {
     receipts.push({
       parameter: 'filter.release_year.min/max',
       value: `${patch.birthYear + 10}–${patch.birthYear + 30}`,
-      reason: `Computed ages 10–30 Reminiscence Bump from birth year ${patch.birthYear}.`,
+      reason: `Computed ages 10–30 Reminiscence Bump from explicit birth year ${patch.birthYear}.`,
+    });
+  }
+  if (ageMatch) {
+    patch.careRecipientAge = Number(ageMatch[1]);
+    receipts.push({
+      parameter: 'kinship.care_recipient_age',
+      value: String(patch.careRecipientAge),
+      reason: 'Used only for present-day pacing and relationship framing; it does not alter the cultural-era window.',
     });
   }
 

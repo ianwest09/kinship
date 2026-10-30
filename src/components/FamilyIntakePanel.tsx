@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import {
   ArrowRight,
   Brain,
+  Camera,
   Check,
   Disc3,
   Heart,
   Plus,
   ShieldCheck,
   Sparkles,
+  Trash2,
   Users,
   Wand2,
   X,
@@ -34,6 +36,10 @@ interface Props {
   geographies: Array<{ id: YouthGeographyId; name: string; country: string; eraCulturalPortrait: string }>;
   guardrails: ElderGuardrails;
   bumpWindow: ReminiscenceBumpWindow;
+  careRecipientAvatar: string;
+  caregiverAvatar: string;
+  onCareRecipientAvatarChange: (avatar: string) => void;
+  onCaregiverAvatarChange: (avatar: string) => void;
   elderClues: Array<{ entity_id?: string; name: string; subtype: QlooEntitySubtype; weight: number }>;
   grandchildSeeds: Array<{ entity_id?: string; name: string; subtype: QlooEntitySubtype }>;
   onSelectPreset: (p: FamilyPreset) => void;
@@ -63,6 +69,42 @@ function retentionLabel(weight: number): string {
   return 'Less';
 }
 
+async function makeAvatarThumbnail(file: File): Promise<string> {
+  if (!file.type.startsWith('image/')) throw new Error('Choose an image file.');
+  if (file.size > 8 * 1024 * 1024) throw new Error('Choose an image smaller than 8 MB.');
+  const source = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error('That photo could not be read.'));
+    reader.readAsDataURL(file);
+  });
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const next = new Image();
+    next.onload = () => resolve(next);
+    next.onerror = () => reject(new Error('That photo could not be opened.'));
+    next.src = source;
+  });
+  const size = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('Photo editing is not available in this browser.');
+  const crop = Math.min(image.naturalWidth, image.naturalHeight);
+  context.drawImage(
+    image,
+    (image.naturalWidth - crop) / 2,
+    (image.naturalHeight - crop) / 2,
+    crop,
+    crop,
+    0,
+    0,
+    size,
+    size
+  );
+  return canvas.toDataURL('image/jpeg', 0.78);
+}
+
 export const FamilyIntakePanel: React.FC<Props> = ({
   presets,
   activePresetId,
@@ -71,6 +113,10 @@ export const FamilyIntakePanel: React.FC<Props> = ({
   geographies,
   guardrails,
   bumpWindow,
+  careRecipientAvatar,
+  caregiverAvatar,
+  onCareRecipientAvatarChange,
+  onCaregiverAvatarChange,
   elderClues,
   grandchildSeeds,
   onSelectPreset,
@@ -89,6 +135,7 @@ export const FamilyIntakePanel: React.FC<Props> = ({
   const [parseReceipt, setParseReceipt] = useState<FamilyNarrativeParseResult | null>(null);
   const [customElderText, setCustomElderText] = useState('');
   const [customGcText, setCustomGcText] = useState('');
+  const [avatarError, setAvatarError] = useState('');
 
   /**
    * Guards against a double tap while the parse is in flight. On a slow
@@ -284,14 +331,30 @@ export const FamilyIntakePanel: React.FC<Props> = ({
             About the two of you
           </h3>
           <p className="mt-2 text-sm leading-relaxed text-loam-body dark:text-loam-body-dark">
-            Names, relationship, age and cultural background help Kinship word shared activities more naturally. Gender is optional and never used to assume an interest. Names and identity details are not sent to Qloo.
+            Current age describes the person today. Birth year separately sets the youth-era window below. Relationship, pronouns and cultural context help Kinship word shared activities naturally; sex is optional and never used to assume taste.
+          </p>
+          <p className="mt-2 text-xs leading-relaxed text-loam-muted dark:text-loam-muted-dark">
+            Names, sex, nationality, pronouns and photos are not sent to Qloo. Optional photos are reduced to small thumbnails in this browser and are saved only when device storage is turned on.
           </p>
         </div>
+
+        {avatarError && (
+          <p className="mt-4 rounded-xl border border-clay-200 bg-clay-50 px-4 py-3 text-sm text-clay-800 dark:border-clay-900 dark:bg-clay-950/30 dark:text-clay-300" role="alert">
+            {avatarError}
+          </p>
+        )}
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <fieldset className="rounded-2xl border border-parchment-200 bg-parchment-50 p-4 dark:border-vinyl-700 dark:bg-vinyl-800 md:p-5">
             <legend className="px-1 font-semibold text-loam-ink dark:text-parchment-50">Person receiving care</legend>
-            <div className="mt-2 grid gap-4 sm:grid-cols-2">
+            <AvatarPicker
+              label="Optional photo for the person receiving care"
+              name={guardrails.elderName}
+              avatar={careRecipientAvatar}
+              onChange={onCareRecipientAvatarChange}
+              onError={setAvatarError}
+            />
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50 sm:col-span-2">
                 Preferred name
                 <input
@@ -303,40 +366,64 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                 />
               </label>
               <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
-                Age
+                Current age
                 <input
                   type="number"
                   min={18}
                   max={120}
-                  value={thisYear - guardrails.birthYear}
-                  onChange={(event) => {
-                    const age = Number(event.target.value);
-                    if (age >= 18 && age <= 120) onUpdateGuardrails({ birthYear: thisYear - age });
-                  }}
-                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                  value={guardrails.careRecipientAge ?? ''}
+                  onChange={(event) => onUpdateGuardrails({ careRecipientAge: event.target.value ? Number(event.target.value) : undefined })}
+                  placeholder={`About ${thisYear - guardrails.birthYear}`}
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink placeholder:text-loam-muted dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
                 />
+                <span className="mt-1 block text-xs font-normal text-loam-muted dark:text-loam-muted-dark">Does not change their cultural era.</span>
               </label>
               <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
-                Gender
+                Sex (optional)
                 <select
-                  value={guardrails.elderGenderIdentity ?? ''}
-                  onChange={(event) => onUpdateGuardrails({ elderGenderIdentity: event.target.value })}
+                  value={guardrails.careRecipientSex ?? ''}
+                  onChange={(event) => onUpdateGuardrails({ careRecipientSex: (event.target.value || undefined) as ElderGuardrails['careRecipientSex'] })}
                   className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
                 >
                   <option value="">Not specified</option>
-                  <option value="woman">Woman</option>
-                  <option value="man">Man</option>
-                  <option value="non-binary">Non-binary</option>
+                  <option value="female">Female</option>
+                  <option value="male">Male</option>
+                  <option value="intersex">Intersex</option>
                   <option value="prefer-not-to-say">Prefer not to say</option>
                 </select>
               </label>
-              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50 sm:col-span-2">
-                Nationality or cultural background
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
+                Pronouns (optional)
+                <select
+                  value={guardrails.careRecipientPronouns ?? ''}
+                  onChange={(event) => onUpdateGuardrails({ careRecipientPronouns: (event.target.value || undefined) as ElderGuardrails['careRecipientPronouns'] })}
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                >
+                  <option value="">Not specified</option>
+                  <option value="she-her">She / her</option>
+                  <option value="he-him">He / him</option>
+                  <option value="they-them">They / them</option>
+                  <option value="name-only">Use their name</option>
+                </select>
+              </label>
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
+                Nationality
                 <input
                   type="text"
-                  value={guardrails.elderNationality ?? ''}
-                  onChange={(event) => onUpdateGuardrails({ elderNationality: event.target.value })}
-                  placeholder="For example: South African, Jamaican-British, Japanese"
+                  value={guardrails.careRecipientNationality ?? ''}
+                  onChange={(event) => onUpdateGuardrails({ careRecipientNationality: event.target.value })}
+                  placeholder="For example: South African"
+                  autoComplete="off"
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink placeholder:text-loam-muted dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                />
+              </label>
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
+                Cultural background
+                <input
+                  type="text"
+                  value={guardrails.careRecipientCulturalBackground ?? ''}
+                  onChange={(event) => onUpdateGuardrails({ careRecipientCulturalBackground: event.target.value })}
+                  placeholder="Languages, communities or traditions"
                   autoComplete="off"
                   className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink placeholder:text-loam-muted dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
                 />
@@ -346,22 +433,27 @@ export const FamilyIntakePanel: React.FC<Props> = ({
 
           <fieldset className="rounded-2xl border border-parchment-200 bg-parchment-50 p-4 dark:border-vinyl-700 dark:bg-vinyl-800 md:p-5">
             <legend className="px-1 font-semibold text-loam-ink dark:text-parchment-50">Caregiver or visiting family member</legend>
-            <div className="mt-2 grid gap-4 sm:grid-cols-2">
+            <AvatarPicker
+              label="Optional photo for the caregiver"
+              name={guardrails.caregiverName || guardrails.grandchildName}
+              avatar={caregiverAvatar}
+              onChange={onCaregiverAvatarChange}
+              onError={setAvatarError}
+            />
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50 sm:col-span-2">
                 Preferred name
                 <input
                   type="text"
                   value={guardrails.caregiverName ?? ''}
-                  onChange={(event) =>
-                    onUpdateGuardrails({ caregiverName: event.target.value, grandchildName: event.target.value || guardrails.grandchildName })
-                  }
+                  onChange={(event) => onUpdateGuardrails({ caregiverName: event.target.value, grandchildName: event.target.value || guardrails.grandchildName })}
                   placeholder="Who will share this time?"
                   autoComplete="off"
                   className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink placeholder:text-loam-muted dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
                 />
               </label>
               <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
-                Age
+                Current age
                 <input
                   type="number"
                   min={12}
@@ -371,20 +463,6 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                   placeholder="Optional"
                   className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink placeholder:text-loam-muted dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
                 />
-              </label>
-              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
-                Gender
-                <select
-                  value={guardrails.caregiverGenderIdentity ?? ''}
-                  onChange={(event) => onUpdateGuardrails({ caregiverGenderIdentity: event.target.value })}
-                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
-                >
-                  <option value="">Not specified</option>
-                  <option value="woman">Woman</option>
-                  <option value="man">Man</option>
-                  <option value="non-binary">Non-binary</option>
-                  <option value="prefer-not-to-say">Prefer not to say</option>
-                </select>
               </label>
               <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
                 Relationship
@@ -405,18 +483,67 @@ export const FamilyIntakePanel: React.FC<Props> = ({
                 </select>
               </label>
               <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
-                Nationality or cultural background
+                Sex (optional)
+                <select
+                  value={guardrails.caregiverSex ?? ''}
+                  onChange={(event) => onUpdateGuardrails({ caregiverSex: (event.target.value || undefined) as ElderGuardrails['caregiverSex'] })}
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                >
+                  <option value="">Not specified</option>
+                  <option value="female">Female</option>
+                  <option value="male">Male</option>
+                  <option value="intersex">Intersex</option>
+                  <option value="prefer-not-to-say">Prefer not to say</option>
+                </select>
+              </label>
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
+                Pronouns (optional)
+                <select
+                  value={guardrails.caregiverPronouns ?? ''}
+                  onChange={(event) => onUpdateGuardrails({ caregiverPronouns: (event.target.value || undefined) as ElderGuardrails['caregiverPronouns'] })}
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                >
+                  <option value="">Not specified</option>
+                  <option value="she-her">She / her</option>
+                  <option value="he-him">He / him</option>
+                  <option value="they-them">They / them</option>
+                  <option value="name-only">Use their name</option>
+                </select>
+              </label>
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
+                Nationality
                 <input
                   type="text"
                   value={guardrails.caregiverNationality ?? ''}
                   onChange={(event) => onUpdateGuardrails({ caregiverNationality: event.target.value })}
-                  placeholder="Optional"
+                  placeholder="For example: Kenyan-British"
+                  autoComplete="off"
+                  className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink placeholder:text-loam-muted dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
+                />
+              </label>
+              <label className="text-sm font-semibold text-loam-ink dark:text-parchment-50">
+                Cultural background
+                <input
+                  type="text"
+                  value={guardrails.caregiverCulturalBackground ?? ''}
+                  onChange={(event) => onUpdateGuardrails({ caregiverCulturalBackground: event.target.value })}
+                  placeholder="Languages, communities or traditions"
                   autoComplete="off"
                   className="mt-1.5 w-full rounded-xl border border-parchment-300 bg-white px-3 py-2.5 text-base font-normal text-loam-ink placeholder:text-loam-muted dark:border-vinyl-600 dark:bg-vinyl-900 dark:text-parchment-50"
                 />
               </label>
             </div>
           </fieldset>
+        </div>
+
+        <div className="mt-5 rounded-2xl border border-pine-200 bg-pine-50/70 p-4 text-sm text-loam-body dark:border-vinyl-700 dark:bg-vinyl-800 dark:text-loam-body-dark">
+          <p className="font-semibold text-loam-ink dark:text-parchment-50">How this changes the shared plan</p>
+          <ul className="mt-2 grid gap-2 sm:grid-cols-2">
+            <li>• Current ages and relationship change the visit wording, pacing and whether a bridge is framed as cross-generational.</li>
+            <li>• Nationality and cultural background help explain shared or cross-cultural starting points without treating identity as taste.</li>
+            <li>• The youth place, birth year and chosen favourites below are what shape Qloo discovery and cultural-era matching.</li>
+            <li>• Saved reactions and exclusions keep future suggestions grounded in what the caregiver actually observed.</li>
+          </ul>
         </div>
       </section>
 
@@ -873,6 +1000,70 @@ export const FamilyIntakePanel: React.FC<Props> = ({
             })}
           </div>
         </section>
+      </div>
+    </div>
+  );
+};
+
+interface AvatarPickerProps {
+  label: string;
+  name: string;
+  avatar: string;
+  onChange: (avatar: string) => void;
+  onError: (message: string) => void;
+}
+
+const AvatarPicker: React.FC<AvatarPickerProps> = ({ label, name, avatar, onChange, onError }) => {
+  const inputId = useId();
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('') || 'K';
+
+  return (
+    <div className="mt-3 flex items-center gap-3 rounded-2xl border border-parchment-200 bg-white p-3 dark:border-vinyl-700 dark:bg-vinyl-900">
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-plum-100 text-lg font-semibold text-plum-700 dark:bg-vinyl-700 dark:text-plum-300">
+        {avatar ? (
+          <img src={avatar} alt={`${name || 'Profile'} avatar`} className="h-full w-full object-cover" />
+        ) : (
+          <span aria-hidden="true">{initials}</span>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-loam-ink dark:text-parchment-50">{name || 'Name not added yet'}</p>
+        <p className="mt-0.5 text-xs text-loam-muted dark:text-loam-muted-dark">{label} · local thumbnail only</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <label htmlFor={inputId} className="loam-btn-quiet cursor-pointer text-xs">
+            <Camera className="h-4 w-4" aria-hidden="true" />
+            {avatar ? 'Change photo' : 'Add photo'}
+          </label>
+          <input
+            id={inputId}
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            onChange={async (event) => {
+              const file = event.target.files?.[0];
+              if (!file) return;
+              onError('');
+              try {
+                onChange(await makeAvatarThumbnail(file));
+              } catch (error) {
+                onError(error instanceof Error ? error.message : 'That photo could not be added.');
+              } finally {
+                event.target.value = '';
+              }
+            }}
+          />
+          {avatar && (
+            <button type="button" onClick={() => onChange('')} className="loam-btn-quiet text-xs" aria-label={`Remove photo for ${name || 'this profile'}`}>
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
+              Remove
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

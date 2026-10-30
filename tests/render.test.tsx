@@ -400,6 +400,8 @@ test('profile management is opt-in and offers saved-profile switching', () => {
     id: 'vera',
     label: 'Vera — jazz and gardening',
     guardrails: { ...data.guardrailsApplied, preferredLanguage: 'en' },
+    careRecipientAvatar: 'data:image/jpeg;base64,recipient-thumbnail',
+    caregiverAvatar: 'data:image/jpeg;base64,caregiver-thumbnail',
     elderClues: [{ name: 'Ella Fitzgerald', subtype: 'urn:entity:artist' as const, weight: 10 }],
     grandchildSeeds: [],
     boostedCueIds: [],
@@ -556,6 +558,10 @@ const familyHtml = renderToString(
     }))}
     guardrails={data.guardrailsApplied}
     bumpWindow={data.bumpWindow}
+    careRecipientAvatar=""
+    caregiverAvatar=""
+    onCareRecipientAvatarChange={noop}
+    onCaregiverAvatarChange={noop}
     elderClues={elderClues}
     grandchildSeeds={grandchildSeeds}
     onSelectPreset={noop}
@@ -587,10 +593,38 @@ test('the family form collects optional details for both people without stereoty
   assert.match(familyHtml, /Person receiving care/);
   assert.match(familyHtml, /Caregiver or visiting family member/);
   assert.match(familyHtml, /Preferred name/);
-  assert.match(familyHtml, /Nationality or cultural background/);
+  assert.match(familyHtml, /Current age/);
+  assert.match(familyHtml, /Does not change their cultural era/);
+  assert.match(familyHtml, /Nationality/);
+  assert.match(familyHtml, /Cultural background/);
   assert.match(familyHtml, /Relationship/);
-  assert.match(familyHtml, /Gender is optional and never used to assume an interest/);
-  assert.match(familyHtml, /Names and identity details are not sent to Qloo/);
+  assert.match(familyHtml, /Sex \(optional\)/);
+  assert.match(familyHtml, /Pronouns \(optional\)/);
+  assert.match(familyHtml, /sex is optional and never used to assume taste/);
+  assert.match(familyHtml, /Optional photo for the person receiving care/);
+  assert.match(familyHtml, /Optional photo for the caregiver/);
+  assert.match(familyHtml, /Names, sex, nationality, pronouns and photos are not sent to Qloo/);
+});
+
+test('current age never silently changes the reminiscence-era birth year', () => {
+  const current = { ...data.guardrailsApplied, birthYear: 1942 };
+  const ageOnly = parseFamilyStoryToKinship('She is 86 years old and loves jazz.', current);
+  assert.equal(ageOnly.guardrailPatch.careRecipientAge, 86);
+  assert.equal(ageOnly.guardrailPatch.birthYear, undefined);
+  assert.match(ageOnly.summary, /1952–1972 Reminiscence Bump/);
+
+  const explicitEra = parseFamilyStoryToKinship('She was born in 1938 and is 86 years old.', current);
+  assert.equal(explicitEra.guardrailPatch.birthYear, 1938);
+  assert.equal(explicitEra.guardrailPatch.careRecipientAge, 86);
+  assert.match(explicitEra.summary, /1948–1968 Reminiscence Bump/);
+});
+
+test('the form explains which context improves Qloo discovery and which context only frames the interaction', () => {
+  assert.match(familyHtml, /How this changes the shared plan/);
+  assert.match(familyHtml, /Current ages and relationship change the visit wording/);
+  assert.match(familyHtml, /without treating identity as taste/);
+  assert.match(familyHtml, /chosen favourites below are what shape Qloo discovery/);
+  assert.match(familyHtml, /Saved reactions and exclusions keep future suggestions grounded/);
 });
 
 test('relationship details make bridge suggestions personal without changing their claim boundary', async () => {
@@ -598,7 +632,8 @@ test('relationship details make bridge suggestions personal without changing the
     guardrails: {
       ...preset.guardrails,
       elderName: 'Vera',
-      elderNationality: 'South African',
+      careRecipientAge: 86,
+      careRecipientNationality: 'South African',
       caregiverName: 'Amina',
       caregiverAge: 42,
       caregiverRelationship: 'daughter',
@@ -612,7 +647,8 @@ test('relationship details make bridge suggestions personal without changing the
   const explanation = personalized.intergenerationalBridges[0].harmonicExplanation;
   assert.match(explanation, /Amina/);
   assert.match(explanation, /42-year-old daughter/);
-  assert.match(explanation, /South African and Kenyan-British/);
+  assert.match(explanation, /44-year age difference/);
+  assert.match(explanation, /Vera: South African; Amina: Kenyan-British/);
   assert.match(explanation, /actual match comes from the places and cultural favourites they selected/);
   assert.match(explanation, /not a prediction of any reaction/);
 });
